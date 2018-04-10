@@ -11,7 +11,7 @@ The proposal has two goals:
 Currently, there is an imperative JS API for instantiating WebAssembly modules. This requires users to manually fetch a module file, wire up imports, and run `WebAssembly.instantiate` or `WebAssembly.instantiateStreaming`. 
 
 ```
-let req = fetch(”./myModule.wasm”);
+let req = fetch("./myModule.wasm");
 
 let imports = {
   aModule: {
@@ -29,7 +29,7 @@ WebAssembly
 A declarative API would improve the ergonomics by making this work happen implicitly.
 
 ```
-import {foo} from “./myModule.wasm”;
+import {foo} from "./myModule.wasm";
 foo();
 ```
 
@@ -147,7 +147,7 @@ Errors will happen automatically because the imports would be undefined, and Web
 ```
 // main.wasm
 (module
-  (import "./counter.js" "getCount" (func $getCount (func (result i32))))
+  (import "./counter.js" "getCount" (func $getCount (result i32)))
 )
 
 // counter.js
