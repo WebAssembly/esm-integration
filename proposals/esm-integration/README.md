@@ -227,11 +227,10 @@ Wasm exports can be imported as live bindings to other wasm modules.
 #### Example
 
 ```
-main.wasm
+// main.wasm
 (module
-  (type $t0 (func (result i32)))
   (import "./counter.wasm" "count" (global i32))
-  (import "./counter.wasm" "increment" (func $increment (type $t0)))
+  (import "./counter.wasm" "increment" (func $increment (result i32)))
 )
 
 // counter.wasm
@@ -256,7 +255,21 @@ Any wasm exports that are re-exported via a JS module will be available to the o
 
 #### Example
 
-@TODO add example
+```
+// main.wasm
+(module
+  (import "./a.js" "memoryExport" (memory 0))
+)
+
+// a.js
+export {memoryExport} from "./b.wasm";
+
+// b.wasm
+(module
+  (memory 1)
+  (export "memoryExport" (memory 0))
+)
+```
 
 ### JS <-> wasm cycle (where JS is higher in the module graph)
 
@@ -275,9 +288,22 @@ Any wasm exports that are re-exported via a JS module will be available to the o
 1. wasm module is instantiated. All imports from the JS module are undefined. Because JS module instantiation hasn't happened yet, the functions are also undefined.
 1. JS module is instantiated. All imports from the wasm module are const live bindings.
 
-#### Examples
+#### Example
 
-@TODO add example
+```
+// a.js
+import {memoryExport} from "./b.wasm";
+export function functionExport() {
+    // do something with memory and DOM
+}
+
+// b.wasm
+(module
+  (memory 1)
+  (export "memoryExport" (memory 0))
+  (import "./a.js" "functionExport" (func $functionExport (result i32)))
+)
+```
 
 ### wasm <-> JS cycle (where wasm is higher in the module graph)
 
@@ -293,7 +319,20 @@ Any wasm exports that are re-exported via a JS module will be available to the o
 
 #### Examples
 
-@TODO add example
+```
+// a.wasm
+(module
+  (memory 1)
+  (export "memoryExport" (memory 0))
+  (import "./b.js" "functionExport" (func $functionExport (result i32)))
+)
+
+// b.js
+import {memoryExport} from "./a.wasm";
+export function functionExport() {
+    // do something with memory and DOM
+}
+```
 
 ### wasm <-> wasm cycle
 
@@ -302,7 +341,3 @@ Any wasm exports that are re-exported via a JS module will be available to the o
 | | Error  | Error  | Error | Error    |
 
 @TODO explain why we need to throw on WebAssembly cycles
-
-#### Examples
-
-@TODO add example
