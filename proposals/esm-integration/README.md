@@ -127,7 +127,7 @@ Some imports are challenging to handle in the current WebAssembly specification.
 
 | export type | value (not a WebAssembly.Global)* | global | memory | table | function |
 |-------------|------------------|--------|--------|-------|----------|
-|              | Error                         | Error  | Error  | Error | snapshot of reference |
+|              | Error                         | Error  | Error  | Error | snapshot |
 
 \*While WebAssembly only has the concept of globals, JS could export either a regular JS value or a `WebAssembly.Global`.
 
@@ -276,7 +276,7 @@ export {memoryExport} from "./b.wasm";
 #### JS exports
 | export type | value (not a WebAssembly.Global)* | global | memory | table | function |
 |-|-------------------------------|--------|--------|-------|----------|
-| | Error                         | Error  | Error  | Error | snapshot of reference (Note: will be an Error if we don't split instantiation into two phases) |
+| | Error                         | Error  | Error  | Error | snapshot (Note: will be an Error if we don't split instantiation into two phases) |
 
 #### wasm exports
 | export type | global       | memory       | table        | function     |
@@ -315,7 +315,7 @@ export function functionExport() {
 #### JS exports
 | export type | value (not a WebAssembly.Global)* | global | memory | table | function |
 |-|-------------------------------|--------|--------|-------|----------|
-| | Error                         | Error  | Error  | Error | snapshot of reference |
+| | Error                         | Error  | Error  | Error | snapshot |
 
 #### Examples
 
