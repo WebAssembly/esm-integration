@@ -88,7 +88,7 @@ Three things happen for each module during the Construction phase.
 
 ### Instantiation
 
-During instantiation, exports and imports are wired up to each other. In JS, functions are initialized at this point. All other values are undefined until evaluation.
+During instantiation, exports and imports are wired up to each other. In JS, function declarations are initialized at this point. All other values are undefined or in TDZ until evaluation.
 
 For WebAssembly, instantiation will include initialization for all [external types](https://webassembly.github.io/spec/core/exec/modules.html#external-typing). External types currently include:
 
@@ -97,18 +97,18 @@ For WebAssembly, instantiation will include initialization for all [external typ
 - memories
 - globals
 
-Because WebAssembly does not currently have a type that can handle arbitrary JS values, JS value imports can not be handled with live bindings and would be snapshotted when they are imported. This means that in the short term, non-function imports coming from JS modules would be assigned a value of `undefined`, which will currently result in an error. 
+Because WebAssembly does not currently have a type that can handle arbitrary JS values, JS value imports can not be handled. This means that in the short term, non-function imports coming from JS modules will currently result in an error. 
 
-It may be possible to provide live bindings for JS values if an `any` type is added to WebAssembly. At this point the restriction prohibiting `undefined` imports could also be lifted. However, we would still want to throw an error for non-function imports in this case. 
+It may be possible to provide live bindings for JS values if an `anyref` type is added to WebAssembly. At this point the restriction prohibiting non-function imports could also be lifted.
 
 The reason we want to throw an error in this case is two fold:
 
-- **Reduce confusion for developers.** Since non-function imports work in JS->JS dependency chains, it is unintuitive that they would be undefined in JS->wasm dependency chains. Throwing an error makes clear what's happening.
-- **Allow for future support.** It may be possible to support non-function imports to wasm modules if an `any` type is added. We close off this avenue if we allow users to import values that can be undefined, though, as code may start depending on that behavior.
+- **Reduce confusion for developers.** WebAssembly snapshots imports while instantiation, but most exports from JS modules are still `undefined` or in TDZ at this time. Since non-function imports work in JS->JS dependency chains, it is unintuitive that they would be undefined in JS->wasm dependency chains. Throwing an error makes clear what's happening.
+- **Allow for future support.** It may be possible to support non-function imports to wasm modules if an `anyref` type is added. We close off this avenue if we allow users to import values that can be undefined, though, as code may start depending on that behavior.
 
-One important limitation of this approach to instantiation is that function imports won't work in JS in JS<->wasm cycles where the JS module is higher in the graph. In that case, the WebAssembly module is instantiated before the JS module, which means that functions haven't been initialized and would throw the same error as non-function imports. 
+For function imports from JS modules a special WebAssembly function (trampoline) is created and used when calling out from WebAssembly code into JS code. This function is created directly from the *ResolvedBinding Record* and read the value on invocation directly from the JS variable. This allows live binding for function imports. Exporting these function from wasm will not yield the original *ResolvedBinding*, but must yield the WebAssembly trampoline to ensure correct type converting to WebAssembly types.
 
-Because of this, instantiation may need to be split into two separate sub-phases for WebAssembly. In this approach, the current instantiation algorithm would be run in the first sub-phase, ensuring that all JS functions are initialized. Then, in the second sub-phase, WebAssembly would be able to snapshot these function exports.
+For non-function imports the `[[Module]]` of *ResolvedBinding Record* must be a WebAssembly mdoule, otherwise an Error is thrown. As imports need to be provided before instantiation, cycles are not allowed in this case.
 
 ### Evaluation
 
@@ -125,20 +125,21 @@ Some imports are challenging to handle in the current WebAssembly specification.
 
 ### wasm imports <- JS exports
 
-| export type | value (not a WebAssembly.Global)* | global | memory | table | function |
-|-------------|------------------|--------|--------|-------|----------|
-|              | Error                         | Error  | Error  | Error | snapshot |
-
-\*While WebAssembly only has the concept of globals, JS could export either a regular JS value or a `WebAssembly.Global`.
+| import type | global | memory | table | function     |
+|-------------|--------|--------|-------|--------------|
+|             | Error  | Error  | Error | live binding |
 
 The sequence of operations for a wasm module which depends on a JS module is as follows:
 
-1. wasm module is parsed
-1. JS module is parsed
-1. JS module is instantiated. Functions are initialized. Non-function imports are set to undefined.
-1. wasm module is instantiated. A snapshot is taken of all imports. Functions are copied. All non-function imports are undefined and thus throw an error.
-
-Errors will happen automatically because the imports would be undefined, and WebAssembly currently does not support importing undefined values.
+1. Construction
+  1. wasm module is parsed
+  1. JS module is parsed
+1. Instantiation
+  1. JS module is instantiation and bindings are created to exports.
+  1. wasm module is instantiated. A trampoline functions is created for function imports, which points to the exported binding. All non-function imports throw an error.
+1. Evaluation
+  1. JS module is evaluation. Exported variables are may assigned values.
+  1. wasm start function runs if any
 
 #### Examples
 
@@ -159,7 +160,7 @@ function getCount() {
 export {getCount};
 ```
 
-##### Value imports
+##### Global imports
 
 The following will result in an error.
 
@@ -182,16 +183,21 @@ The following will result in an error.
 
 ### JS imports <- wasm exports
 
-| export type | global       | memory       | table        | function     |
-|-------------|--------------|--------------|--------------|--------------|
-|   | const live binding | const live binding | const live binding | const live binding |
+| export type | global             | memory             | table              | function           |
+|-------------|--------------------|--------------------|--------------------|--------------------|
+|             | const live binding | const live binding | const live binding | const live binding |
 
 These are const live bindings because the binding can not be reassigned, but the value that it points to (e.g. in the case of `WebAssembly.Global`) can change. However, as the export is initialized during the wasm module instantiation, the JS side can bind to the memory location, so it gets a value even in the presence of cycles.
 
-1. JS module is parsed
-1. wasm module is parsed
-1. wasm module is instantiated. Memories and tables are initialized but are not yet filled with data/elem sections. Globals are initialized and initializer expressions are evaluated. 
-1. JS module is instantiated. All imports from wasm module are available as const live bindings. They are already initialized at this point.
+1. Construction
+  1. JS module is parsed
+  1. wasm module is parsed
+1. Instantiation
+  1. wasm module is instantiated. Memories and tables are initialized and filled with data/elem sections. Globals are initialized and initializer expressions are evaluated. Export bindings are created for all exported elements.
+  1. JS module is instantiated. In the Environment Records of the JS modules import bindings are created (*CreateImportBinding*).
+1. Evaluation
+  1. wasm start function runs.
+  1. JS module is evaluation. All imports from wasm module are available as const live bindings.
 
 Currently, the value of the export for something like `WebAssembly.Global` would be accessed using the `.value` property on the JS object. However, when host bindings are in place, these could be annotated with a host binding that turns it into a real live binding that points directly to the value's address. **If we did this, we would have first-class mutable live bindings.**
 
@@ -218,9 +224,9 @@ console.log(count.value); // logs 6
 
 ### wasm imports <- wasm exports
 
-| export type | global       | memory       | table        | function     |
-|-------------|--------------|--------------|--------------|--------------|
-|   | live binding | const live binding | const live binding | const live binding |
+| import type | global             | memory             | table              | function           |
+|-------------|--------------------|--------------------|--------------------|--------------------|
+|             | const live binding | const live binding | const live binding | const live binding |
 
 Wasm exports can be imported as live bindings to other wasm modules.
 
@@ -247,11 +253,11 @@ Wasm exports can be imported as live bindings to other wasm modules.
 
 ### wasm imports <- JS re-exports <- wasm exports
 
-| export type | global       | memory       | table        | function     |
-|-------------|--------------|--------------|--------------|--------------|
-|   | live binding | const live binding | const live binding | const live binding |
+| export type | global             | memory             | table              | function           |
+|-------------|--------------------|--------------------|--------------------|--------------------|
+|             | const live binding | const live binding | const live binding | const live binding |
 
-Any wasm exports that are re-exported via a JS module will be available to the other wasm module as live bindings. The memory location gets wrapped into a JS object (e.g. `WebAssembly.Global`) and then unwrapped to the memory location in the importing wasm module.
+Any wasm exports that are re-exported via a JS module will be available to the other wasm module as live bindings. This makes sense as Instantiation resolves exports and works with the *ResolvedBinding*.
 
 #### Example
 
@@ -271,22 +277,52 @@ export {memoryExport} from "./b.wasm";
 )
 ```
 
+#### Example which throws an Error
+
+```
+// main.wasm
+(module
+  (import "./a.js" "default" (memory 0))
+)
+
+// a.js
+import {memoryExport} from "./b.wasm";
+
+export default memoryExport;
+
+// b.wasm
+(module
+  (memory 1)
+  (export "memoryExport" (memory 0))
+)
+```
+
+As `export default` is not a re-export this case is handled like importing memory from a JS module and will therefor result in an Error, because non-function can't be imported from a JS module.
+
+Changing it to `export { memoryExport as default }` would fix the error.
+
 ### JS <-> wasm cycle (where JS is higher in the module graph)
 
 #### JS exports
-| export type | value (not a WebAssembly.Global)* | global | memory | table | function |
-|-|-------------------------------|--------|--------|-------|----------|
-| | Error                         | Error  | Error  | Error | snapshot (Note: will be an Error if we don't split instantiation into two phases) |
+| import type | global | memory | table | function     |
+|-------------|-----------------|-------|--------------|
+|             | Error  | Error  | Error | live binding |
 
 #### wasm exports
-| export type | global       | memory       | table        | function     |
-|-|--------------|--------------|--------------|--------------|
-| | const live binding | const live binding | const live binding | const live binding |
+| export type | global             | memory             | table              | function           |
+|-------------|--------------------|--------------------|--------------------|--------------------|
+|             | const live binding | const live binding | const live binding | const live binding |
 
-1. JS module is parsed
-1. wasm module is parsed
-1. wasm module is instantiated. All imports from the JS module are undefined. Because JS module instantiation hasn't happened yet, the functions are also undefined.
-1. JS module is instantiated. All imports from the wasm module are const live bindings.
+1. Construction
+  1. JS module is parsed
+  1. wasm module is parsed
+1. Instantiation
+  1. Export bindings for the exports in the JS module are created.
+  1. wasm module is instantiated. Memories and tables are initialized and filled with data/elem sections. Globals are initialized and initializer expressions are evaluated. Export bindings are created for all exported elements. A trampoline functions is created for function imports, which points to the exported binding. All non-function imports throw an error.
+  1. JS module is instantiated. In the Environment Records of the JS modules import bindings are created (*CreateImportBinding*).
+1. Evaluation
+  1. wasm start function runs. Function imports from JS module are available as trampoline function to a live binding
+  1. JS module is evaluation. All imports from wasm module are available as const live bindings.
 
 #### Example
 
@@ -308,14 +344,14 @@ export function functionExport() {
 ### wasm <-> JS cycle (where wasm is higher in the module graph)
 
 #### wasm exports
-| export type | global       | memory       | table        | function     |
-|-|--------------|--------------|--------------|--------------|
-| | const live binding | const live binding | const live binding | const live binding |
+| export type | global             | memory             | table              | function           |
+|-------------|--------------------|--------------------|--------------------|--------------------|
+|             | const live binding | const live binding | const live binding | const live binding |
 
 #### JS exports
-| export type | value (not a WebAssembly.Global)* | global | memory | table | function |
-|-|-------------------------------|--------|--------|-------|----------|
-| | Error                         | Error  | Error  | Error | snapshot |
+| import type | global | memory | table | function     |
+|-------------|--------|--------|-------|--------------|
+|             | Error  | Error  | Error | live binding |
 
 #### Examples
 
@@ -336,8 +372,8 @@ export function functionExport() {
 
 ### wasm <-> wasm cycle
 
-| export type | global | memory | table | function |
-|-|--------|--------|-------|----------|
-| | Error  | Error  | Error | Error    |
+| export type | global | memory | table | function           |
+|-------------|--------|--------|-------|--------------------|
+|             | Error  | Error  | Error | const live binding |
 
-@TODO explain why we need to throw on WebAssembly cycles
+As values for non-function imports need to be available before instantiation, non-function imports won't work in wasm cycles. This can be solved with a trampoline function similar to importing from JS modules. As this has a negative performance implication wasm cycles should be avoided, but are not prohibited by the spec. It's unspecified at which position the trampoline is inserted.  
