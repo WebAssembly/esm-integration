@@ -875,3 +875,86 @@ same class of exception is thrown as for out of memory conditions in JavaScript.
 The particular exception here is implementation-defined in both cases.
 
 Note: ECMAScript doesn't specify any sort of behavior on out-of-memory conditions; implementations have been observed to throw OOMError and to crash. Either is valid here.
+
+<h2 id="esm-integration">Integration with ECMAScript modules</h2>
+
+WebAssembly modules can be used in a module graph with ECMAScript modules.
+
+<dfn>WebAssembly Module Record</dfn>s are a subclass of <a href="https://github.com/tc39/ecma262/pull/1311">Circular Module Records</a> which contain WebAssembly code. WebAssembly Module Records has one additional internal slot:
+    * \[[WebAssemblyModule]] : a WebAssembly {{Module}} object
+
+<div algorithm>
+To <dfn>parse a WebAssembly module</dfn> given a an {{ArrayBuffer}} |body|, a Realm |realm| and object |hostDefined|, perform the following steps.
+
+1. [=Compile a WebAssembly module|Compile the WebAssembly module=] |stableBytes| and store the result as |module|.
+1. If |module| is [=error=], throw a {{CompileError}} exception.
+1. [=Construct a WebAssembly module object=] from |module| and |bytes|, and let |module| be the result.
+1. Let |requestedModules| be a set.
+1. For each (|moduleName|, |name|, |type|) in [=module_imports=](|module|.\[[Module]]),
+    1. [=set/Append=] |moduleName| to |requestedModules|.
+1. Return { \[[Realm]]: |realm|, \[[Environment]]: undefined, \[[Namespace]]: undefined, \[[Status]]: "uninstantiated", \[[EvaluationError]]: undefined, \[[HostDefined]]: |hostDefined|, \[[WebAssemblyModule]]: |module|, \[[RequestedModules]]: |requestedModules|, \[[DFSIndex]]: undefined, \[[DFSAncestorIndex]]: undefined }.
+
+</div>
+
+<div algorithm>
+The <dfn>export name list</dfn> of a WebAssembly Module Record |record| is defined by the following algorithm:
+
+1. Let |module| be |record|'s \[[WebAssemblyModule]] internal slot.
+1. Let |exports| be an empty [=list=].
+1. For each (|name|, |type|) in [=module_exports=](|module|.\[[Module]])
+    1. [=Append=] |name| to the end of |exports|.
+1. Return |exports|.
+
+</div>
+
+WebAssembly Module Records have the following methods:
+
+<h3 id="get-exported-names">GetExportedNames ( |exportStarSet| ) Concrete Method</h3>
+1. Let |record| be this WebAssembly Module Record.
+1. Return the [=export name list=] of |record|.
+
+<h3 id="resolve-export">ResolveExport ( |exportName|, |resolveSet| ) Concrete Method</h3>
+1. Let |record| be this WebAssembly Module Record.
+1. If the [=export name list=] of |record| contains |exportName|, return { \[[Module]]: |record|, \[[BindingName]]: |exportName| }.
+1. Otherwise, return null.
+
+<h3 id="module-declaration-environment-setup">ModuleDeclarationEnvironmentSetup ( ) Concrete Method</h3>
+1. Let |record| be this WebAssembly Module Record.
+1. Let |env| be NewModuleEnvironment(null).
+1. Set |record|.\[[Environment]] to |env|.
+1. Let |envRec| be |env|'s EnvironmentRecord.
+1. For each |name| in the [=export name list=] of |record|,
+    1. Perform ! |envRec|.CreateImmutableBinding(|name|, true).
+
+<h3 id="module-execution">ModuleExecution ( ) Concrete Method</h3>
+1. Let |record| be this WebAssembly Module Record.
+1. Let |module| be |record|.\[[WebAssemblyModule]].
+1. Let |imports| be a new, empty [=map=].
+1. For each (|importedModuleName|, |name|, |type|) in [=module_imports=](|module|.\[[Module]]),
+    1. If |imports|[|importedModuleName|] does not exist, set |imports|[|importedModuleName|] to a new, empty [=map=].
+    1. Let |importedModule| be ! HostResolveImportedModule(|module|, |importedModuleName|).
+    1. NOTE: The above call cannot fail because imported module requests are a subset of |module|.\[[RequestedModules]], and these have been resolved earlier in this algorithm.
+    1. Let |value| be ? |importedModule|.\[[Environment]].GetBindingValue(|name|, true).
+    1. Set |imports|[|moduleName|][|name|] to |value|.
+1. Let |importsObject| be a new Object.
+1. For each |key| →  |value| of |imports|,
+    1. Let |moduleImportsObject| be a new Object.
+    1. For each |importedName| →  |importedValue| of |imports|,
+        1. Perform ! CreateDataPropertyOrThrow(|moduleImportsObject|, |importedName|, |importedValuealue|).
+    1. Perform ! CreateDataPropertyOrThrow(|importsObject|, |key|, |moduleImportsObject|).
+1. [=Instantiate a WebAssembly module=] |module| with imports |importsObject| and let |instance| be the result.
+1. Let |envRec| be the EnvironmentRecord of |record|.\[[Environment]].
+1. For each |name| in the [=export name list=] of |record|,
+    1. Perform ! |envRec|.InitializeBinding(|name|, ! Get(|instance|.\[[Exports]], |name|)).
+
+Note: Instantiating the WebAssembly module may yield to the task queue and is not guaranteed to be synchronous.
+
+<h3 id="html-modifications">Modifications to HTML</h3>
+
+The <a href="https://html.spec.whatwg.org/#fetch-a-single-module-script">fetch a single module script</a> algorithm, in Step 9, would switch off of the mimetype. If the response has a JavaScript mimetype, continue the algorithm. If it has a non-wasm mimetype, abort the algorithm. If it has an `application/wasm` mimetype, perform the following steps:
+
+1. Let |source| be |response|'s body as an {{ArrayBuffer}}
+1. <a href="https://html.spec.whatwg.org/#creating-a-module-script">Create a module script</a>, but with step 7 replacing ParseModule with the [=parse a WebAssembly Module=] algorithm.
+1. Set |moduleMap|[|url|] to to |module|
+
+TODO: Write this up as a PR against the HTML spec.
