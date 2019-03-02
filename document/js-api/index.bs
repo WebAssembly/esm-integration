@@ -85,6 +85,7 @@ urlPrefix: https://tc39.github.io/ecma262/; spec: ECMASCRIPT
         text: the Number value; url: sec-ecmascript-language-types-number-type
         text: NumberToRawBytes; url: sec-numbertorawbytes
         text: Built-in Function Objects; url: sec-built-in-function-objects
+        text: Cyclic Module Record; url: cyclic-module-record
 urlPrefix: https://webassembly.github.io/spec/core/; spec: WebAssembly; type: dfn
     url: valid/modules.html#valid-module
         text: valid
@@ -1087,7 +1088,9 @@ In practice, an implementation may run out of resources for valid modules below 
 
 WebAssembly modules can be used in a module graph with ECMAScript modules.
 
-<dfn>WebAssembly Module Record</dfn>s are a subclass of <a href="https://github.com/tc39/ecma262/pull/1311">Circular Module Records</a> which contain WebAssembly code. WebAssembly Module Records has one additional internal slot:
+Because WebAssembly module instantiation is asynchronous, these semantics are built on the <a href="https://github.com/tc39/proposal-top-level-await/">top-level await</a> TC39 JavaScript proposal.
+
+<dfn>WebAssembly Module Record</dfn>s are a subclass of [=Cyclic Module Record=] which contain WebAssembly code. WebAssembly Module Records has one additional internal slot:
     * \[[WebAssemblyModule]] : a WebAssembly {{Module}} object
 
 <div algorithm>
@@ -1101,6 +1104,7 @@ To <dfn>parse a WebAssembly module</dfn> given a an {{ArrayBuffer}} |body|, a Re
     1. [=set/Append=] |moduleName| to |requestedModules|.
 1. Return { \[[Realm]]: |realm|, \[[Environment]]: undefined, \[[Namespace]]: undefined, \[[Status]]: "uninstantiated", \[[EvaluationError]]: undefined, \[[HostDefined]]: |hostDefined|, \[[WebAssemblyModule]]: |module|, \[[RequestedModules]]: |requestedModules|, \[[DFSIndex]]: undefined, \[[DFSAncestorIndex]]: undefined }.
 
+Note: From HTML, it's not observable when [=parse a WebAssembly module=] begins, so any work perfomed in compilation may be performed off-thread.
 </div>
 
 <div algorithm>
@@ -1133,7 +1137,7 @@ WebAssembly Module Records have the following methods:
 1. For each |name| in the [=export name list=] of |record|,
     1. Perform ! |envRec|.CreateImmutableBinding(|name|, true).
 
-<h3 id="module-execution">ExecuteModule ( _promiseCapability_ ) Concrete Method</h3>
+<h3 id="module-execution">ExecuteModule ( |promiseCapability| ) Concrete Method</h3>
 1. Let |record| be this WebAssembly Module Record.
 1. Let |module| be |record|.\[[WebAssemblyModule]].
 1. Let |imports| be a new, empty [=map=].
@@ -1149,11 +1153,17 @@ WebAssembly Module Records have the following methods:
     1. For each |importedName| →  |importedValue| of |imports|,
         1. Perform ! CreateDataPropertyOrThrow(|moduleImportsObject|, |importedName|, |importedValuealue|).
     1. Perform ! CreateDataPropertyOrThrow(|importsObject|, |key|, |moduleImportsObject|).
-1. [=Instantiate a WebAssembly module=] |module| with imports |importsObject| and let |instance| be the result.
-1. Let |envRec| be the EnvironmentRecord of |record|.\[[Environment]].
-1. For each |name| in the [=export name list=] of |record|,
-    1. Perform ! |envRec|.InitializeBinding(|name|, ! Get(|instance|.\[[Exports]], |name|)).
+1. [=Asynchronously instantiate a WebAssembly module=] |module| with imports |importsObject| and let |instancePromise| be the result.
+1. [=Upon fulfillment=] of |instancePromise| with value |instance|:
+    1. Let |envRec| be the EnvironmentRecord of |record|.\[[Environment]].
+    1. For each |name| in the [=export name list=] of |record|,
+        1. Perform ! |envRec|.InitializeBinding(|name|, ! Get(|instance|.\[[Exports]], |name|)).
+    1. Perform ! Call(|promiseCapability|.\[[Resolve]], undefined, undefined).
+1. [=Upon rejection=] of |instancePromise| with reason |r|:
+    1. Perform ! Call(|promiseCapability|.\[[Reject]], undefined, |r|).
+    1. [=Reject=] |promiseCapability| with |r|.
+        Note: exported bindings are left uninitialized, i.e., in TDZ.
 
-Note: Instantiating the WebAssembly module may yield to the task queue and is not guaranteed to be synchronous.
+Note: In the <a href="https://github.com/tc39/proposal-top-level-await/pull/49">synchronous branch</a> of the top-level await proposal, add the following additional algorithm step: "Set |module|.\[[EvaluationResult]] to |promiseCapability|.\[[Promise]]." to indicate that instantiating WebAssembly modules is always asynchronous.
 
 Note: See corresponding modifications to HTML in <a href="https://github.com/whatwg/html/pull/4372">PR #4372</a>.
