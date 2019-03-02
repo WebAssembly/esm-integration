@@ -1172,7 +1172,7 @@ WebAssembly Module Records have the following methods:
 1. If the [=export name list=] of |record| contains |exportName|, return { \[[Module]]: |record|, \[[BindingName]]: |exportName| }.
 1. Otherwise, return null.
 
-<h3 id="module-declaration-environment-setup">ModuleDeclarationEnvironmentSetup ( ) Concrete Method</h3>
+<h3 id="module-declaration-environment-setup">InitializeEnvironment ( ) Concrete Method</h3>
 1. Let |record| be this WebAssembly Module Record.
 1. Let |env| be NewModuleEnvironment(null).
 1. Set |record|.\[[Environment]] to |env|.
@@ -1180,7 +1180,7 @@ WebAssembly Module Records have the following methods:
 1. For each |name| in the [=export name list=] of |record|,
     1. Perform ! |envRec|.CreateImmutableBinding(|name|, true).
 
-<h3 id="module-execution">ModuleExecution ( ) Concrete Method</h3>
+<h3 id="module-execution">ExecuteModule ( _promiseCapability_ ) Concrete Method</h3>
 1. Let |record| be this WebAssembly Module Record.
 1. Let |module| be |record|.\[[WebAssemblyModule]].
 1. Let |imports| be a new, empty [=map=].
@@ -1203,11 +1203,4 @@ WebAssembly Module Records have the following methods:
 
 Note: Instantiating the WebAssembly module may yield to the task queue and is not guaranteed to be synchronous.
 
-<h3 id="html-modifications">Modifications to HTML</h3>
-
-The <a href="https://html.spec.whatwg.org/#fetch-a-single-module-script">fetch a single module script</a> algorithm, in Step 9, would switch off of the mimetype. If the response has a JavaScript mimetype, continue the algorithm. If it has a non-wasm mimetype, abort the algorithm. If it has an `application/wasm` mimetype, perform the following steps:
-
-1. Let |source| be |response|'s body as an {{ArrayBuffer}}
-1. <a href="https://html.spec.whatwg.org/#creating-a-module-script">Create a module script</a>, but with step 7 replacing ParseModule with the [=parse a WebAssembly Module=] algorithm.
-1. Set |moduleMap|[|url|] to to |module|
-
+Note: See corresponding modifications to HTML in <a href="https://github.com/whatwg/html/pull/4372">PR #4372</a>.
