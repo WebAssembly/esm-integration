@@ -402,7 +402,7 @@ A {{Module}} object represents a single WebAssembly module. Each {{Module}} obje
 </div>
 
 <div algorithm>
-  To <dfn>instantate the core of a WebAssembly module</dfn> from a module |module| and imports |imports|, perform the following steps:
+  To <dfn>instantiate the core of a WebAssembly module</dfn> from a module |module| and imports |imports|, perform the following steps:
 
       1. Let |store| be the [=surrounding agent=]'s [=associated store=].
       1. Let (|store|, |instance|) be [=instantiate_module=](|store|, |module|, |imports|).
