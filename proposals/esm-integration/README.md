@@ -1,14 +1,14 @@
-# ES Module Integration
+# WebAssembly/ES Module Integration
 
-This page describes a proposal for integration with ES modules. For additional context, you can [watch the proposal presentation](https://youtu.be/qR_b5gajwug) or see the slides ([with notes](https://linclark.github.io/wasm-es-modules/slides/2018-03-24/#/0?presenter), [without notes](https://linclark.github.io/wasm-es-modules/slides/2018-03-24/#/)).
+This page describes  WebAssembly as an ES module. With this proposal, WebAssembly could be loaded from a JavaScript `import` statement, or a `<script type=module>` tag.
+
+This proposal is at Stage 1 in [WebAssembly's process](https://github.com/WebAssembly/meetings/blob/master/process/phases.md).
 
 ## Motivation
 
-The proposal has two goals:
-
 ### Improve ergonomics of WebAssembly module instantiation
 
-Currently, there is an imperative JS API for instantiating WebAssembly modules. This requires users to manually fetch a module file, wire up imports, and run `WebAssembly.instantiate` or `WebAssembly.instantiateStreaming`. 
+Currently, there is an imperative JS API for instantiating WebAssembly modules. This requires users to manually fetch a module file, wire up imports, and run `WebAssembly.instantiate` or `WebAssembly.instantiateStreaming`.
 
 ```
 let req = fetch("./myModule.wasm");
@@ -57,316 +57,129 @@ function incrementCount() {
 export {count, incrementCount};
 ```
 
-WebAssembly modules currently can't take part in these graphs. This means that developers who want to use WebAssembly modules have to manually trigger instantiation, which may not have completed by the time the JS module graph returns, breaking the mental model of modules.
+WebAssembly modules currently can't take part in these graphs. This means that developers who want to use WebAssembly modules have to manually use the WebAssembly JS API. However, the API to compile and instantiate a WebAssembly module is asynchronous, so without [top-level await](https://github.com/tc39/proposal-top-level-await), it's not possible to export things which came out of WebAssembly module instantiation, in a way that's available to importers when the import completes.
 
-## Proposed solution
+### Unify various WebAssembly module implementations
 
-Both goals can be addressed by enabling WebAssembly modules to be loaded using the ES module system. 
+The need for WebAssembly modules integrated with the ES module graph has been broadly identified by JavaScript module implementations. For this reason, support for WebAssembly modules has been implemented in various bundlers ([webpack](https://webpack.js.org/configuration/module/#ruletype), a [Rollup plugin](https://github.com/rollup/rollup-plugin-wasm), [Parcel](https://parceljs.org/webAssembly.html) and [Browserify](https://github.com/browserify/rustify)), browser-based module shims ([System.js](https://guybedford.com/systemjs-2.0#web-assembly-integration)), and experimental Node.js module loaders (including [esm](https://github.com/standard-things/esm) and [the Node.js ecmascript-modules branch](https://github.com/nodejs/ecmascript-modules/pull/46)).
+
+Unfortunately, the semantics implemented by various tools differs, and the ideas in these implementations are not always consistent with future feature plans from the WebAssembly Community Group. This proposal attempts to find a common, future-proof for WebAssembly modules, suitable for implementation in both tools and browsers. Hopefully, over time, tools can transition to use the native browser implementation, once support reaches sufficient levels.
+
+## Semantics in terms of module stages
+
+These goals can be addressed by enabling WebAssembly modules to be loaded using the ES module system, as a standard.
 
 This system has three phases:
 
-1. Construction — Module files are fetched and parsed and the module record is constructed.
-1. Instantiation — Exports and imports are wired up to memory locations. Functions are also initialized here.
-1. Evaluation — Top-level module code is evaluated so that non-function exports can be assigned their values.
+1. Fetch and parse — A module record is constructed from Module resources.
+1. Link — Exports and imports are wired up to memory locations.
+1. Evaluate — Top-level module code is run, assigning the value to exports.
 
-The work completed in these phases is defined in two different specs:
+The work completed in these phases is defined in two different specifications:
 
-- A host-specific specification (i.e. the HTML spec) defines how to load modules.
-- The ES module spec provides methods for loaders to use to parse, instantiate, and evaluate modules. The spec defines both an Abstract Module Record and a concrete subclass of this for JS modules, called the Source Text Module Record.
+- The ECMAScript spec provides methods for loaders to use to parse, link, and evaluate modules.
+- A host-specific spec (e.g., HTML) drives the algorithms defined by ECMAScript, and it describes how to fetch and cache modules.
 
-This proposal will create a new WebAssembly Module subclass of the Abstract Module Record. For this, the 3 phases will be specified as follows (with the possible introduction of a sub-phase in Instantiation):
+WebAssembly fits into these steps as follows:
 
-### Construction
+### Fetch and Parse
 
-During construction, all files for modules in the graph are downloaded and are parsed into Module Records. 
+Fetching and parsing modules is a recursive process, which can be thought of as the following steps, defined in the host specification:
+1. Figure out what the module specifier is pointing to, and fetch the module.
+1. Parse the module, to find further dependencies.
+1. Fetch and parse all modules that are imported by this parsed module, if they aren't already in the cache.
 
-Three things happen for each module during the Construction phase.
+If any syntax error is reached, the algorithm fails, throwing the error.
 
-1. Finding the file — Based on the module specifier, the host figures out where to get the file from using its module resolution algorithm. Module resolution algorithms differ between hosts. There is ongoing work to fix incompatibilities between Node.js and browser module resolution with the [package-name-maps](https://github.com/domenic/package-name-maps) proposal.
-1. Loading the file — The host fetches the file using the module path generated in module resolution. For browsers, the loading algorithm is specified in the [HTML spec](https://html.spec.whatwg.org/#fetch-a-module-script-tree). The WebAssembly MIME type will need to be added to this spec, but loading should largely work without change for WebAssembly modules. 
-1. Parsing the file — The runtime parses the file into a Module Record. For JavaScript, this work is specified in the [`ParseModule` method](https://tc39.github.io/ecma262/#sec-parsemodule) of the Source Text Module Record. This proposal will add a `ParseModule` method to the WebAssembly spec. The runtime creates the logical equivalent of `WebAssembly.Module` during this phase, and fills in the `RequestedModules` field of the module.
+In WebAssembly's case, during this phase, "parsing" means parsing the binary format and [validating the module](https://webassembly.github.io/spec/js-api/index.html#dom-webassembly-validate). For comparison, in JavaScript, the [ParseModule](https://tc39.github.io/ecma262/#sec-parsemodule) checks if the module has syntax errors.
 
-### Instantiation
+In both cases, module parsing identifies the new, named exports that this module defines. In WebAssembly, exports can be functions, WebAssembly.Table objects, WebAssembly.Memory objects, and WebAssembly.Global objects. When future WebAssembly types are exposed through the [WebAssembly JS API](https://webassembly.github.io/spec/js-api/index.html), the intention is to allow them to be exported via WebAssembly ESM modules as well.
 
-When `Module.Instantiate` is called on a JavaScript module, a Lexical Environment is set up. Space for exports is allocated and the memory locations are bound to the export name. Additionally, any imports from dependencies are resolved. In JS, function declarations are initialized at this point. All other values are undefined or in [TDZ](http://2ality.com/2015/10/why-tdz.html) (i.e. would lead to a ReferenceError on access) until evaluation.
+In the proposed HTML integration of WebAssembly modules, the [module name](https://webassembly.github.io/spec/core/syntax/modules.html#syntax-import) in an import is interpreted the same as a JavaScript module specifier: basically, as a URL. The [import maps](https://github.com/wicg/import-maps/) proposal adds more expressiveness to module specifiers.
 
-When `Module.Instantiate` is called on a WebAssembly module, the module will go through the same process. A Lexical Environment is set up, and all exports (for functions, tables, memories and globals) have a binding created for them, which is initialized to TDZ. This process is not WebAssembly module instantiation--WebAssembly validation is not run at this point, and the start function is not executed. Unlike in JavaScript, functions will not be initialized at this point. Function exports, like other exports, start out as TDZ. Initialization of these bindings to take them out of TDZ for all values happens during evaluation.
+### Link
 
-WebAssembly exports can be any one of the [external types](https://webassembly.github.io/spec/core/exec/modules.html#external-typing), which currently include:
+Module records include names of imports and exports. The "link" phase checks whether the named imports correspond to things that are exported, and if so, hooking up the imports of one module to the exports of another module.
 
-- functions
-- tables
-- memories
-- globals
+The ECMAScript specification holds the module's export in a lexical scope, as potentially mutable variables. The importing module will have the ability to read, but not write, the variables in this lexical scope.
 
-WebAssembly does not currently have a type that can handle arbitrary JS values. This means that JS value imports can not be handled with live bindings and will be snapshotted when they are imported. This means that if a JS module changes one of its exports to point to a different object, a WebAssembly module importing that object will not see the change.
+At the end of the link phase, the variables in the module's lexical scope are generally uninitialized. From JavaScript, accessing an uninitialized import causes a ReferenceError. JavaScript function declarations are initialized during the Link phase, as part of function hoisting, but WebAssembly function exports are not initialized until the Evaluation phase.
 
-It may be possible to provide live bindings for JS values if an [`anyref`](https://github.com/WebAssembly/reference-types) type is added to WebAssembly.
-
-### Evaluation
+### Evaluate
 
 During evaluation, the code is evaluated to assign values to the exported bindings. In JS, this means running the top-level module code.
 
-WebAssembly has explicit types for both imports and exports. The type of exports is used to populate the lexical environment with a JavaScript value based on the WebAssembly export, from the [WebAssembly JS API](https://webassembly.github.io/spec/js-api/index.html). The type of imports is used to type check or convert imports to the required WebAssembly type.
+In WebAssembly, evaluating a module consists of the following steps:
+1. Read each imported value and converting it into the WebAssembly type which the import was declared as.
+1. Instantiate the WebAssembly module with those imports, and run the module's start function.
+1. Convert the WebAssembly module's exports to JavaScript values, and initialize the exports in the lexical scope to these values.
 
-For WebAssembly, evaluation consists of:
-- validating the WebAssembly module
-- snapshotting all imports:
-    - If any import is in TDZ, throw a ReferenceError exception
-    - Type-check/coerce each imported value against the declared import type, per step 8 of the [*instantiate a WebAssembly module*](https://webassembly.github.io/spec/js-api/index.html#instantiate-a-webassembly-module) algorithm.
-    - Initialize ("snapshot") the imported bindings to the checked/coerced value
-- initializing the Wasm module, performing [Wasm module instantiation](https://webassembly.github.io/spec/core/appendix/embedding.html#embed-instantiate-module)
-    - filling in memory using the data segment
-    - filling in tables using elem segments
-    - running the start function, which corresponds to running the top-level module code
-- initializing all exports in the Lexical Environment to their analogous Wasm/JS API objects, per step 4 of the [*instantiate a WebAssembly module*](https://webassembly.github.io/spec/js-api/index.html#instantiate-a-webassembly-module) algorithm.
+#### "Snapshotting" imports
 
-Because JS modules that the WebAssembly module imports from are already evaluated at this point, their values will be available for WebAssembly to snapshot (as long as the WebAssembly module was not in a cycle with the JS module, with the WebAssembly module's evaluation preceding the JS module's evaluation).
+Some impacts of reading the imports up-front:
+- The handling of imports could be called a "snapshotting" process: Later updates to the imported values won't be reflected within the WebAssembly module.
+- Circular WebAssembly modules are not supported: One of them will run first, and that one will find that the exports of the other aren't yet initialized, leading to a ReferenceError.
 
-#### A note on snapshotting
+See the FAQ for more explanation of the rationale for this design decision, and what features it enables which would be difficult or impossible otherwise.
 
-For JavaScript ES modules, an export name is bound to a slot on the Module Record. For all of the values that we currently allow, this slot will contain a reference to another memory location, which contains the object (e.g. the `WebAssembly.Global` object that is being imported).
+## FAQ
 
-The term "snapshot" means that WebAssembly will snapshot the reference. This does result in an observable difference between the way JavaScript and WebAssembly handle updates. In JavaScript modules, it is possible for the exporting module to update an export to point to a different object. Other JavaScript modules that are importing that export will then get the new object. In contrast, while WebAssembly modules will see changes to the object that the export was first bound to (e.g. when the exporting module calls `WebAssembly.Global.prototype.set` to change the value), the WebAssembly module will never see updated bindings.
+### How would this work, in some concrete examples?
 
-## Examples and explanation of import/export handling
+See some examples of these semantics in [EXAMPLES.md](./EXAMPLES.md).
 
-Some imports are challenging to handle in the current WebAssembly specification. In this section, we will discuss each kind of export and what the specification described above means for how it is handled.
+### Does this proposal expose named exports from WebAssembly?
 
-### wasm imports <- JS exports
+Yes. In this proposal, each WebAssembly export has its own named binding. To expose a default export from a WebAssembly module, simply make an export called `default`.
 
-When the Wasm module is evaluated, the exported value of the JS module is used in a way which is based on the import type declared in the WebAssembly module.
+### How are imports and exports converted from JavaScript values?
 
-| import type | behavior |
-|-------------|----------|
-| global      | If the exported value is a WebAssembly.Global object, throw an exception if types mismatch, otherwise take that object as the import. Otherwise, if the imported type is `const`, cast the imported value to the appropriate numeric type, and create a new const global to hold the result. Otherwise, throw an exception. |
-| memory      | Check that the exported value is a WebAssembly.Memory object which meets the type imported; use it if so, otherwise, throw an exception |
-| table       | Check that the exported value is a WebAssembly.Table object which meets the type imported; use it if so, otherwise, throw an exception |
-| function    | If the exported value is a WebAssembly exported function based on the same types, make use of it. Otherwise, [create a host function](https://webassembly.github.io/spec/js-api/index.html#create-a-host-function) out of the JS function which includes the casts implied by its type. |
+The conversion is based on the type that the import and export was declared as, which is inside the WebAssembly module. The conversion algorithm is the same as the JS API's [instantiate a WebAssembly module](https://webassembly.github.io/spec/js-api/index.html#instantiate-a-webassembly-module) algorithm.
 
-While WebAssembly only has the concept of globals, JS could export either a regular JS value or a `WebAssembly.Global`.
+### When one WebAssembly module imports another one, will there be overhead due to converting back and forth to JS values?
 
-The sequence of operations for a wasm module which depends on a JS module is as follows:
+Note that exports of ES Module Records always have values that can be directly treated as JavaScript values. Although we're talking about conversions to and from JavaScript for these exports, it's expected that, in native implementations, the conversion to and from Javascript would "cancel out" and not lead to the use of wrappers in practice.
 
-1. wasm module is parsed
-1. JS module is parsed
-1. JS module is instantiated. Function declaration exports are initialized. Other exports are set to undefined or are in TDZ.
-1. wasm module has an exports lexical environment created. Imports are bound to memory locations but values are not snapshotted yet.
-1. JS module is evaluated. All of its remaining exports (i.e. non-fuction values) are initialized. Any top-level statements are executed.
-1. wasm module is instantiated and its start function runs. All imports are snapshotted. All exports are initialized.
+### Why are WebAssembly modules instantiated during the "Evaluation" phase?
 
-Note: because these are snapshots of values, this does not maintain the live-binding semantics that exists between JS modules. For example, let's say JS module exports a function, called `foo`. The WebAssembly module imports `foo`. Then, after evaluation, the JS module sets `foo` to a different function. Other JS modules would see this update. However, WebAssembly modules will not.
+WebAssembly module instantiation is when imports are passed in. Even if it's possible to make a trampoline for functions in some cases, or mutate a global, there's no way to indirectly access Memory or Tables. It may be possible to hoist the definition of Globals, Memory or Tables when they are created from WebAssembly, but it's not possible to manipulate those objects when exported from JavaScript, which may initialize these based on the execution of arbitrary JavaScript code.
 
-#### Examples
+Future WebAssembly proposals may make this issue even more accute in the context of the [WebAssembly GC proposal](https://github.com/WebAssembly/gc/blob/master/proposals/gc/Overview.md): When WebAssembly modules may import and export types, these types similarly need to be available when the module is instantiated. At they same time, they are exported as a value from another module.
 
-##### Function imports
-
-```
-// main.wasm
-(module
-  (import "./counter.js" "getCount" (func $getCount (func (result i32))))
-)
+If instantiation took place earlier (e.g., during the Parse or Link phases), then these imports would not yet be available, and so it would not be possible to properly instantiate the module.
 
-// counter.js
-let count = 42;
+### Even if not some imports have a snapshot, could we use a trampoline for functions?
 
-function getCount() {
-    return count;
-}
-export {getCount};
-```
+The snapshotting semantics may be the biggest difference between this proposal and the semantics of WebAssembly module support in tooling. As explained above, live bindings are simply not possible for many types that WebAssembly may import. One frequent feature request is for functions among WebAssembly modules to be imported in a circular way.
 
-##### Value imports
+The idea here would be to use a trampoline: in the Link phase, create a function and initialize a binding for it which would look at whether the underlying import has been initialized yet, and calls it if so.
 
-@TODO add example of WebAssembly.Global being updated
+The main problem with this proposal is, for detailed reasons, it would be very difficult to eliminate the various kinds of overhead associated with this trampoline. In practice, it may behave like a nested function call. In a future with many small WebAssembly modules, doubling the cross-module function call overhead does not sound very attractive, when there's been so much work put into reducing function call overhead.
 
-```
-// main.wasm
-(module
-  (import "./counter.js" "count" (global i32))
-)
+Instead of including this check in the default semantics of functions, a trampoline can be explicitly constructed which does this check and passes control on to the maybe-initialized function. Initially, this trampoline can be constructed by bundlers. In a potential follow-on proposal, the trampoline may be generated natively. See https://github.com/WebAssembly/esm-integration/issues/17 for further discussion.
 
-// counter.js
-let count = 42;
-export {count};
-```
+### What does snapshotting imports mean for importing globals?
 
-##### External type imports
+When a WebAssembly module imports a Global, there are two possible modes of operation:
+- If the Global type is immutable (as declared in the importing module), then the exporting module may either export a numeric value or an immutable Global.
+- If the Global type is mutable, then the exporting module must export a mutable Global. The snapshot here is "shallow" in the sense that modifications *within* this particular mutable Global object *will* be visible in the importing module (but, if the exporting module overwrites the entire binding with some unrelated value, this will not be noticed by the importing module).
 
-@TODO add example of JS exporting memory
+### Why does this proposal depend on top-level await?
 
-### JS imports <- wasm exports
+On some platforms, some compilation work may need to happen when instantiating the module, rather than when parsing it, based on the dynamic values of the imports. For example, if a module imports Memory, there may be different instructions generated for different kinds of memory, with the choice made based on what's dynamically available.
 
-| export type | imported value            |
-|-------------|---------------------------|
-| global      | WebAssembly.Global object |
-| memory      | WebAssembly.Memory object |
-| table       | WebAssembly.Table object  |
-| function    | WebAssembly exported function |
+Instantiating a WebAssembly module may take a significant amount of time, as it may involve expensive compilation work. For this reason, at some point during evaluation of a WebAssembly module, control is yielded to the event loop, to not block up the main thread. This yield uses the infrastructure of [the TC39 top-level await proposal](https://github.com/tc39/proposal-top-level-await).
 
-Wasm bindings cannot be reassigned as it can in JS, so the exported value will not change in their object identity. But the value that it points to (e.g. `.value` in the case of `WebAssembly.Global`) can change.
+### Can Web APIs be imported via modules?
 
-1. JS module is parsed
-1. wasm module is parsed
-1. wasm module has a lexical environment created for its exports. All exports are initially in TDZ.
-1. JS module is instantiated. Imports are bound to the same memory locations.
-1. wasm module is instantiated evaluated. Functions are initialized. Memories and tables are initialized and filled with data/elem sections. Globals are initialized and initializer expressions are evaluated. The start function runs.
-1. JS module is evaluated. All values are available.
-
-Currently, the value of the export for something like `WebAssembly.Global` would be accessed using the `.value` property on the JS object. However, when host bindings are in place, these could be annotated with a host binding that turns it into a real live binding that points directly to the value's address.
-
-#### Example
-
-```
-// main.js
-import {count, increment} from "./counter.wasm";
-console.log(count.value); // logs 5
-increment();
-console.log(count.value); // logs 6
-
-// counter.wasm
-(module
-  (func $increment
-    get_global 0
-    i32.const 1
-    i32.add
-    set_global 0)
-  (global (mut i32) i32.const 5)
-  (export "count" (global 0))
-  (export "increment" (func $increment)))
-```
-
-### wasm imports <- wasm exports
-
-Wasm exports can be imported as accurate, immutable bindings to other wasm modules. Types between imports and exports must match. Types are checked in the "evaluation" phase, when they undergo Wasm instantiation.
-
-#### Example
-
-```
-// main.wasm
-(module
-  (import "./counter.wasm" "count" (global i32))
-  (import "./counter.wasm" "increment" (func $increment (result i32)))
-)
-
-// counter.wasm
-(module
-  (func $increment
-    get_global 0
-    i32.const 1
-    i32.add
-    set_global 0)
-  (global (mut i32) i32.const 5)
-  (export "count" (global 0))
-  (export "increment" (func $increment)))
-```
-
-### wasm imports <- JS re-exports <- wasm exports
-
-Any wasm exports that are re-exported via a JS module will be available to the other wasm module as accurate, immutable bindings. The wasm export gets wrapped into a JS object (e.g. `WebAssembly.Global`) and then unwrapped to the wasm import in the importing wasm module. When imported from JS, the first and second Wasm modules will yield the same object identities for the multiply exported Wasm objects.
-
-#### Example
-
-```
-// main.wasm
-(module
-  (import "./a.js" "memoryExport" (memory 0))
-)
-
-// a.js
-export {memoryExport} from "./b.wasm";
-
-// b.wasm
-(module
-  (memory 1)
-  (export "memoryExport" (memory 0))
-)
-```
-
-### JS <-> wasm cycle (where JS is higher in the module graph)
-
-#### JS exports
-| export type | value (not a WebAssembly.Global)* | global | memory | table | function |
-|-|-------------------------------|--------|--------|-------|----------|
-| | 0 if a const import and not in TDZ, otherwise Error | Error  | Error  | Error | snapshot if it is a function declaration, otherwise Error |
-
-#### wasm exports
-| export type | global       | memory       | table        | function     |
-|-|--------------|--------------|--------------|--------------|
-| | accurate binding | accurate binding | accurate binding | accurate binding |
-
-1. JS module is parsed
-1. wasm module is parsed
-1. wasm module has a lexical environment created for its exports. All exports are initially in TDZ.
-1. JS module is instantiated. All imports (including functions) from the wasm module are memory locations holding undefined.
-1. wasm module is instantiated and evaluated. Snapshots of imports are taken. Export bindings are initialized.
-1. JS module is evaluated. 
-
-#### Example
-
-```
-// a.js
-import {memoryExport} from "./b.wasm";
-export function functionExport() {
-    // do something with memory and DOM
-}
-
-// b.wasm
-(module
-  (memory 1)
-  (export "memoryExport" (memory 0))
-  (import "./a.js" "functionExport" (func $functionExport (result i32)))
-)
-```
-
-### wasm <-> JS cycle (where wasm is higher in the module graph)
-
-#### wasm exports
-| export type | global       | memory       | table        | function     |
-|-|--------------|--------------|--------------|--------------|
-| | accurate binding | accurate binding | accurate binding | accurate binding |
-
-#### JS exports
-| export type | value (not a WebAssembly.Global)* | global | memory | table | function |
-|-|-------------------------------|--------|--------|-------|----------|
-| | Error                         | snapshot  | snapshot  | snapshot | snapshot |
-
-1. wasm module is parsed
-1. JS module is parsed
-1. JS module is instantiated. 
-1. wasm module has a lexical environment created for its exports. All exports are initially in TDZ.
-1. JS module is evaluated. wasm exports lead to a ReferenceError if used.
-1. wasm module is instantiated and evaluated; wasm-exported bindings are updated to their appropriate JS API-exposed values. 
-
-#### Examples
-
-```
-// a.wasm
-(module
-  (memory 1)
-  (export "memoryExport" (memory 0))
-  (import "./b.js" "functionExport" (func $functionExport (result i32)))
-)
-
-// b.js
-import {memoryExport} from "./a.wasm";
-export function functionExport() {
-    // do something with memory and DOM
-}
-```
-
-### wasm <-> wasm cycle
-
-In this initial version of Wasm/ESM integration, a wasm<->wasm cycle is an error. There are two possible paths to possible circular Wasm module imports, described in the next section.
-
-#### Break up instantiation into two phrases -- infeasible
-
-A core design point of this proposal is that WebAssembly modules are instantiated one by one. The WebAssembly module instantiation path includes validation, type checking, reading imports, exposing exports and running the "start" function. By contrast, the JavaScript specification is broken up into two phases, one to identify and initialize the imports/exports, and one to make use of them. The difference is motivated, in part, by the fact that updating the bindings on the JavaScript end has fixed behavior--because the language is dynamically typed, the process is just updating a binding. By contrast, in WebAssembly, that binding needs to have its type checked.
-
-In a planned WebAssembly feature, the [GC v1](https://github.com/WebAssembly/gc/blob/master/proposals/gc/MVP.md) proposal, WebAssembly will get the ability to import types from other modules. With this, at the time that types are being checked, it is essential that that type be available. To accommodate this proposal, circular modules which import types from each other are impossible. Instantiation must be one phase which happens together, including importing the actual types (not just abstract bindings over the types) to use in module type checking.
-
-#### Use a trampoline to implement live bindings of functions -- possible follow-on proposal
-
-Since instantiation is one-by-one, if we allow circular modules, it will not be possible to call a function from a module that has not yet been instantiated. So, from a start function, it would be necessary to check whether a function has been instantiated yet or not. WebAssembly is based on a design philosophy of no additional runtime overhead from dynamic checks. Including a check like this by default and trying to optimize it out sometimes would go contrary to that philosophy.
-
-Instead of including this check in the default semantics of functions, a trampoline can be explicitly constructed which does this check and passes control on to the maybe-initialized function. Initially, this trampoline can be constructed by build tools like webpack. In a potential follow-on proposal, the trampoline may be generated natively, as part of the host-bindings proposal. See https://github.com/WebAssembly/esm-integration/issues/17 for details.
+In general, Web APIs are exposed through properties of the JavaScript global object, and are not available through ES Modules. See [this WebIDL](https://github.com/heycam/webidl/issues/676) issue for some early discussion about exposing Web APIs through modules.
+
+To start using this proposal ahead of that change, create a JavaScript module which exports the appropriate Web APIs that you need.
+
+### How can I provide my own imports for a WebAssembly module, rather than have those be supplied by other JavaScript or WebAssembly modules?
+
+The WebAssembly JS API and Web APIs provide explicit control over imports and remain available for this purpose. When possible, we recommend using [WebAssembly.instantiateStreaming](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WebAssembly/instantiateStreaming) to create modules with given imports efficiently.
+
+## Past presentations
+
+For additional context, you can [watch the proposal presentation](https://youtu.be/qR_b5gajwug) or see the slides ([with notes](https://linclark.github.io/wasm-es-modules/slides/2018-03-24/#/0?presenter), [without notes](https://linclark.github.io/wasm-es-modules/slides/2018-03-24/#/)).
