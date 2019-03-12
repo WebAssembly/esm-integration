@@ -1235,7 +1235,7 @@ WebAssembly Module Records have the following methods:
 1. Let |importsObject| be a new Object.
 1. For each |key| →  |value| of |imports|,
     1. Let |moduleImportsObject| be a new Object.
-    1. For each |importedName| →  |importedValue| of |imports|,
+    1. For each |importedName| →  |importedValue| of |value|,
         1. Perform ! CreateDataPropertyOrThrow(|moduleImportsObject|, |importedName|, |importedValue|).
     1. Perform ! CreateDataPropertyOrThrow(|importsObject|, |key|, |moduleImportsObject|).
 1. [=Asynchronously instantiate a WebAssembly module=] |module| with imports |importsObject| and let |instancePromise| be the result.
