@@ -1246,8 +1246,8 @@ WebAssembly Module Records have the following methods:
     1. Perform ! Call(|promiseCapability|.\[[Resolve]], undefined, undefined).
 1. [=Upon rejection=] of |instancePromise| with reason |r|:
     1. Perform ! Call(|promiseCapability|.\[[Reject]], undefined, |r|).
-    1. [=Reject=] |promiseCapability| with |r|.
-        Note: exported bindings are left uninitialized, i.e., in TDZ.
+
+    Note: exported bindings are left uninitialized, i.e., in TDZ.
 
 Note: In the <a href="https://github.com/tc39/proposal-top-level-await/pull/49">synchronous branch</a> of the top-level await proposal, add the following additional algorithm step: "Set |module|.\[[EvaluationResult]] to |promiseCapability|.\[[Promise]]." to indicate that instantiating WebAssembly modules is always asynchronous.
 
