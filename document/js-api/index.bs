@@ -15,6 +15,10 @@ Prepare For TR: true
 
 <pre class='biblio'>
 {
+  "TLA": {
+    "href": "https://tc39.github.io/proposal-top-level-await/",
+    "title": "Top-Level Await"
+  },
   "WEBASSEMBLY": {
     "href": "https://webassembly.github.io/spec/core/",
     "title": "WebAssembly Core Specification",
@@ -1084,7 +1088,7 @@ In practice, an implementation may run out of resources for valid modules below 
 
 WebAssembly modules can be used in a module graph with ECMAScript modules.
 
-Because WebAssembly module instantiation is asynchronous, these semantics are built on the <a href="https://github.com/tc39/proposal-top-level-await/">top-level await</a> TC39 JavaScript proposal.
+Because WebAssembly module instantiation is asynchronous, these semantics are built on the top-level await TC39 JavaScript proposal. [[!TLA]]
 
 <dfn export>WebAssembly Module Record</dfn>s are a subclass of [=Cyclic Module Record=] which contain WebAssembly code. WebAssembly Module Records has one additional internal slot:
     * \[[WebAssemblyModule]] : a WebAssembly {{Module}} object
@@ -1105,12 +1109,15 @@ To <dfn export>parse a WebAssembly module</dfn> given a an {{ArrayBuffer}} |byte
       \[[Environment]]: undefined,
       \[[Namespace]]: undefined,
       \[[HostDefined]]: |hostDefined|,
+      \[[Async]]: true,
+      \[[EvaluationPromise]]: undefined,
       <!-- Cyclic Module Records -->
       \[[Status]]: "uninstantiated",
       \[[EvaluationError]]: undefined,
       \[[DFSIndex]]: undefined,
       \[[DFSAncestorIndex]]: undefined,
       \[[RequestedModules]]: |requestedModules|,
+      \[[ModuleAsync]]: true,
       <!-- WebAssembly Module Records -->
       \[[WebAssemblyModule]]: |module|
     }.
@@ -1148,8 +1155,11 @@ WebAssembly Module Records have the following methods:
 1. For each |name| in the [=export name list=] of |record|,
     1. Perform ! |envRec|.CreateImmutableBinding(|name|, true).
 
-<h3 id="module-execution">ExecuteModule ( |promiseCapability| ) Concrete Method</h3>
+<h3 id="module-execution">ExecuteModule ( [ |promiseCapability| ] ) Concrete Method</h3>
+1. Assert: |promiseCapability| was provided.
 1. Let |record| be this WebAssembly Module Record.
+1. Assert: |record|.\[[Async]] is true.
+1. Assert: |record|.\[[ModuleAsync]] is true.
 1. Let |module| be |record|.\[[WebAssemblyModule]].
 1. Let |imports| be a new, empty [=map=].
 1. For each (|importedModuleName|, |name|, <var ignore>type</var>) in [=module_imports=](|module|.\[[Module]]),
@@ -1174,7 +1184,5 @@ WebAssembly Module Records have the following methods:
     1. Perform ! Call(|promiseCapability|.\[[Reject]], undefined, |r|).
 
     Note: exported bindings are left uninitialized, i.e., in TDZ.
-
-Note: In the <a href="https://github.com/tc39/proposal-top-level-await/pull/49">synchronous branch</a> of the top-level await proposal, add the following additional algorithm step: "Set |record|.\[[EvaluationResult]] to |promiseCapability|.\[[Promise]]." to indicate that instantiating WebAssembly modules is always asynchronous.
 
 Note: See corresponding modifications to HTML in <a href="https://github.com/whatwg/html/pull/4372">PR #4372</a>.
