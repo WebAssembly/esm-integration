@@ -1187,7 +1187,21 @@ To <dfn export>parse a WebAssembly module</dfn> given a an {{ArrayBuffer}} |byte
 1. Let |requestedModules| be a set.
 1. For each (|moduleName|, <var ignore>name</var>, <var ignore>type</var>) in [=module_imports=](|module|.\[[Module]]),
     1. [=set/Append=] |moduleName| to |requestedModules|.
-1. Return { \[[Realm]]: |realm|, \[[Environment]]: undefined, \[[Namespace]]: undefined, \[[Status]]: "uninstantiated", \[[EvaluationError]]: undefined, \[[HostDefined]]: |hostDefined|, \[[WebAssemblyModule]]: |module|, \[[RequestedModules]]: |requestedModules|, \[[DFSIndex]]: undefined, \[[DFSAncestorIndex]]: undefined }.
+1. Return {
+      <!-- Abstract Module Records -->
+      \[[Realm]]: |realm|,
+      \[[Environment]]: undefined,
+      \[[Namespace]]: undefined,
+      \[[HostDefined]]: |hostDefined|,
+      <!-- Cyclic Module Records -->
+      \[[Status]]: "uninstantiated",
+      \[[EvaluationError]]: undefined,
+      \[[DFSIndex]]: undefined,
+      \[[DFSAncestorIndex]]: undefined,
+      \[[RequestedModules]]: |requestedModules|,
+      <!-- WebAssembly Module Records -->
+      \[[WebAssemblyModule]]: |module|
+    }.
 
 Note: From HTML, it's not observable when [=parse a WebAssembly module=] begins, so any work perfomed in compilation may be performed off-thread.
 </div>
