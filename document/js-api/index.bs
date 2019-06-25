@@ -1197,15 +1197,17 @@ To <dfn export>parse a WebAssembly module</dfn> given a an {{ArrayBuffer}} |byte
       \[[Environment]]: undefined,
       \[[Namespace]]: undefined,
       \[[HostDefined]]: |hostDefined|,
-      \[[Async]]: true,
-      \[[EvaluationPromise]]: undefined,
       <!-- Cyclic Module Records -->
-      \[[Status]]: "uninstantiated",
+      \[[Status]]: "unlinked",
       \[[EvaluationError]]: undefined,
       \[[DFSIndex]]: undefined,
       \[[DFSAncestorIndex]]: undefined,
       \[[RequestedModules]]: |requestedModules|,
-      \[[ModuleAsync]]: true,
+      \[[Async]]: true,
+      \[[AsyncEvaluating]]: false,
+      \[[TopLevelCapability]]: undefined
+      \[[AsyncParentModules]]: undefined,
+      \[[PendingAsyncDependencies]]: undefined,
       <!-- WebAssembly Module Records -->
       \[[WebAssemblyModule]]: |module|
     }.
