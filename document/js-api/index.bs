@@ -1110,7 +1110,7 @@ To <dfn export>parse a WebAssembly module</dfn> given a an {{ArrayBuffer}} |byte
       \[[Namespace]]: undefined,
       \[[HostDefined]]: |hostDefined|,
       <!-- Cyclic Module Records -->
-      \[[Status]]: "uninstantiated",
+      \[[Status]]: "unlinked",
       \[[EvaluationError]]: undefined,
       \[[DFSIndex]]: undefined,
       \[[DFSAncestorIndex]]: undefined,
