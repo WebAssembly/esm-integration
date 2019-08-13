@@ -1,5 +1,13 @@
 [![Build Status](https://travis-ci.org/WebAssembly/spec.svg?branch=master)](https://travis-ci.org/WebAssembly/spec)
 
+# ES Module Integration Proposal for WebAssembly
+
+This repository is a clone of github.com/WebAssembly/spec/. It is meant for discussion, prototype specification and implementation of a proposal to add ES module integration to WebAssembly.
+
+The [specifics of the ES Module integration Propsal are found in this subfolder](/proposals/esm-integration).
+
+Original README from upstream repository follows...
+
 # spec
 
 This repository holds the sources for the WebAssembly draft specification
