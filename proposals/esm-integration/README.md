@@ -2,7 +2,7 @@
 
 This page describes  WebAssembly as an ES module. With this proposal, WebAssembly could be loaded from a JavaScript `import` statement, or a `<script type=module>` tag.
 
-This proposal is at Stage 1 in [WebAssembly's process](https://github.com/WebAssembly/meetings/blob/master/process/phases.md).
+This proposal is at Stage 2 in [WebAssembly's process](https://github.com/WebAssembly/meetings/blob/master/process/phases.md).
 
 ## Motivation
 
