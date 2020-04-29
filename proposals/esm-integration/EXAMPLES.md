@@ -8,9 +8,9 @@ When the Wasm module is evaluated, the exported value of the JS module is used i
 
 | import type | behavior |
 |-------------|----------|
-| global      | If the exported value is a WebAssembly.Global object, throw an exception if types mismatch, otherwise take that object as the import. Otherwise, if the imported type is `const`, cast the imported value to the appropriate numeric type, and create a new const global to hold the result. Otherwise, throw an exception. |
-| memory      | Check that the exported value is a WebAssembly.Memory object which meets the type imported; use it if so, otherwise, throw an exception |
-| table       | Check that the exported value is a WebAssembly.Table object which meets the type imported; use it if so, otherwise, throw an exception |
+| global      | If the exported value is a `WebAssembly.Global` object, throw an exception if types mismatch, otherwise take that object as the import. Otherwise, if the imported type is `const`, cast the imported value to the appropriate numeric type, and create a new const global to hold the result. Otherwise, throw an exception. |
+| memory      | Check that the exported value is a `WebAssembly.Memory` object which meets the type imported; use it if so, otherwise, throw an exception |
+| table       | Check that the exported value is a `WebAssembly.Table` object which meets the type imported; use it if so, otherwise, throw an exception |
 | function    | If the exported value is a WebAssembly exported function based on the same types, make use of it. Otherwise, [create a host function](https://webassembly.github.io/spec/js-api/index.html#create-a-host-function) out of the JS function which includes the casts implied by its type. |
 
 While WebAssembly only has the concept of globals, JS could export either a regular JS value or a `WebAssembly.Global`.
@@ -21,7 +21,7 @@ The sequence of operations for a wasm module which depends on a JS module is as 
 1. JS module is parsed
 1. JS module is instantiated. Function declaration exports are initialized. Other exports are set to undefined or are in TDZ.
 1. wasm module has an exports lexical environment created. Imports are bound to memory locations but values are not snapshotted yet.
-1. JS module is evaluated. All of its remaining exports (i.e. non-fuction values) are initialized. Any top-level statements are executed.
+1. JS module is evaluated. All of its remaining exports (i.e. non-function values) are initialized. Any top-level statements are executed.
 1. wasm module is instantiated and its start function runs. All imports are snapshotted. All exports are initialized.
 
 Note: because these are snapshots of values, this does not maintain the live-binding semantics that exists between JS modules. For example, let's say JS module exports a function, called `foo`. The WebAssembly module imports `foo`. Then, after evaluation, the JS module sets `foo` to a different function. Other JS modules would see this update. However, WebAssembly modules will not.
@@ -30,12 +30,13 @@ Note: because these are snapshots of values, this does not maintain the live-bin
 
 ##### Function imports
 
-```
+```wasm
 // main.wasm
 (module
   (import "./counter.js" "getCount" (func $getCount (func (result i32))))
 )
-
+```
+```js
 // counter.js
 let count = 42;
 
@@ -49,12 +50,13 @@ export {getCount};
 
 @TODO add example of WebAssembly.Global being updated
 
-```
+```wasm
 // main.wasm
 (module
   (import "./counter.js" "count" (global i32))
 )
-
+```
+```js
 // counter.js
 let count = 42;
 export {count};
@@ -68,9 +70,9 @@ export {count};
 
 | export type | imported value            |
 |-------------|---------------------------|
-| global      | WebAssembly.Global object |
-| memory      | WebAssembly.Memory object |
-| table       | WebAssembly.Table object  |
+| global      | `WebAssembly.Global` object |
+| memory      | `WebAssembly.Memory` object |
+| table       | `WebAssembly.Table` object  |
 | function    | WebAssembly exported function |
 
 Wasm bindings cannot be reassigned as it can in JS, so the exported value will not change in their object identity. But the value that it points to (e.g. `.value` in the case of `WebAssembly.Global`) can change.
@@ -86,13 +88,14 @@ Currently, the value of the export for something like `WebAssembly.Global` would
 
 #### Example
 
-```
+```js
 // main.js
 import {count, increment} from "./counter.wasm";
 console.log(count.value); // logs 5
 increment();
 console.log(count.value); // logs 6
-
+```
+```wasm
 // counter.wasm
 (module
   (func $increment
@@ -111,7 +114,7 @@ Wasm exports can be imported as accurate, immutable bindings to other wasm modul
 
 #### Example
 
-```
+```wasm
 // main.wasm
 (module
   (import "./counter.wasm" "count" (global i32))
@@ -136,15 +139,17 @@ Any wasm exports that are re-exported via a JS module will be available to the o
 
 #### Example
 
-```
+```wasm
 // main.wasm
 (module
   (import "./a.js" "memoryExport" (memory 0))
 )
-
+```
+```js
 // a.js
 export {memoryExport} from "./b.wasm";
-
+```
+```wasm
 // b.wasm
 (module
   (memory 1)
@@ -155,9 +160,9 @@ export {memoryExport} from "./b.wasm";
 ### JS <-> wasm cycle (where JS is higher in the module graph)
 
 #### JS exports
-| export type | value (not a WebAssembly.Global)* | global | memory | table | function |
+| export type | value (not a `WebAssembly.Global`)* | global | memory | table | function |
 |-|-------------------------------|--------|--------|-------|----------|
-| | 0 if a const import and not in TDZ, otherwise Error | Error  | Error  | Error | snapshot if it is a function declaration, otherwise Error |
+| | `0` if a const import and not in TDZ, otherwise `Error` | `Error`  | `Error`  | `Error` | snapshot if it is a function declaration, otherwise `Error` |
 
 #### wasm exports
 | export type | global       | memory       | table        | function     |
@@ -173,13 +178,14 @@ export {memoryExport} from "./b.wasm";
 
 #### Example
 
-```
+```js
 // a.js
 import {memoryExport} from "./b.wasm";
 export function functionExport() {
     // do something with memory and DOM
 }
-
+```
+```wasm
 // b.wasm
 (module
   (memory 1)
@@ -198,7 +204,7 @@ export function functionExport() {
 #### JS exports
 | export type | value (not a WebAssembly.Global)* | global | memory | table | function |
 |-|-------------------------------|--------|--------|-------|----------|
-| | Error                         | snapshot  | snapshot  | snapshot | snapshot |
+| | `Error`                         | snapshot  | snapshot  | snapshot | snapshot |
 
 1. wasm module is parsed
 1. JS module is parsed
@@ -209,14 +215,15 @@ export function functionExport() {
 
 #### Examples
 
-```
+```wasm
 // a.wasm
 (module
   (memory 1)
   (export "memoryExport" (memory 0))
   (import "./b.js" "functionExport" (func $functionExport (result i32)))
 )
-
+```
+```js
 // b.js
 import {memoryExport} from "./a.wasm";
 export function functionExport() {
