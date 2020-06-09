@@ -10,7 +10,7 @@ This proposal is at Stage 2 in [WebAssembly's process](https://github.com/WebAss
 
 Currently, there is an imperative JS API for instantiating WebAssembly modules. This requires users to manually fetch a module file, wire up imports, and run `WebAssembly.instantiate` or `WebAssembly.instantiateStreaming`.
 
-```
+```js
 let req = fetch("./myModule.wasm");
 
 let imports = {
@@ -28,7 +28,7 @@ WebAssembly
 
 A declarative API would improve the ergonomics by making this work happen implicitly.
 
-```
+```js
 import {foo} from "./myModule.wasm";
 foo();
 ```
@@ -39,13 +39,13 @@ With the introduction of ES modules, the JS spec provides a way to express modul
 
 These graphs are expressed with import and export statements.
 
-```
+```js
 // main.js
 
 import {count, incrementCount} from "./dep.js"
 ```
 
-```
+```js
 //dep.js
 
 let count = 10;
