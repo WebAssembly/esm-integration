@@ -31,7 +31,7 @@ Note: because these are snapshots of values, this does not maintain the live-bin
 ##### Function imports
 
 ```wasm
-// main.wasm
+;; main.wasm
 (module
   (import "./counter.js" "getCount" (func $getCount (func (result i32))))
 )
@@ -51,7 +51,7 @@ export {getCount};
 @TODO add example of WebAssembly.Global being updated
 
 ```wasm
-// main.wasm
+;; main.wasm
 (module
   (import "./counter.js" "count" (global i32))
 )
@@ -96,7 +96,7 @@ increment();
 console.log(count.value); // logs 6
 ```
 ```wasm
-// counter.wasm
+;; counter.wasm
 (module
   (func $increment
     get_global 0
@@ -115,13 +115,13 @@ Wasm exports can be imported as accurate, immutable bindings to other wasm modul
 #### Example
 
 ```wasm
-// main.wasm
+;; main.wasm
 (module
   (import "./counter.wasm" "count" (global i32))
   (import "./counter.wasm" "increment" (func $increment (result i32)))
 )
 
-// counter.wasm
+;; counter.wasm
 (module
   (func $increment
     get_global 0
@@ -140,7 +140,7 @@ Any wasm exports that are re-exported via a JS module will be available to the o
 #### Example
 
 ```wasm
-// main.wasm
+;; main.wasm
 (module
   (import "./a.js" "memoryExport" (memory 0))
 )
@@ -150,7 +150,7 @@ Any wasm exports that are re-exported via a JS module will be available to the o
 export {memoryExport} from "./b.wasm";
 ```
 ```wasm
-// b.wasm
+;; b.wasm
 (module
   (memory 1)
   (export "memoryExport" (memory 0))
@@ -186,7 +186,7 @@ export function functionExport() {
 }
 ```
 ```wasm
-// b.wasm
+;; b.wasm
 (module
   (memory 1)
   (export "memoryExport" (memory 0))
@@ -216,7 +216,7 @@ export function functionExport() {
 #### Examples
 
 ```wasm
-// a.wasm
+;; a.wasm
 (module
   (memory 1)
   (export "memoryExport" (memory 0))
