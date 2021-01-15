@@ -122,6 +122,12 @@ Some impacts of reading the imports up-front:
 
 See the FAQ for more explanation of the rationale for this design decision, and what features it enables which would be difficult or impossible otherwise.
 
+### Import Assertions
+
+When integrating with import assertions, it is important to note that `assert { type: 'wasm' }` will not be supported, because there is no privilege escalation between ESM imports or Wasm imports.
+
+Instead, the ESM integration may take advantage of [evaluator attributes](https://github.com/tc39/proposal-import-assertions#follow-up-proposal-evaluator-attributes) in future in order to potentially permit features instance constructors or private Wasm imports.
+
 ## FAQ
 
 ### How would this work, in some concrete examples?
