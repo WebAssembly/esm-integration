@@ -126,7 +126,7 @@ See the FAQ for more explanation of the rationale for this design decision, and 
 
 When integrating with the [Import Assertions proposal](https://github.com/tc39/proposal-import-assertions), it is important to note that `assert { type: 'wasm' }` will not be supported, because there is no privilege escalation between ESM imports or Wasm imports.
 
-Instead, the ESM integration may take advantage of [evaluator attributes](https://github.com/tc39/proposal-import-assertions#follow-up-proposal-evaluator-attributes) in future in order to potentially permit features instance constructors or private Wasm imports.
+Instead, the ESM integration may take advantage of [evaluator attributes](https://github.com/tc39/proposal-import-assertions#follow-up-proposal-evaluator-attributes) in future in order to potentially permit features such as instance constructors or private Wasm imports.
 
 ## FAQ
 
