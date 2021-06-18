@@ -3,10 +3,15 @@ WebAssembly Specification
 
 .. only:: html
 
-   Release |release| (Draft, last updated |today|)
+   | Release |release|
+
+   | Editor: Andreas Rossberg
+
+   | Latest Draft: |WasmDraft|
+   | Issue Tracker: |WasmIssues|
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 2
 
    intro/index
    syntax/index

@@ -1,5 +1,11 @@
+type void
+
 module Fun =
 struct
+  let id x = x
+  let curry f x y = f (x, y)
+  let uncurry f (x, y) = f x y
+
   let rec repeat n f x =
     if n = 0 then () else (f x; repeat (n - 1) f x)
 end
@@ -41,16 +47,25 @@ struct
       let len = min n (String.length s - i) in
       if len = 0 then [] else String.sub s i len :: loop (i + len)
     in loop 0
+
+  let rec find_from_opt f s i =
+    if i = String.length s then
+      None
+    else if f s.[i] then
+      Some i
+    else
+      find_from_opt f s (i + 1)
 end
 
 module List =
 struct
-  let rec make n x =
-    if n = 0 then [] else x :: make (n - 1) x
+  let rec make n x = make' n x []
+  and make' n x xs =
+    if n = 0 then xs else make' (n - 1) x (x::xs)
 
-  let rec table n f = table' 0 n f
-  and table' i n f =
-    if i = n then [] else f i :: table' (i + 1) n f
+  let rec table n f = table' n f []
+  and table' n f xs =
+    if n = 0 then xs else table' (n - 1) f (f (n - 1) :: xs)
 
   let rec take n xs =
     match n, xs with
@@ -89,10 +104,18 @@ struct
       match f x with
       | None -> map_filter f xs
       | Some y -> y :: map_filter f xs
+
+  let rec concat_map f = function
+    | [] -> []
+    | x::xs -> f x @ concat_map f xs
 end
 
 module List32 =
 struct
+  let rec make n x = make' n x []
+  and make' n x xs =
+    if n = 0l then xs else make' (Int32.sub n 1l) x (x::xs)
+
   let rec length xs = length' xs 0l
   and length' xs n =
     match xs with
@@ -117,6 +140,11 @@ struct
     | 0l, _ -> xs
     | n, _::xs' when n > 0l -> drop (Int32.sub n 1l) xs'
     | _ -> failwith "drop"
+
+  let rec mapi f xs = mapi' f 0l xs
+  and mapi' f i = function
+    | [] -> []
+    | x::xs -> f i x :: mapi' f (Int32.add i 1l) xs
 end
 
 module Array32 =
@@ -167,6 +195,11 @@ struct
     match o with
     | Some y -> y
     | None -> x
+
+  let force o =
+    match o with
+    | Some y -> y
+    | None -> raise (Invalid_argument "Option.force")
 
   let map f = function
     | Some x -> Some (f x)

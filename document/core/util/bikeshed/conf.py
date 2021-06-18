@@ -35,7 +35,7 @@ extensions = [
   'sphinx.ext.mathjax',
   'sphinx.ext.ifconfig',
   'sphinx.ext.githubpages',
-  'mathdef',
+  'mathdefbs',
   'pseudo-lexer'
 ]
 
@@ -67,7 +67,7 @@ logo = 'static/webassembly.png'
 # built documents.
 #
 # The short X.Y version.
-version = u'1.0'
+version = u'1.1'
 # The full version, including alpha/beta/rc tags.
 release = version + ''
 
@@ -130,7 +130,7 @@ todo_include_todos = True
 # a list of builtin themes.
 #
 html_theme = 'classic'
-html_add_permalinks = None
+html_permalinks = False
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -176,7 +176,7 @@ html_logo = logo
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static', 'static/custom.css']
+# html_static_path = ['_static', 'static/custom.css']
 
 # Add any extra paths that contain custom files (such as robots.txt or
 # .htaccess) here, relative to this directory. These files are copied
@@ -226,12 +226,12 @@ html_show_sphinx = False
 
 # If true, "(C) Copyright ..." is shown in the HTML footer. Default is True.
 #
-html_show_copyright = True
+html_show_copyright = False
 
 # If this is not None, a ‘Last updated on:’ timestamp is inserted at every
 # page bottom, using the given strftime() format.
 #
-html_last_updated_fmt = '%F'
+html_last_updated_fmt = None
 
 # If true, an OpenSearch description file will be output, and all pages will
 # contain a <link> tag referring to it.  The value of this option must be the

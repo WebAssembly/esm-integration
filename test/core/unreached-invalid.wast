@@ -1,11 +1,11 @@
 ;; Failures in unreachable code.
 
 (assert_invalid
-  (module (func $local-index (unreachable) (drop (get_local 0))))
+  (module (func $local-index (unreachable) (drop (local.get 0))))
   "unknown local"
 )
 (assert_invalid
-  (module (func $global-index (unreachable) (drop (get_global 0))))
+  (module (func $global-index (unreachable) (drop (global.get 0))))
   "unknown global"
 )
 (assert_invalid
@@ -535,20 +535,6 @@
   ))
   "type mismatch"
 )
-(assert_invalid
-  (module (func $type-br_table-label-num-vs-label-num-after-unreachable
-    (block (result f64)
-      (block (result f32)
-        (unreachable)
-        (br_table 0 1 1 (i32.const 1))
-      )
-      (drop)
-      (f64.const 0)
-    )
-    (drop)
-  ))
-  "type mismatch"
-)
 
 (assert_invalid
   (module (func $type-block-value-nested-unreachable-num-vs-void
@@ -682,7 +668,7 @@
 (assert_invalid
   (module (func $tee-local-unreachable-value
     (local i32)
-    (tee_local 0 (unreachable))
+    (local.tee 0 (unreachable))
   ))
   "type mismatch"
 )
@@ -702,8 +688,63 @@
     (func $type-br_if-after-unreachable (result i64)
       unreachable
       br_if 0
-      i64.extend_u/i32
+      i64.extend_i32_u
     )
   )
  "type mismatch"
 )
+
+;; The first two operands should have the same type as each other
+(assert_invalid
+  (module (func (unreachable) (select (i32.const 1) (i64.const 1) (i32.const 1)) (drop)))
+  "type mismatch"
+)
+
+(assert_invalid
+  (module (func (unreachable) (select (i64.const 1) (i32.const 1) (i32.const 1)) (drop)))
+  "type mismatch"
+)
+
+;; Third operand must be i32
+(assert_invalid
+  (module (func (unreachable) (select (i32.const 1) (i32.const 1) (i64.const 1)) (drop)))
+  "type mismatch"
+)
+
+(assert_invalid
+  (module (func (unreachable) (select (i32.const 1) (i64.const 1)) (drop)))
+  "type mismatch"
+)
+
+(assert_invalid
+  (module (func (unreachable) (select (i64.const 1)) (drop)))
+  "type mismatch"
+)
+
+;; Result of select has type of first two operands (type of second operand when first one is omitted)
+(assert_invalid
+  (module (func (result i32) (unreachable) (select (i64.const 1) (i32.const 1))))
+  "type mismatch"
+)
+
+
+;; select always has non-empty result
+(assert_invalid
+  (module (func (unreachable) (select)))
+  "type mismatch"
+)
+
+(assert_invalid
+  (module (func $meet-bottom (param i32) (result externref)
+    (block $l1 (result externref)
+      (drop
+        (block $l2 (result i32)
+          (br_table $l2 $l1 $l2 (ref.null extern) (local.get 0))
+        )
+      )
+      (ref.null extern)
+    )
+  ))
+  "type mismatch"
+)
+
