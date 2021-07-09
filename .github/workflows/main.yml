@@ -34,6 +34,5 @@ jobs:
         if: success()
         uses: peaceiris/actions-gh-pages@v3
         with:
-          target_branch: gh-pages
-          build_dir: document
+          publish_dir: ./document
           github_token: ${{ secrets.GITHUB_TOKEN }}
