@@ -48,8 +48,7 @@ export {getCount};
 
 ##### Value imports
 
-@TODO add example of WebAssembly.Global being updated
-
+Constant:
 ```wasm
 ;; main.wat --> main.wasm
 (module
@@ -62,9 +61,49 @@ let count = 42;
 export {count};
 ```
 
+Mutable:
+```wasm
+;; main.wat --> main.wasm
+(module
+  (import "./counter.js" "count" (global (mut i32)))
+  (func (export "incrementCount")
+    (global.set 0
+      (i32.add
+        (global.get 0)
+        (i32.const 1))))
+)
+```
+```js
+// counter.js
+export const count = new WebAssembly.Global({
+  value: 'i32',
+  mutable: true,
+}, 42);
+```
+
 ##### External type imports
 
-@TODO add example of JS exporting memory
+```wasm
+;; main.wat --> main.wasm
+(module
+  (import "./buffer.js" "buffer" (memory 1))
+  (func (export "getFirstByte")
+    (result i32)
+
+    (i32.and
+      (i32.load (i32.const 0))
+      (i32.const 255)))
+)
+```
+```js
+// buffer.js
+export const buffer = new WebAssembly.Memory({ initial: 1, maximum: 1 });
+
+const length = 10;
+const view = new Uint8Array(buffer.buffer, 0, length);
+for (let index = 0; index < length; index++)
+    view[index] = Math.random() > 0.5 ? 1 : 0;
+```
 
 ### JS imports <- wasm exports
 
