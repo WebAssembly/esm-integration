@@ -137,14 +137,13 @@ console.log(count.value); // logs 6
 ```wasm
 ;; counter.wat --> counter.wasm
 (module
-  (func $increment
-    get_global 0
-    i32.const 1
-    i32.add
-    set_global 0)
-  (global (mut i32) i32.const 5)
-  (export "count" (global 0))
-  (export "increment" (func $increment)))
+  (func (export "increment")
+    (global.set 0
+      (i32.add
+        (global.get 0)
+        (i32.const 1))))
+  (global (export "count") (mut i32) i32.const 5)
+)
 ```
 
 ### wasm imports <- wasm exports
@@ -162,14 +161,13 @@ Wasm exports can be imported as accurate, immutable bindings to other wasm modul
 
 ;; counter.wat --> counter.wasm
 (module
-  (func $increment
-    get_global 0
-    i32.const 1
-    i32.add
-    set_global 0)
-  (global (mut i32) i32.const 5)
-  (export "count" (global 0))
-  (export "increment" (func $increment)))
+  (func (export "increment")
+    (global.set 0
+      (i32.add
+        (global.get 0)
+        (i32.const 1))))
+  (global (export "count") (mut i32) i32.const 5)
+)
 ```
 
 ### wasm imports <- JS re-exports <- wasm exports
