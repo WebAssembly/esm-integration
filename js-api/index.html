@@ -7,7 +7,7 @@
   <meta content="This document provides an explicit JavaScript API for interacting with WebAssembly." name="abstract">
   <meta content="Bikeshed version 5f7b0e20, updated Tue Aug 18 15:46:28 2020 -0700" name="generator">
   <link href="https://www.w3.org/TR/wasm-js-api-1/" rel="canonical">
-  <meta content="2ed816c5245c5b38b8d1e5e1939a662547ad71fd" name="document-revision">
+  <meta content="01da9a9d0cb0d1c6aa642d548480706edc295785" name="document-revision">
 <style>
 emu-const {
     font-family: serif;
@@ -1967,114 +1967,118 @@ In practice, an implementation may run out of resources for valid modules below 
       <p>For each (<var>name</var>, <var>type</var>) in <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/appendix/embedding.html#embed-module-exports" id="ref-for-embed-module-exports②">module_exports</a>(<var>module</var>.[[Module]])</p>
       <ol>
        <li data-md>
-        <p><a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-node-append" id="ref-for-concept-node-append">Append</a> <var>name</var> to the end of <var>exports</var>.</p>
+        <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-append" id="ref-for-list-append①①">Append</a> <var>name</var> to the end of <var>exports</var>.</p>
       </ol>
      <li data-md>
       <p>Return <var>exports</var>.</p>
     </ol>
    </div>
    <p>WebAssembly Module Records have the following methods:</p>
-   <h3 class="heading settled" data-level="8.1" id="get-exported-names"><span class="secno">8.1. </span><span class="content">GetExportedNames ( <var>exportStarSet</var> ) Concrete Method</span><a class="self-link" href="#get-exported-names"></a></h3>
-   <ol>
-    <li data-md>
-     <p>Let <var>record</var> be this WebAssembly Module Record.</p>
-    <li data-md>
-     <p>Return the <a data-link-type="dfn" href="#export-name-list" id="ref-for-export-name-list">export name list</a> of <var>record</var>.</p>
-   </ol>
-   <h3 class="heading settled" data-level="8.2" id="resolve-export"><span class="secno">8.2. </span><span class="content">ResolveExport ( <var>exportName</var>, <var>resolveSet</var> ) Concrete Method</span><a class="self-link" href="#resolve-export"></a></h3>
-   <ol>
-    <li data-md>
-     <p>Let <var>record</var> be this WebAssembly Module Record.</p>
-    <li data-md>
-     <p>If the <a data-link-type="dfn" href="#export-name-list" id="ref-for-export-name-list①">export name list</a> of <var>record</var> contains <var>exportName</var>, return { [[Module]]: <var>record</var>, [[BindingName]]: <var>exportName</var> }.</p>
-    <li data-md>
-     <p>Otherwise, return null.</p>
-   </ol>
-   <h3 class="heading settled" data-level="8.3" id="module-declaration-environment-setup"><span class="secno">8.3. </span><span class="content">InitializeEnvironment ( ) Concrete Method</span><a class="self-link" href="#module-declaration-environment-setup"></a></h3>
-   <ol>
-    <li data-md>
-     <p>Let <var>record</var> be this WebAssembly Module Record.</p>
-    <li data-md>
-     <p>Let <var>env</var> be NewModuleEnvironment(null).</p>
-    <li data-md>
-     <p>Set <var>record</var>.[[Environment]] to <var>env</var>.</p>
-    <li data-md>
-     <p>Let <var>envRec</var> be <var>env</var>’s EnvironmentRecord.</p>
-    <li data-md>
-     <p>For each <var>name</var> in the <a data-link-type="dfn" href="#export-name-list" id="ref-for-export-name-list②">export name list</a> of <var>record</var>,</p>
-     <ol>
-      <li data-md>
-       <p>Perform ! <var>envRec</var>.CreateImmutableBinding(<var>name</var>, true).</p>
-     </ol>
-   </ol>
-   <h3 class="heading settled" data-level="8.4" id="module-execution"><span class="secno">8.4. </span><span class="content">ExecuteModule ( [ <var>promiseCapability</var> ] ) Concrete Method</span><a class="self-link" href="#module-execution"></a></h3>
-   <ol>
-    <li data-md>
-     <p class="assertion">Assert: <var>promiseCapability</var> was provided.</p>
-    <li data-md>
-     <p>Let <var>record</var> be this WebAssembly Module Record.</p>
-    <li data-md>
-     <p class="assertion">Assert: <var>record</var>.[[Async]] is true.</p>
-    <li data-md>
-     <p class="assertion">Assert: <var>record</var>.[[ModuleAsync]] is true.</p>
-    <li data-md>
-     <p>Let <var>module</var> be <var>record</var>.[[WebAssemblyModule]].</p>
-    <li data-md>
-     <p>Let <var>imports</var> be a new, empty <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#ordered-map" id="ref-for-ordered-map①">map</a>.</p>
-    <li data-md>
-     <p>For each (<var>importedModuleName</var>, <var>name</var>, <var>type</var>) in <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/appendix/embedding.html#embed-module-imports" id="ref-for-embed-module-imports③">module_imports</a>(<var>module</var>.[[Module]]),</p>
-     <ol>
-      <li data-md>
-       <p>If <var>imports</var>[<var>importedModuleName</var>] does not exist, set <var>imports</var>[<var>importedModuleName</var>] to a new, empty <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#ordered-map" id="ref-for-ordered-map②">map</a>.</p>
-      <li data-md>
-       <p>Let <var>importedModule</var> be ! HostResolveImportedModule(<var>record</var>, <var>importedModuleName</var>).</p>
-      <li data-md>
-       <p class="note" role="note"><span>NOTE:</span> The above call cannot fail because imported module requests are a subset of <var>record</var>.[[RequestedModules]], and these have been resolved earlier in this algorithm.</p>
-      <li data-md>
-       <p>Let <var>value</var> be ? <var>importedModule</var>.[[Environment]].GetBindingValue(<var>name</var>, true).</p>
-      <li data-md>
-       <p>Set <var>imports</var>[<var>importedModuleName</var>][<var>name</var>] to <var>value</var>.</p>
-     </ol>
-    <li data-md>
-     <p>Let <var>importsObject</var> be a new Object.</p>
-    <li data-md>
-     <p>For each <var>key</var> → <var>value</var> of <var>imports</var>,</p>
-     <ol>
-      <li data-md>
-       <p>Let <var>moduleImportsObject</var> be a new Object.</p>
-      <li data-md>
-       <p>For each <var>importedName</var> → <var>importedValue</var> of <var>value</var>,</p>
-       <ol>
-        <li data-md>
-         <p>Perform ! CreateDataPropertyOrThrow(<var>moduleImportsObject</var>, <var>importedName</var>, <var>importedValue</var>).</p>
-       </ol>
-      <li data-md>
-       <p>Perform ! CreateDataPropertyOrThrow(<var>importsObject</var>, <var>key</var>, <var>moduleImportsObject</var>).</p>
-     </ol>
-    <li data-md>
-     <p><a data-link-type="dfn" href="#asynchronously-instantiate-a-webassembly-module" id="ref-for-asynchronously-instantiate-a-webassembly-module①">Asynchronously instantiate a WebAssembly module</a> <var>module</var> with imports <var>importsObject</var> and let <var>instancePromise</var> be the result.</p>
-    <li data-md>
-     <p><a data-link-type="dfn" href="https://heycam.github.io/webidl/#upon-fulfillment" id="ref-for-upon-fulfillment①">Upon fulfillment</a> of <var>instancePromise</var> with value <var>instance</var>:</p>
-     <ol>
-      <li data-md>
-       <p>Let <var>envRec</var> be the EnvironmentRecord of <var>record</var>.[[Environment]].</p>
-      <li data-md>
-       <p>For each <var>name</var> in the <a data-link-type="dfn" href="#export-name-list" id="ref-for-export-name-list③">export name list</a> of <var>record</var>,</p>
-       <ol>
-        <li data-md>
-         <p>Perform ! <var>envRec</var>.InitializeBinding(<var>name</var>, ! Get(<var>instance</var>.[[Exports]], <var>name</var>)).</p>
-       </ol>
-      <li data-md>
-       <p>Perform ! Call(<var>promiseCapability</var>.[[Resolve]], undefined, undefined).</p>
-     </ol>
-    <li data-md>
-     <p><a data-link-type="dfn" href="https://heycam.github.io/webidl/#upon-rejection" id="ref-for-upon-rejection①">Upon rejection</a> of <var>instancePromise</var> with reason <var>r</var>:</p>
-     <ol>
-      <li data-md>
-       <p>Perform ! Call(<var>promiseCapability</var>.[[Reject]], undefined, <var>r</var>).</p>
-     </ol>
-     <p class="note" role="note"><span>Note:</span> exported bindings are left uninitialized, i.e., in TDZ.</p>
-   </ol>
+   <div class="algorithm" data-algorithm="GetExportedNames">
+    <h3 class="heading settled" data-level="8.1" id="get-exported-names"><span class="secno">8.1. </span><span class="content">GetExportedNames ( <var>exportStarSet</var> ) Concrete Method</span><a class="self-link" href="#get-exported-names"></a></h3>
+    <ol>
+     <li data-md>
+      <p>Let <var>record</var> be this WebAssembly Module Record.</p>
+     <li data-md>
+      <p>Return the <a data-link-type="dfn" href="#export-name-list" id="ref-for-export-name-list">export name list</a> of <var>record</var>.</p>
+    </ol>
+   </div>
+   <div class="algorithm" data-algorithm="ResolveExport">
+    <h3 class="heading settled" data-level="8.2" id="resolve-export"><span class="secno">8.2. </span><span class="content">ResolveExport ( <var>exportName</var>, <var>resolveSet</var> ) Concrete Method</span><a class="self-link" href="#resolve-export"></a></h3>
+    <ol>
+     <li data-md>
+      <p>Let <var>record</var> be this WebAssembly Module Record.</p>
+     <li data-md>
+      <p>If the <a data-link-type="dfn" href="#export-name-list" id="ref-for-export-name-list①">export name list</a> of <var>record</var> contains <var>exportName</var>, return { [[Module]]: <var>record</var>, [[BindingName]]: <var>exportName</var> }.</p>
+     <li data-md>
+      <p>Otherwise, return null.</p>
+    </ol>
+   </div>
+   <div class="algorithm" data-algorithm="InitializeEnvironment">
+    <h3 class="heading settled" data-level="8.3" id="module-declaration-environment-setup"><span class="secno">8.3. </span><span class="content">InitializeEnvironment ( ) Concrete Method</span><a class="self-link" href="#module-declaration-environment-setup"></a></h3>
+    <ol>
+     <li data-md>
+      <p>Let <var>record</var> be this WebAssembly Module Record.</p>
+     <li data-md>
+      <p>Let <var>env</var> be <a data-link-type="abstract-op" href="https://tc39.github.io/ecma262/#sec-newmoduleenvironment" id="ref-for-sec-newmoduleenvironment">NewModuleEnvironment</a>(null).</p>
+     <li data-md>
+      <p>Set <var>record</var>.[[Environment]] to <var>env</var>.</p>
+     <li data-md>
+      <p>For each <var>name</var> in the <a data-link-type="dfn" href="#export-name-list" id="ref-for-export-name-list②">export name list</a> of <var>record</var>,</p>
+      <ol>
+       <li data-md>
+        <p>Perform ! <var>env</var>.CreateImmutableBinding(<var>name</var>, true).</p>
+      </ol>
+    </ol>
+   </div>
+   <div class="algorithm" data-algorithm="ExecuteModule">
+    <h3 class="heading settled" data-level="8.4" id="module-execution"><span class="secno">8.4. </span><span class="content">ExecuteModule ( [ <var>promiseCapability</var> ] ) Concrete Method</span><a class="self-link" href="#module-execution"></a></h3>
+    <ol>
+     <li data-md>
+      <p class="assertion">Assert: <var>promiseCapability</var> was provided.</p>
+     <li data-md>
+      <p>Let <var>record</var> be this WebAssembly Module Record.</p>
+     <li data-md>
+      <p class="assertion">Assert: <var>record</var>.[[Async]] is true.</p>
+     <li data-md>
+      <p class="assertion">Assert: <var>record</var>.[[ModuleAsync]] is true.</p>
+     <li data-md>
+      <p>Let <var>module</var> be <var>record</var>.[[WebAssemblyModule]].</p>
+     <li data-md>
+      <p>Let <var>imports</var> be a new, empty <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#ordered-map" id="ref-for-ordered-map①">map</a>.</p>
+     <li data-md>
+      <p>For each (<var>importedModuleName</var>, <var>name</var>, <var>type</var>) in <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/appendix/embedding.html#embed-module-imports" id="ref-for-embed-module-imports③">module_imports</a>(<var>module</var>.[[Module]]),</p>
+      <ol>
+       <li data-md>
+        <p>If <var>imports</var>[<var>importedModuleName</var>] does not exist, set <var>imports</var>[<var>importedModuleName</var>] to a new, empty <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#ordered-map" id="ref-for-ordered-map②">map</a>.</p>
+       <li data-md>
+        <p>Let <var>importedModule</var> be ! <a data-link-type="abstract-op" href="https://tc39.github.io/ecma262/#sec-hostresolveimportedmodule" id="ref-for-sec-hostresolveimportedmodule">HostResolveImportedModule</a>(<var>record</var>, <var>importedModuleName</var>).</p>
+       <li data-md>
+        <p class="note" role="note"><span>NOTE:</span> The above call cannot fail because imported module requests are a subset of <var>record</var>.[[RequestedModules]], and these have been resolved earlier in this algorithm.</p>
+       <li data-md>
+        <p>Let <var>value</var> be ? <var>importedModule</var>.[[Environment]].GetBindingValue(<var>name</var>, true).</p>
+       <li data-md>
+        <p>Set <var>imports</var>[<var>importedModuleName</var>][<var>name</var>] to <var>value</var>.</p>
+      </ol>
+     <li data-md>
+      <p>Let <var>importsObject</var> be ! <a data-link-type="abstract-op" href="https://tc39.github.io/ecma262/#sec-ordinaryobjectcreate" id="ref-for-sec-ordinaryobjectcreate">OrdinaryObjectCreate</a>(null).</p>
+     <li data-md>
+      <p>For each <var>key</var> → <var>value</var> of <var>imports</var>,</p>
+      <ol>
+       <li data-md>
+        <p>Let <var>moduleImportsObject</var> be ! <a data-link-type="abstract-op" href="https://tc39.github.io/ecma262/#sec-ordinaryobjectcreate" id="ref-for-sec-ordinaryobjectcreate①">OrdinaryObjectCreate</a>(null).</p>
+       <li data-md>
+        <p>For each <var>importedName</var> → <var>importedValue</var> of <var>value</var>,</p>
+        <ol>
+         <li data-md>
+          <p>Perform ! <a data-link-type="abstract-op" href="https://tc39.github.io/ecma262/#sec-createdatapropertyorthrow" id="ref-for-sec-createdatapropertyorthrow">CreateDataPropertyOrThrow</a>(<var>moduleImportsObject</var>, <var>importedName</var>, <var>importedValue</var>).</p>
+        </ol>
+       <li data-md>
+        <p>Perform ! <a data-link-type="abstract-op" href="https://tc39.github.io/ecma262/#sec-createdatapropertyorthrow" id="ref-for-sec-createdatapropertyorthrow①">CreateDataPropertyOrThrow</a>(<var>importsObject</var>, <var>key</var>, <var>moduleImportsObject</var>).</p>
+      </ol>
+     <li data-md>
+      <p><a data-link-type="dfn" href="#asynchronously-instantiate-a-webassembly-module" id="ref-for-asynchronously-instantiate-a-webassembly-module①">Asynchronously instantiate a WebAssembly module</a> <var>module</var> with imports <var>importsObject</var> and let <var>instancePromise</var> be the result.</p>
+     <li data-md>
+      <p><a data-link-type="dfn" href="https://heycam.github.io/webidl/#upon-fulfillment" id="ref-for-upon-fulfillment①">Upon fulfillment</a> of <var>instancePromise</var> with value <var>instance</var>:</p>
+      <ol>
+       <li data-md>
+        <p>For each <var>name</var> in the <a data-link-type="dfn" href="#export-name-list" id="ref-for-export-name-list③">export name list</a> of <var>record</var>,</p>
+        <ol>
+         <li data-md>
+          <p>Perform ! <var>record</var>.[[Environment]].InitializeBinding(<var>name</var>, ! Get(<var>instance</var>.[[Exports]], <var>name</var>)).</p>
+        </ol>
+       <li data-md>
+        <p>Perform ! <a data-link-type="dfn" href="https://tc39.github.io/ecma262/#sec-call" id="ref-for-sec-call①">Call</a>(<var>promiseCapability</var>.[[Resolve]], undefined, undefined).</p>
+      </ol>
+     <li data-md>
+      <p><a data-link-type="dfn" href="https://heycam.github.io/webidl/#upon-rejection" id="ref-for-upon-rejection①">Upon rejection</a> of <var>instancePromise</var> with reason <var>r</var>:</p>
+      <ol>
+       <li data-md>
+        <p>Perform ! <a data-link-type="dfn" href="https://tc39.github.io/ecma262/#sec-call" id="ref-for-sec-call②">Call</a>(<var>promiseCapability</var>.[[Reject]], undefined, <var>r</var>).</p>
+      </ol>
+      <p class="note" role="note"><span>Note:</span> exported bindings are left uninitialized, i.e., in TDZ.</p>
+    </ol>
+   </div>
    <p class="note" role="note"><span>Note:</span> See corresponding modifications to HTML in <a href="https://github.com/whatwg/html/pull/4372">PR #4372</a>.</p>
   </main>
   <h2 class="no-ref no-num heading settled" id="conformance"><span class="content"> Conformance</span><a class="self-link" href="#conformance"></a></h2>
@@ -2267,12 +2271,6 @@ In practice, an implementation may run out of resources for valid modules below 
    <li><a href="#dictdef-webassemblyinstantiatedsource">WebAssemblyInstantiatedSource</a><span>, in §4</span>
    <li><a href="#webassembly-module-record">WebAssembly Module Record</a><span>, in §8</span>
   </ul>
-  <aside class="dfn-panel" data-for="term-for-concept-node-append">
-   <a href="https://dom.spec.whatwg.org/#concept-node-append">https://dom.spec.whatwg.org/#concept-node-append</a><b>Referenced in:</b>
-   <ul>
-    <li><a href="#ref-for-concept-node-append">8. Integration with ECMAScript modules</a>
-   </ul>
-  </aside>
   <aside class="dfn-panel" data-for="term-for-sec-properties-of-the-function-prototype-object">
    <a href="https://tc39.github.io/ecma262/#sec-properties-of-the-function-prototype-object">https://tc39.github.io/ecma262/#sec-properties-of-the-function-prototype-object</a><b>Referenced in:</b>
    <ul>
@@ -2293,10 +2291,34 @@ In practice, an implementation may run out of resources for valid modules below 
     <li><a href="#ref-for-sec-arraybuffer-objects⑤">8. Integration with ECMAScript modules</a>
    </ul>
   </aside>
+  <aside class="dfn-panel" data-for="term-for-sec-createdatapropertyorthrow">
+   <a href="https://tc39.github.io/ecma262/#sec-createdatapropertyorthrow">https://tc39.github.io/ecma262/#sec-createdatapropertyorthrow</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-sec-createdatapropertyorthrow">8.4. ExecuteModule ( [ promiseCapability ] ) Concrete Method</a> <a href="#ref-for-sec-createdatapropertyorthrow①">(2)</a>
+   </ul>
+  </aside>
   <aside class="dfn-panel" data-for="term-for-sec-createmethodproperty">
    <a href="https://tc39.github.io/ecma262/#sec-createmethodproperty">https://tc39.github.io/ecma262/#sec-createmethodproperty</a><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-sec-createmethodproperty">4.7. Error Objects</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="term-for-sec-hostresolveimportedmodule">
+   <a href="https://tc39.github.io/ecma262/#sec-hostresolveimportedmodule">https://tc39.github.io/ecma262/#sec-hostresolveimportedmodule</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-sec-hostresolveimportedmodule">8.4. ExecuteModule ( [ promiseCapability ] ) Concrete Method</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="term-for-sec-newmoduleenvironment">
+   <a href="https://tc39.github.io/ecma262/#sec-newmoduleenvironment">https://tc39.github.io/ecma262/#sec-newmoduleenvironment</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-sec-newmoduleenvironment">8.3. InitializeEnvironment ( ) Concrete Method</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="term-for-sec-ordinaryobjectcreate">
+   <a href="https://tc39.github.io/ecma262/#sec-ordinaryobjectcreate">https://tc39.github.io/ecma262/#sec-ordinaryobjectcreate</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-sec-ordinaryobjectcreate">8.4. ExecuteModule ( [ promiseCapability ] ) Concrete Method</a> <a href="#ref-for-sec-ordinaryobjectcreate①">(2)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-sec-native-error-types-used-in-this-standard-rangeerror">
@@ -2350,6 +2372,7 @@ In practice, an implementation may run out of resources for valid modules below 
    <a href="https://tc39.github.io/ecma262/#sec-call">https://tc39.github.io/ecma262/#sec-call</a><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-sec-call">4.6. Exported Functions</a>
+    <li><a href="#ref-for-sec-call①">8.4. ExecuteModule ( [ promiseCapability ] ) Concrete Method</a> <a href="#ref-for-sec-call②">(2)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-sec-createarrayfromlist">
@@ -3269,17 +3292,16 @@ In practice, an implementation may run out of resources for valid modules below 
   <h3 class="no-num no-ref heading settled" id="index-defined-elsewhere"><span class="content">Terms defined by reference</span><a class="self-link" href="#index-defined-elsewhere"></a></h3>
   <ul class="index">
    <li>
-    <a data-link-type="biblio">[DOM]</a> defines the following terms:
-    <ul>
-     <li><span class="dfn-paneled" id="term-for-concept-node-append" style="color:initial">append</span>
-    </ul>
-   <li>
     <a data-link-type="biblio">[ECMASCRIPT]</a> defines the following terms:
     <ul>
      <li><span class="dfn-paneled" id="term-for-sec-properties-of-the-function-prototype-object" style="color:initial">%functionprototype%</span>
      <li><span class="dfn-paneled" id="term-for-sec-well-known-symbols" style="color:initial">@@iterator</span>
      <li><span class="dfn-paneled" id="term-for-sec-arraybuffer-objects" style="color:initial">ArrayBuffer</span>
+     <li><span class="dfn-paneled" id="term-for-sec-createdatapropertyorthrow" style="color:initial">CreateDataPropertyOrThrow</span>
      <li><span class="dfn-paneled" id="term-for-sec-createmethodproperty" style="color:initial">CreateMethodProperty</span>
+     <li><span class="dfn-paneled" id="term-for-sec-hostresolveimportedmodule" style="color:initial">HostResolveImportedModule</span>
+     <li><span class="dfn-paneled" id="term-for-sec-newmoduleenvironment" style="color:initial">NewModuleEnvironment</span>
+     <li><span class="dfn-paneled" id="term-for-sec-ordinaryobjectcreate" style="color:initial">OrdinaryObjectCreate</span>
      <li><span class="dfn-paneled" id="term-for-sec-native-error-types-used-in-this-standard-rangeerror" style="color:initial">RangeError</span>
      <li><span class="dfn-paneled" id="term-for-sec-native-error-types-used-in-this-standard-typeerror" style="color:initial">TypeError</span>
      <li><span class="dfn-paneled" id="term-for-agent" style="color:initial">agent</span>
@@ -3448,8 +3470,6 @@ In practice, an implementation may run out of resources for valid modules below 
   <h2 class="no-num no-ref heading settled" id="references"><span class="content">References</span><a class="self-link" href="#references"></a></h2>
   <h3 class="no-num no-ref heading settled" id="normative"><span class="content">Normative References</span><a class="self-link" href="#normative"></a></h3>
   <dl>
-   <dt id="biblio-dom">[DOM]
-   <dd>Anne van Kesteren. <a href="https://dom.spec.whatwg.org/">DOM Standard</a>. Living Standard. URL: <a href="https://dom.spec.whatwg.org/">https://dom.spec.whatwg.org/</a>
    <dt id="biblio-ecmascript">[ECMASCRIPT]
    <dd><a href="https://tc39.es/ecma262/">ECMAScript Language Specification</a>. URL: <a href="https://tc39.es/ecma262/">https://tc39.es/ecma262/</a>
    <dt id="biblio-encoding">[ENCODING]
