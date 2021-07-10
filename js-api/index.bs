@@ -1240,7 +1240,7 @@ WebAssembly modules can be used in a module graph with ECMAScript modules.
 
 Because WebAssembly module instantiation is asynchronous, these semantics are built on the top-level await TC39 JavaScript proposal. [[!TLA]]
 
-<dfn export>WebAssembly Module Record</dfn>s are a subclass of [=Cyclic Module Record=] which contain WebAssembly code. WebAssembly Module Records has one additional internal slot:
+<dfn export>WebAssembly Module Record</dfn>s are a subclass of [=Cyclic Module Record=] which contain WebAssembly code. WebAssembly Module Records have one additional internal slot:
     * \[[WebAssemblyModule]] : a WebAssembly {{Module}} object
 
 <div algorithm>
