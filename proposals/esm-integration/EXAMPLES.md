@@ -31,7 +31,7 @@ Note: because these are snapshots of values, this does not maintain the live-bin
 ##### Function imports
 
 ```wasm
-;; main.wasm
+;; main.wat --> main.wasm
 (module
   (import "./counter.js" "getCount" (func $getCount (func (result i32))))
 )
@@ -48,10 +48,9 @@ export {getCount};
 
 ##### Value imports
 
-@TODO add example of WebAssembly.Global being updated
-
+Constant:
 ```wasm
-;; main.wasm
+;; main.wat --> main.wasm
 (module
   (import "./counter.js" "count" (global i32))
 )
@@ -62,9 +61,49 @@ let count = 42;
 export {count};
 ```
 
+Mutable:
+```wasm
+;; main.wat --> main.wasm
+(module
+  (import "./counter.js" "count" (global (mut i32)))
+  (func (export "incrementCount")
+    (global.set 0
+      (i32.add
+        (global.get 0)
+        (i32.const 1))))
+)
+```
+```js
+// counter.js
+export const count = new WebAssembly.Global({
+  value: 'i32',
+  mutable: true,
+}, 42);
+```
+
 ##### External type imports
 
-@TODO add example of JS exporting memory
+```wasm
+;; main.wat --> main.wasm
+(module
+  (import "./buffer.js" "buffer" (memory 1))
+  (func (export "getFirstByte")
+    (result i32)
+
+    (i32.and
+      (i32.load (i32.const 0))
+      (i32.const 255)))
+)
+```
+```js
+// buffer.js
+export const buffer = new WebAssembly.Memory({ initial: 1, maximum: 1 });
+
+const length = 10;
+const view = new Uint8Array(buffer.buffer, 0, length);
+for (let index = 0; index < length; index++)
+    view[index] = Math.random() > 0.5 ? 1 : 0;
+```
 
 ### JS imports <- wasm exports
 
@@ -96,16 +135,15 @@ increment();
 console.log(count.value); // logs 6
 ```
 ```wasm
-;; counter.wasm
+;; counter.wat --> counter.wasm
 (module
-  (func $increment
-    get_global 0
-    i32.const 1
-    i32.add
-    set_global 0)
-  (global (mut i32) i32.const 5)
-  (export "count" (global 0))
-  (export "increment" (func $increment)))
+  (func (export "increment")
+    (global.set 0
+      (i32.add
+        (global.get 0)
+        (i32.const 1))))
+  (global (export "count") (mut i32) i32.const 5)
+)
 ```
 
 ### wasm imports <- wasm exports
@@ -115,22 +153,21 @@ Wasm exports can be imported as accurate, immutable bindings to other wasm modul
 #### Example
 
 ```wasm
-;; main.wasm
+;; main.wat --> main.wasm
 (module
   (import "./counter.wasm" "count" (global i32))
   (import "./counter.wasm" "increment" (func $increment (result i32)))
 )
 
-;; counter.wasm
+;; counter.wat --> counter.wasm
 (module
-  (func $increment
-    get_global 0
-    i32.const 1
-    i32.add
-    set_global 0)
-  (global (mut i32) i32.const 5)
-  (export "count" (global 0))
-  (export "increment" (func $increment)))
+  (func (export "increment")
+    (global.set 0
+      (i32.add
+        (global.get 0)
+        (i32.const 1))))
+  (global (export "count") (mut i32) i32.const 5)
+)
 ```
 
 ### wasm imports <- JS re-exports <- wasm exports
@@ -140,7 +177,7 @@ Any wasm exports that are re-exported via a JS module will be available to the o
 #### Example
 
 ```wasm
-;; main.wasm
+;; main.wat --> main.wasm
 (module
   (import "./a.js" "memoryExport" (memory 0))
 )
@@ -150,7 +187,7 @@ Any wasm exports that are re-exported via a JS module will be available to the o
 export {memoryExport} from "./b.wasm";
 ```
 ```wasm
-;; b.wasm
+;; b.wat --> b.wasm
 (module
   (memory 1)
   (export "memoryExport" (memory 0))
@@ -186,7 +223,7 @@ export function functionExport() {
 }
 ```
 ```wasm
-;; b.wasm
+;; b.wat --> b.wasm
 (module
   (memory 1)
   (export "memoryExport" (memory 0))
@@ -216,7 +253,7 @@ export function functionExport() {
 #### Examples
 
 ```wasm
-;; a.wasm
+;; a.wat --> a.wasm
 (module
   (memory 1)
   (export "memoryExport" (memory 0))
