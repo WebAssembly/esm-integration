@@ -11,7 +11,7 @@ When the Wasm module is evaluated, the exported value of the JS module is used i
 | global      | If the exported value is a `WebAssembly.Global` object, throw an exception if types mismatch, otherwise take that object as the import. Otherwise, if the imported type is `const`, cast the imported value to the appropriate numeric type, and create a new const global to hold the result. Otherwise, throw an exception. |
 | memory      | Check that the exported value is a `WebAssembly.Memory` object which meets the type imported; use it if so, otherwise, throw an exception |
 | table       | Check that the exported value is a `WebAssembly.Table` object which meets the type imported; use it if so, otherwise, throw an exception |
-| function    | If the exported value is a WebAssembly exported function based on the same types, make use of it. Otherwise, [create a host function](https://webassembly.github.io/spec/js-api/index.html#create-a-host-function) out of the JS function which includes the casts implied by its type. |
+| function    | If the exported value is a WebAssembly exported function based on the same types,  throw an exception if types mismatch, otherwise make use of it. Otherwise, [create a host function](https://webassembly.github.io/spec/js-api/index.html#create-a-host-function) out of the JS function which includes the casts implied by its type. |
 
 While WebAssembly only has the concept of globals, JS could export either a regular JS value or a `WebAssembly.Global`.
 
