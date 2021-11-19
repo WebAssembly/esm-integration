@@ -105,6 +105,14 @@ The ECMAScript specification holds the module's export in a lexical scope, as po
 
 At the end of the link phase, the variables in the module's lexical scope are generally uninitialized. From JavaScript, accessing an uninitialized import causes a ReferenceError. JavaScript function declarations are initialized during the Link phase, as part of function hoisting, but WebAssembly function exports are not initialized until the Evaluation phase.
 
+#### Import Assertions
+
+[Import assertions](https://github.com/tc39/proposal-import-assertions) specify linking invariants that should be verified before evaluation can proceed. Currently HTML specifies a `"type"` assertion which is a requirement for CSS or JSON module imports due to their having different security privileges over full execution.
+
+When importing WebAssembly from JavaScript, no assertion should be required since they share the same security privilege level in the ESM integration and in order to ensure transparent interoperability of the formats.
+
+Future Wasm extensions may include supporting these assertions for imports from WebAssembly modules.
+
 ### Evaluate
 
 During evaluation, the code is evaluated to assign values to the exported bindings. In JS, this means running the top-level module code.
@@ -121,12 +129,6 @@ Some impacts of reading the imports up-front:
 - Circular WebAssembly modules are not supported: One of them will run first, and that one will find that the exports of the other aren't yet initialized, leading to a ReferenceError.
 
 See the FAQ for more explanation of the rationale for this design decision, and what features it enables which would be difficult or impossible otherwise.
-
-### Import Assertions
-
-When integrating with the [Import Assertions proposal](https://github.com/tc39/proposal-import-assertions), it is important to note that `assert { type: 'wasm' }` will not be supported, because there is no privilege escalation between ESM imports or Wasm imports.
-
-Instead, the ESM integration may take advantage of [evaluator attributes](https://github.com/tc39/proposal-import-assertions#follow-up-proposal-evaluator-attributes) in future in order to potentially permit features such as instance constructors or private Wasm imports.
 
 ## FAQ
 
