@@ -6,7 +6,7 @@ This repository is a clone of github.com/WebAssembly/spec/. It is meant for disc
 
 The [specifics of the ES Module integration Proposal are found in this subfolder](/proposals/esm-integration).
 
-A formatted version of the spec, including this proposal, is available here: webassembly.github.io/esm-integration.
+A formatted version of the spec, including this proposal, is available here: [webassembly.github.io/esm-integration](https://webassembly.github.io/esm-integration).
 
 Original README from upstream repository follows...
 
