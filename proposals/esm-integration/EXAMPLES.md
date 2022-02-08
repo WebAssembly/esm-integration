@@ -199,7 +199,7 @@ export {memoryExport} from "./b.wasm";
 #### JS exports
 | export type | value (not a `WebAssembly.Global`)* | global | memory | table | function |
 |-|-------------------------------|--------|--------|-------|----------|
-| | `0` if a const import and not in TDZ, otherwise `Error` | `Error`  | `Error`  | `Error` | snapshot if it is a function declaration, otherwise `Error` |
+| | `Error` | `Error`  | `Error`  | `Error` | snapshot if it is a function declaration, otherwise `Error` |
 
 #### wasm exports
 | export type | global       | memory       | table        | function     |
@@ -241,7 +241,7 @@ export function functionExport() {
 #### JS exports
 | export type | value (not a WebAssembly.Global)* | global | memory | table | function |
 |-|-------------------------------|--------|--------|-------|----------|
-| | `Error`                         | snapshot  | snapshot  | snapshot | snapshot |
+| | If the value is a Number or BigInt, it will be converted appropriately. Otherwise `Error`. | snapshot  | snapshot  | snapshot | snapshot |
 
 1. wasm module is parsed
 1. JS module is parsed
