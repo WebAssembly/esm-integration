@@ -156,7 +156,7 @@ Wasm exports can be imported as accurate, immutable bindings to other wasm modul
 ;; main.wat --> main.wasm
 (module
   (import "./counter.wasm" "count" (global i32))
-  (import "./counter.wasm" "increment" (func $increment (result i32)))
+  (import "./counter.wasm" "increment" (func $increment))
 )
 
 ;; counter.wat --> counter.wasm
