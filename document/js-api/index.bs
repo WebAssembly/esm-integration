@@ -1355,4 +1355,13 @@ WebAssembly Module Records have the following methods:
 
 </div>
 
+<div algorithm=GetModuleSource>
+
+<h3 id="get-module-source">GetModuleSource ( ) Concrete Method</h3>
+1. Let |record| be this WebAssembly Module Record.
+1. Let |module| be |record|.\[[WebAssemblyModule]].
+1. Return |module|.
+
+</div>
+
 Note: See corresponding modifications to HTML in <a href="https://github.com/whatwg/html/pull/4372">PR #4372</a>.
