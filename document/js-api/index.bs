@@ -550,8 +550,8 @@ interface Module {
 };
 </pre>
 
-Per ECMA-262 requirements for source phase import integration, the interface object for {{Module}} must have as its [[Prototype]] be %AbstractModuleSource%, created as if by ObjectCreate(%AbstractModuleSource%), instead of %ObjectPrototype%.
-In addition, the interface prototype object for {{Module}} must have as its [[Prototype]] %AbstractModuleSource.prototype%, created as if by ObjectCreate(%AbstractModuleSource%), instead of %ObjectPrototype%.
+Per ECMA-262 requirements for source phase import integration, the interface object for {{Module}} must have as its \[[Prototype]] be %AbstractModuleSource%, created as if by ObjectCreate(%AbstractModuleSource%), instead of %ObjectPrototype%.
+In addition, the interface prototype object for {{Module}} must have as its \[[Prototype]] %AbstractModuleSource.prototype%, created as if by ObjectCreate(%AbstractModuleSource%), instead of %ObjectPrototype%.
 
 <div algorithm>
   The <dfn>string value of the extern type</dfn> |type| is
