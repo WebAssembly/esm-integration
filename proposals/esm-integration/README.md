@@ -1,6 +1,6 @@
 # WebAssembly/ES Module Integration
 
-This page describes  WebAssembly as an ES module. With this proposal, WebAssembly could be loaded from a JavaScript `import` statement, or a `<script type=module>` tag.
+This page describes WebAssembly as an ES module. With this proposal, WebAssembly may be loaded with a JavaScript `import` statement, or a `<script type=module>` tag.
 
 This proposal is at Stage 2 in [WebAssembly's process](https://github.com/WebAssembly/meetings/blob/master/process/phases.md).
 
@@ -71,9 +71,9 @@ These goals can be addressed by enabling WebAssembly modules to be loaded using 
 
 This system has three phases:
 
-1. Fetch and parse — A module record is constructed from Module resources.
+1. Source — A module record is constructed from Module resources.
 1. Link — Exports and imports are wired up to memory locations.
-1. Evaluate — Top-level module code is run, assigning the value to exports.
+1. Evaluation — Top-level module code is run, assigning the value to exports.
 
 The work completed in these phases is defined in two different specifications:
 
@@ -82,7 +82,7 @@ The work completed in these phases is defined in two different specifications:
 
 WebAssembly fits into these steps as follows:
 
-### Fetch and Parse
+### Source Phase
 
 Fetching and parsing modules is a recursive process, which can be thought of as the following steps, defined in the host specification:
 1. Figure out what the module specifier is pointing to, and fetch the module.
@@ -97,7 +97,26 @@ In both cases, module parsing identifies the new, named exports that this module
 
 In the proposed HTML integration of WebAssembly modules, the [module name](https://webassembly.github.io/spec/core/syntax/modules.html#syntax-import) in an import is interpreted the same as a JavaScript module specifier: basically, as a URL. The [import maps](https://github.com/wicg/import-maps/) proposal adds more expressiveness to module specifiers.
 
-### Link
+#### Source Phase Imports
+
+[Source phase imports](https://github.com/tc39/proposal-source-phase-imports) expose the source phase of the module
+loading process, corresponding to a `WebAssembly.Module` source.
+
+For WebAssembly, the benefit of this import phase is being able to support multiple instantiation and custom
+instantiation or imports, while still utilizing the ESM integration for portable module resolution and fetching.
+
+Source phase objects exposed by the module system must contain `AbstractModuleSource` in their prototype chain,
+therefore to support these imports for WebAssembly, the prototype of `WebAssembly.Module` is updated accordingly.
+
+#### Import Attributes
+
+[Import attributes](https://github.com/tc39/proposal-import-attributes) parameterize module imports in the module system. Currently HTML specifies a `"type"` attribute which is a requirement for CSS or JSON module imports due to their having different security privileges over full execution.
+
+When importing WebAssembly from JavaScript, no `"type"` should be required since they share the same security privilege level in the ESM integration and in order to ensure transparent interoperability of the formats.
+
+Future Wasm extensions may include supporting attributes for imports from WebAssembly modules.
+
+### Link Phase
 
 Module records include names of imports and exports. The "link" phase checks whether the named imports correspond to things that are exported, and if so, hooking up the imports of one module to the exports of another module.
 
@@ -105,15 +124,7 @@ The ECMAScript specification holds the module's export in a lexical scope, as po
 
 At the end of the link phase, the variables in the module's lexical scope are generally uninitialized. From JavaScript, accessing an uninitialized import causes a ReferenceError. JavaScript function declarations are initialized during the Link phase, as part of function hoisting, but WebAssembly function exports are not initialized until the Evaluation phase.
 
-#### Import Assertions
-
-[Import assertions](https://github.com/tc39/proposal-import-assertions) specify linking invariants that should be verified before evaluation can proceed. Currently HTML specifies a `"type"` assertion which is a requirement for CSS or JSON module imports due to their having different security privileges over full execution.
-
-When importing WebAssembly from JavaScript, no assertion should be required since they share the same security privilege level in the ESM integration and in order to ensure transparent interoperability of the formats.
-
-Future Wasm extensions may include supporting these assertions for imports from WebAssembly modules.
-
-### Evaluate
+### Evaluation Phase
 
 During evaluation, the code is evaluated to assign values to the exported bindings. In JS, this means running the top-level module code.
 

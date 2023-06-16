@@ -328,6 +328,7 @@ A {{Module}} object represents a single WebAssembly module. Each {{Module}} obje
 
     * \[[Module]] : a WebAssembly [=/module=]
     * \[[Bytes]] : the source bytes of \[[Module]].
+    * \[[SourceClassName]] : the string "WebAssembly.Module"
 
 <div algorithm>
   To <dfn>construct a WebAssembly module object</dfn> from a module |module| and source bytes |bytes|, perform the following steps:
@@ -335,6 +336,7 @@ A {{Module}} object represents a single WebAssembly module. Each {{Module}} obje
     1. Let |moduleObject| be a new {{Module}} object.
     1. Set |moduleObject|.\[[Module]] to |module|.
     1. Set |moduleObject|.\[[Bytes]] to |bytes|.
+    1. Set |moduleObject|.\[[SourceClassName]] to "WebAssembly.Module".
     1. Return |moduleObject|.
 </div>
 
@@ -547,6 +549,9 @@ interface Module {
   static sequence&lt;ArrayBuffer> customSections(Module moduleObject, DOMString sectionName);
 };
 </pre>
+
+Per ECMA-262 requirements for source phase import integration, the interface object for {{Module}} must have as its [[Prototype]] be %AbstractModuleSource%, created as if by ObjectCreate(%AbstractModuleSource%), instead of %ObjectPrototype%.
+In addition, the interface prototype object for {{Module}} must have as its [[Prototype]] %AbstractModuleSource.prototype%, created as if by ObjectCreate(%AbstractModuleSource%), instead of %ObjectPrototype%.
 
 <div algorithm>
   The <dfn>string value of the extern type</dfn> |type| is
