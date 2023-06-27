@@ -1240,6 +1240,8 @@ This document defines a host environment for WebAssembly. It enables a WebAssemb
 
 <h2 id="esm-integration">Integration with ECMAScript modules</h2>
 
+Note: The champions of the Wasm-ESM integration proposal deem it acceptable to implement this integration in two stages. In the first stage only source phase imports of WASM are supported (`import source mod from "./mod.wasm"`). In the second stage, evaluation phase imports would be supported too (`import instance from "./mod.wasm"`). If initially implementing just source phase imports, the `GetExportedNames`, `ResolveExport`, `InitializeEnvironment`, and `ExecuteModule` abstract operations can be implemented as abstract operations unconditionally throwing a `TypeError` exception. In this case, module fetch and CSP integration is still required to be implemented as specified in this proposal.
+
 WebAssembly modules can be used in a module graph with ECMAScript modules.
 
 Because WebAssembly module instantiation is asynchronous, these semantics are built on the top-level await TC39 JavaScript proposal. [[!TLA]]
