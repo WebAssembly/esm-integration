@@ -4,9 +4,9 @@
   <meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport">
   <title>WebAssembly JavaScript Interface</title>
   <meta content="ED" name="w3c-status">
-  <meta content="Bikeshed version 5fcd28d6d, updated Tue May 30 13:12:11 2023 -0700" name="generator">
+  <meta content="Bikeshed version 5edf5e459, updated Thu Jun 22 11:28:01 2023 -0700" name="generator">
   <link href="https://www.w3.org/TR/wasm-js-api-1/" rel="canonical">
-  <meta content="c2f9326f5dad797cab82a2308c4e8989462a2411" name="document-revision">
+  <meta content="052e3530cbdee77038bd53051275b81ab6c5bd67" name="document-revision">
 <style>
 emu-const {
     font-family: serif;
@@ -518,33 +518,12 @@ a.self-link::before            { content: "¶"; }
 .heading > a.self-link::before { content: "§"; }
 dfn > a.self-link::before      { content: "#"; }
 </style>
-<style>/* Boilerplate: style-style-syntax-highlighting */
+<style>/* Boilerplate: style-syntax-highlighting */
 
             pre.idl.highlight {
                 background: var(--borderedblock-bg, var(--def-bg));
             }
             
-</style>
-<style>/* Boilerplate: style-style-var-click-highlighting */
-/*
-Colors were chosen in Lab using https://nixsensor.com/free-color-converter/
-D50 2deg illuminant, L in [0,100], a and b in [-128, 128]
-0 = lab(85,0,85)
-1 = lab(85,80,30)
-2 = lab(85,-40,40)
-3 = lab(85,-50,0)
-4 = lab(85,5,15)
-5 = lab(85,-10,-50)
-6 = lab(85,35,-15)
-*/
-var { cursor: pointer; }
-var.selected0 { background-color: #F4D200; box-shadow: 0 0 0 2px #F4D200; }
-var.selected1 { background-color: #FF87A2; box-shadow: 0 0 0 2px #FF87A2; }
-var.selected2 { background-color: #96E885; box-shadow: 0 0 0 2px #96E885; }
-var.selected3 { background-color: #3EEED2; box-shadow: 0 0 0 2px #3EEED2; }
-var.selected4 { background-color: #EACFB6; box-shadow: 0 0 0 2px #EACFB6; }
-var.selected5 { background-color: #82DDFF; box-shadow: 0 0 0 2px #82DDFF; }
-var.selected6 { background-color: #FFBCF2; box-shadow: 0 0 0 2px #FFBCF2; }
 </style>
 <style>/* Boilerplate: style-syntax-highlighting */
 
@@ -669,12 +648,33 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
     c-[il] { color: #657b83 } /* Literal.Number.Integer.Long */
 }
 </style>
+<style>/* Boilerplate: style-var-click-highlighting */
+/*
+Colors were chosen in Lab using https://nixsensor.com/free-color-converter/
+D50 2deg illuminant, L in [0,100], a and b in [-128, 128]
+0 = lab(85,0,85)
+1 = lab(85,80,30)
+2 = lab(85,-40,40)
+3 = lab(85,-50,0)
+4 = lab(85,5,15)
+5 = lab(85,-10,-50)
+6 = lab(85,35,-15)
+*/
+var { cursor: pointer; }
+var.selected0 { background-color: #F4D200; box-shadow: 0 0 0 2px #F4D200; }
+var.selected1 { background-color: #FF87A2; box-shadow: 0 0 0 2px #FF87A2; }
+var.selected2 { background-color: #96E885; box-shadow: 0 0 0 2px #96E885; }
+var.selected3 { background-color: #3EEED2; box-shadow: 0 0 0 2px #3EEED2; }
+var.selected4 { background-color: #EACFB6; box-shadow: 0 0 0 2px #EACFB6; }
+var.selected5 { background-color: #82DDFF; box-shadow: 0 0 0 2px #82DDFF; }
+var.selected6 { background-color: #FFBCF2; box-shadow: 0 0 0 2px #FFBCF2; }
+</style>
   <link href="https://www.w3.org/StyleSheets/TR/2021/W3C-ED" rel="stylesheet">
  <body class="h-entry">
   <div class="head">
    <p data-fill-with="logo"><a class="logo" href="https://www.w3.org/"> <img alt="W3C" height="48" src="https://www.w3.org/StyleSheets/TR/2021/logos/W3C" width="72"> </a> </p>
    <h1 class="p-name no-ref" id="title">WebAssembly JavaScript Interface</h1>
-   <p id="w3c-state"><a href="https://www.w3.org/standards/types#ED">Editor’s Draft</a>, <time class="dt-updated" datetime="2023-06-13">13 June 2023</time></p>
+   <p id="w3c-state"><a href="https://www.w3.org/standards/types#ED">Editor’s Draft</a>, <time class="dt-updated" datetime="2023-07-03">3 July 2023</time></p>
    <details open>
     <summary>More details about this document</summary>
     <div data-fill-with="spec-metadata">
@@ -693,7 +693,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
     </div>
    </details>
    <div data-fill-with="warning"></div>
-   <p class="copyright" data-fill-with="copyright"><a href="https://www.w3.org/Consortium/Legal/ipr-notice#Copyright">Copyright</a> © 2023 <a href="https://www.w3.org/">World Wide Web Consortium</a>. <abbr title="World Wide Web Consortium">W3C</abbr><sup>®</sup> <a href="https://www.w3.org/Consortium/Legal/ipr-notice#Legal_Disclaimer">liability</a>, <a href="https://www.w3.org/Consortium/Legal/ipr-notice#W3C_Trademarks">trademark</a> and <a href="https://www.w3.org/Consortium/Legal/2023/software-license" rel="license" title="W3C Software and Document License">permissive document license</a> rules apply. </p>
+   <p class="copyright" data-fill-with="copyright"><a href="https://www.w3.org/Consortium/Legal/ipr-notice#Copyright">Copyright</a> © 2023 <a href="https://www.w3.org/">World Wide Web Consortium</a>. <abbr title="World Wide Web Consortium">W3C</abbr><sup>®</sup> <a href="https://www.w3.org/Consortium/Legal/ipr-notice#Legal_Disclaimer">liability</a>, <a href="https://www.w3.org/Consortium/Legal/ipr-notice#W3C_Trademarks">trademark</a> and <a href="https://www.w3.org/Consortium/Legal/copyright-software" rel="license" title="W3C Software and Document License">permissive document license</a> rules apply. </p>
    <hr title="Separator for header">
   </div>
   <div class="p-summary" data-fill-with="abstract">
@@ -882,6 +882,8 @@ This mapping is used to ensure that, for a given <a data-link-type="dfn" href="h
      <p>[[Module]] : a WebAssembly <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/syntax/modules.html#syntax-module" id="ref-for-syntax-module">module</a></p>
     <li data-md>
      <p>[[Bytes]] : the source bytes of [[Module]].</p>
+    <li data-md>
+     <p>[[SourceClassName]] : the string "WebAssembly.Module"</p>
    </ul>
    <div class="algorithm" data-algorithm="construct a WebAssembly module object">
      To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="construct-a-webassembly-module-object">construct a WebAssembly module object</dfn> from a module <var>module</var> and source bytes <var>bytes</var>, perform the following steps: 
@@ -892,6 +894,8 @@ This mapping is used to ensure that, for a given <a data-link-type="dfn" href="h
       <p>Set <var>moduleObject</var>.[[Module]] to <var>module</var>.</p>
      <li data-md>
       <p>Set <var>moduleObject</var>.[[Bytes]] to <var>bytes</var>.</p>
+     <li data-md>
+      <p>Set <var>moduleObject</var>.[[SourceClassName]] to "WebAssembly.Module".</p>
      <li data-md>
       <p>Return <var>moduleObject</var>.</p>
     </ol>
@@ -1274,6 +1278,8 @@ If this throws an exception, catch it, <a data-link-type="dfn" href="https://web
   <c- b>static</c-> <a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#idl-sequence" id="ref-for-idl-sequence②"><c- b>sequence</c-></a>&lt;<a class="idl-code" data-link-type="interface" href="https://tc39.github.io/ecma262/#sec-arraybuffer-objects" id="ref-for-sec-arraybuffer-objects"><c- b>ArrayBuffer</c-></a>> <a class="idl-code" data-link-type="method" href="#dom-module-customsections" id="ref-for-dom-module-customsections"><c- g>customSections</c-></a>(<a data-link-type="idl-name" href="#module" id="ref-for-module①⓪"><c- n>Module</c-></a> <dfn class="idl-code" data-dfn-for="Module/customSections(moduleObject, sectionName)" data-dfn-type="argument" data-export id="dom-module-customsections-moduleobject-sectionname-moduleobject"><code><c- g>moduleObject</c-></code><a class="self-link" href="#dom-module-customsections-moduleobject-sectionname-moduleobject"></a></dfn>, <a class="idl-code" data-link-type="interface" href="https://webidl.spec.whatwg.org/#idl-DOMString" id="ref-for-idl-DOMString"><c- b>DOMString</c-></a> <dfn class="idl-code" data-dfn-for="Module/customSections(moduleObject, sectionName)" data-dfn-type="argument" data-export id="dom-module-customsections-moduleobject-sectionname-sectionname"><code><c- g>sectionName</c-></code><a class="self-link" href="#dom-module-customsections-moduleobject-sectionname-sectionname"></a></dfn>);
 };
 </pre>
+   <p>Per ECMA-262 requirements for source phase import integration, the interface object for <code class="idl"><a data-link-type="idl" href="#module" id="ref-for-module①①">Module</a></code> must have as its [[Prototype]] be %AbstractModuleSource%, created as if by ObjectCreate(%AbstractModuleSource%), instead of %ObjectPrototype%.
+In addition, the interface prototype object for <code class="idl"><a data-link-type="idl" href="#module" id="ref-for-module①②">Module</a></code> must have as its [[Prototype]] %AbstractModuleSource.prototype%, created as if by ObjectCreate(%AbstractModuleSource%), instead of %ObjectPrototype%.</p>
    <div class="algorithm" data-algorithm="string value of the extern type">
      The <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="string-value-of-the-extern-type">string value of the extern type</dfn> <var>type</var> is 
     <ul>
@@ -1372,7 +1378,7 @@ If this throws an exception, catch it, <a data-link-type="dfn" href="https://web
    <h3 class="heading settled" data-level="4.2" id="instances"><span class="secno">4.2. </span><span class="content">Instances</span><a class="self-link" href="#instances"></a></h3>
 <pre class="idl highlight def">[<a class="idl-code" data-link-type="extended-attribute" href="https://webidl.spec.whatwg.org/#LegacyNamespace" id="ref-for-LegacyNamespace①"><c- g>LegacyNamespace</c-></a>=<a data-link-type="idl-name" href="#namespacedef-webassembly" id="ref-for-namespacedef-webassembly①"><c- n>WebAssembly</c-></a>, <a class="idl-code" data-link-type="extended-attribute" href="https://webidl.spec.whatwg.org/#Exposed" id="ref-for-Exposed②"><c- g>Exposed</c-></a>=(<c- n>Window</c->,<c- n>Worker</c->,<c- n>Worklet</c->)]
 <c- b>interface</c-> <dfn class="dfn-paneled idl-code" data-dfn-type="interface" data-export id="instance"><code><c- g>Instance</c-></code></dfn> {
-  <a class="idl-code" data-link-type="constructor" href="#dom-instance-instance" id="ref-for-dom-instance-instance"><c- g>constructor</c-></a>(<a data-link-type="idl-name" href="#module" id="ref-for-module①①"><c- n>Module</c-></a> <dfn class="idl-code" data-dfn-for="Instance/Instance(module, importObject), Instance/constructor(module, importObject), Instance/Instance(module), Instance/constructor(module)" data-dfn-type="argument" data-export id="dom-instance-instance-module-importobject-module"><code><c- g>module</c-></code><a class="self-link" href="#dom-instance-instance-module-importobject-module"></a></dfn>, <c- b>optional</c-> <a class="idl-code" data-link-type="interface" href="https://webidl.spec.whatwg.org/#idl-object" id="ref-for-idl-object②"><c- b>object</c-></a> <dfn class="idl-code" data-dfn-for="Instance/Instance(module, importObject), Instance/constructor(module, importObject), Instance/Instance(module), Instance/constructor(module)" data-dfn-type="argument" data-export id="dom-instance-instance-module-importobject-importobject"><code><c- g>importObject</c-></code><a class="self-link" href="#dom-instance-instance-module-importobject-importobject"></a></dfn>);
+  <a class="idl-code" data-link-type="constructor" href="#dom-instance-instance" id="ref-for-dom-instance-instance"><c- g>constructor</c-></a>(<a data-link-type="idl-name" href="#module" id="ref-for-module①③"><c- n>Module</c-></a> <dfn class="idl-code" data-dfn-for="Instance/Instance(module, importObject), Instance/constructor(module, importObject), Instance/Instance(module), Instance/constructor(module)" data-dfn-type="argument" data-export id="dom-instance-instance-module-importobject-module"><code><c- g>module</c-></code><a class="self-link" href="#dom-instance-instance-module-importobject-module"></a></dfn>, <c- b>optional</c-> <a class="idl-code" data-link-type="interface" href="https://webidl.spec.whatwg.org/#idl-object" id="ref-for-idl-object②"><c- b>object</c-></a> <dfn class="idl-code" data-dfn-for="Instance/Instance(module, importObject), Instance/constructor(module, importObject), Instance/Instance(module), Instance/constructor(module)" data-dfn-type="argument" data-export id="dom-instance-instance-module-importobject-importobject"><code><c- g>importObject</c-></code><a class="self-link" href="#dom-instance-instance-module-importobject-importobject"></a></dfn>);
   <c- b>readonly</c-> <c- b>attribute</c-> <a class="idl-code" data-link-type="interface" href="https://webidl.spec.whatwg.org/#idl-object" id="ref-for-idl-object③"><c- b>object</c-></a> <a class="idl-code" data-link-type="attribute" data-readonly data-type="object" href="#dom-instance-exports" id="ref-for-dom-instance-exports"><c- g>exports</c-></a>;
 };
 </pre>
@@ -2324,7 +2330,7 @@ In practice, an implementation may run out of resources for valid modules below 
    <p><dfn data-dfn-type="dfn" data-export id="webassembly-module-record">WebAssembly Module Record<a class="self-link" href="#webassembly-module-record"></a></dfn>s are a subclass of <a data-link-type="dfn" href="https://tc39.github.io/ecma262/#cyclic-module-record" id="ref-for-cyclic-module-record">Cyclic Module Record</a> which contain WebAssembly code. WebAssembly Module Records have one additional internal slot:</p>
    <ul>
     <li data-md>
-     <p>[[WebAssemblyModule]] : a WebAssembly <code class="idl"><a data-link-type="idl" href="#module" id="ref-for-module①②">Module</a></code> object</p>
+     <p>[[WebAssemblyModule]] : a WebAssembly <code class="idl"><a data-link-type="idl" href="#module" id="ref-for-module①④">Module</a></code> object</p>
    </ul>
    <div class="algorithm" data-algorithm="parse a WebAssembly module">
      To <dfn class="dfn-paneled" data-dfn-type="dfn" data-export id="parse-a-webassembly-module">parse a WebAssembly module</dfn> given a an <code class="idl"><a data-link-type="idl" href="https://tc39.github.io/ecma262/#sec-arraybuffer-objects" id="ref-for-sec-arraybuffer-objects⑤">ArrayBuffer</a></code> <var>bytes</var>, a Realm <var>realm</var> and object <var>hostDefined</var>, perform the following steps. 
@@ -3534,7 +3540,7 @@ window.dfnpanelData['dictdef-moduleimportdescriptor'] = {"dfnID": "dictdef-modul
 window.dfnpanelData['dom-moduleimportdescriptor-module'] = {"dfnID": "dom-moduleimportdescriptor-module", "url": "#dom-moduleimportdescriptor-module", "dfnText": "module", "refSections": [{"refs": [{"id": "ref-for-dom-moduleimportdescriptor-module"}], "title": "4.1. Modules"}], "external": false};
 window.dfnpanelData['dom-moduleimportdescriptor-name'] = {"dfnID": "dom-moduleimportdescriptor-name", "url": "#dom-moduleimportdescriptor-name", "dfnText": "name", "refSections": [{"refs": [{"id": "ref-for-dom-moduleimportdescriptor-name"}], "title": "4.1. Modules"}], "external": false};
 window.dfnpanelData['dom-moduleimportdescriptor-kind'] = {"dfnID": "dom-moduleimportdescriptor-kind", "url": "#dom-moduleimportdescriptor-kind", "dfnText": "kind", "refSections": [{"refs": [{"id": "ref-for-dom-moduleimportdescriptor-kind"}], "title": "4.1. Modules"}], "external": false};
-window.dfnpanelData['module'] = {"dfnID": "module", "url": "#module", "dfnText": "Module", "refSections": [{"refs": [{"id": "ref-for-module"}, {"id": "ref-for-module\u2460"}, {"id": "ref-for-module\u2461"}, {"id": "ref-for-module\u2462"}, {"id": "ref-for-module\u2463"}, {"id": "ref-for-module\u2464"}, {"id": "ref-for-module\u2465"}, {"id": "ref-for-module\u2466"}], "title": "4. The WebAssembly Namespace"}, {"refs": [{"id": "ref-for-module\u2467"}, {"id": "ref-for-module\u2468"}, {"id": "ref-for-module\u2460\u24ea"}], "title": "4.1. Modules"}, {"refs": [{"id": "ref-for-module\u2460\u2460"}], "title": "4.2. Instances"}, {"refs": [{"id": "ref-for-module\u2460\u2461"}], "title": "8. Integration with ECMAScript modules"}], "external": false};
+window.dfnpanelData['module'] = {"dfnID": "module", "url": "#module", "dfnText": "Module", "refSections": [{"refs": [{"id": "ref-for-module"}, {"id": "ref-for-module\u2460"}, {"id": "ref-for-module\u2461"}, {"id": "ref-for-module\u2462"}, {"id": "ref-for-module\u2463"}, {"id": "ref-for-module\u2464"}, {"id": "ref-for-module\u2465"}, {"id": "ref-for-module\u2466"}], "title": "4. The WebAssembly Namespace"}, {"refs": [{"id": "ref-for-module\u2467"}, {"id": "ref-for-module\u2468"}, {"id": "ref-for-module\u2460\u24ea"}, {"id": "ref-for-module\u2460\u2460"}, {"id": "ref-for-module\u2460\u2461"}], "title": "4.1. Modules"}, {"refs": [{"id": "ref-for-module\u2460\u2462"}], "title": "4.2. Instances"}, {"refs": [{"id": "ref-for-module\u2460\u2463"}], "title": "8. Integration with ECMAScript modules"}], "external": false};
 window.dfnpanelData['string-value-of-the-extern-type'] = {"dfnID": "string-value-of-the-extern-type", "url": "#string-value-of-the-extern-type", "dfnText": "string value of the extern type", "refSections": [{"refs": [{"id": "ref-for-string-value-of-the-extern-type"}, {"id": "ref-for-string-value-of-the-extern-type\u2460"}], "title": "4.1. Modules"}], "external": false};
 window.dfnpanelData['dom-module-exports'] = {"dfnID": "dom-module-exports", "url": "#dom-module-exports", "dfnText": "exports(moduleObject)", "refSections": [{"refs": [{"id": "ref-for-dom-module-exports"}], "title": "4.1. Modules"}], "external": false};
 window.dfnpanelData['dom-module-imports'] = {"dfnID": "dom-module-imports", "url": "#dom-module-imports", "dfnText": "imports(moduleObject)", "refSections": [{"refs": [{"id": "ref-for-dom-module-imports"}], "title": "4.1. Modules"}], "external": false};
