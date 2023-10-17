@@ -4,9 +4,9 @@
   <meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport">
   <title>WebAssembly JavaScript Interface</title>
   <meta content="ED" name="w3c-status">
-  <meta content="Bikeshed version 5edf5e459, updated Thu Jun 22 11:28:01 2023 -0700" name="generator">
+  <meta content="Bikeshed version 82ce88815, updated Thu Sep 7 16:33:55 2023 -0700" name="generator">
   <link href="https://www.w3.org/TR/wasm-js-api-1/" rel="canonical">
-  <meta content="da1215740038c63d75c09990b4cfef6e8a39177d" name="document-revision">
+  <meta content="26e6faa9762b604e8eea399be1e8a1c3bda256ab" name="document-revision">
 <style>
 emu-const {
     font-family: serif;
@@ -674,7 +674,7 @@ var.selected6 { background-color: #FFBCF2; box-shadow: 0 0 0 2px #FFBCF2; }
   <div class="head">
    <p data-fill-with="logo"><a class="logo" href="https://www.w3.org/"> <img alt="W3C" height="48" src="https://www.w3.org/StyleSheets/TR/2021/logos/W3C" width="72"> </a> </p>
    <h1 class="p-name no-ref" id="title">WebAssembly JavaScript Interface</h1>
-   <p id="w3c-state"><a href="https://www.w3.org/standards/types#ED">Editor’s Draft</a>, <time class="dt-updated" datetime="2023-07-06">6 July 2023</time></p>
+   <p id="w3c-state"><a href="https://www.w3.org/standards/types#ED">Editor’s Draft</a>, <time class="dt-updated" datetime="2023-10-17">17 October 2023</time></p>
    <details open>
     <summary>More details about this document</summary>
     <div data-fill-with="spec-metadata">
@@ -718,7 +718,7 @@ and the <a href="https://www.w3.org/TR/wasm-web-api/">WebAssembly Web API</a>.
 	W3C maintains a <a href="https://www.w3.org/2004/01/pp-impl/101196/status" rel="disclosure">public list of any patent disclosures</a> made in connection with the deliverables of the group;
 	that page also includes instructions for disclosing a patent.
 	An individual who has actual knowledge of a patent which the individual believes contains <a href="https://www.w3.org/Consortium/Patent-Policy-20170801/#def-essential">Essential Claim(s)</a> must disclose the information in accordance with <a href="https://www.w3.org/Consortium/Patent-Policy-20170801/#sec-Disclosure">section 6 of the W3C Patent Policy</a>. </p>
-   <p> This document is governed by the <a href="https://www.w3.org/2021/Process-20211102/" id="w3c_process_revision">2 November 2021 W3C Process Document</a>. </p>
+   <p> This document is governed by the <a href="https://www.w3.org/2023/Process-20230612/" id="w3c_process_revision">12 June 2023 W3C Process Document</a>. </p>
    <p></p>
   </div>
   <div data-fill-with="at-risk"></div>
@@ -883,7 +883,7 @@ This mapping is used to ensure that, for a given <a data-link-type="dfn" href="h
     <li data-md>
      <p>[[Bytes]] : the source bytes of [[Module]].</p>
     <li data-md>
-     <p>[[SourceClassName]] : the string "WebAssembly.Module"</p>
+     <p>[[ModuleSourceClassName]] : the string "WebAssembly.Module"</p>
    </ul>
    <div class="algorithm" data-algorithm="construct a WebAssembly module object">
      To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="construct-a-webassembly-module-object">construct a WebAssembly module object</dfn> from a module <var>module</var> and source bytes <var>bytes</var>, perform the following steps: 
@@ -895,7 +895,7 @@ This mapping is used to ensure that, for a given <a data-link-type="dfn" href="h
      <li data-md>
       <p>Set <var>moduleObject</var>.[[Bytes]] to <var>bytes</var>.</p>
      <li data-md>
-      <p>Set <var>moduleObject</var>.[[SourceClassName]] to "WebAssembly.Module".</p>
+      <p>Set <var>moduleObject</var>.[[ModuleSourceClassName]] to "WebAssembly.Module".</p>
      <li data-md>
       <p>Return <var>moduleObject</var>.</p>
     </ol>
@@ -1279,7 +1279,7 @@ If this throws an exception, catch it, <a data-link-type="dfn" href="https://web
 };
 </pre>
    <p>Per ECMA-262 requirements for source phase import integration, the interface object for <code class="idl"><a data-link-type="idl" href="#module" id="ref-for-module①①">Module</a></code> must have as its [[Prototype]] be %AbstractModuleSource%, created as if by ObjectCreate(%AbstractModuleSource%), instead of %ObjectPrototype%.
-In addition, the interface prototype object for <code class="idl"><a data-link-type="idl" href="#module" id="ref-for-module①②">Module</a></code> must have as its [[Prototype]] %AbstractModuleSource.prototype%, created as if by ObjectCreate(%AbstractModuleSource%), instead of %ObjectPrototype%.</p>
+In addition, the interface prototype object for <code class="idl"><a data-link-type="idl" href="#module" id="ref-for-module①②">Module</a></code> must have as its [[Prototype]] be %AbstractModuleSource.prototype%, created as if by ObjectCreate(%AbstractModuleSource.prototype%), instead of %ObjectPrototype%.</p>
    <div class="algorithm" data-algorithm="string value of the extern type">
      The <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="string-value-of-the-extern-type">string value of the extern type</dfn> <var>type</var> is 
     <ul>
