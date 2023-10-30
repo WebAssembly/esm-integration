@@ -57,7 +57,7 @@ function incrementCount() {
 export {count, incrementCount};
 ```
 
-WebAssembly modules currently can't take part in these graphs. This means that developers who want to use WebAssembly modules have to manually use the WebAssembly JS API. However, the API to compile and instantiate a WebAssembly module is asynchronous, so without [top-level await](https://github.com/tc39/proposal-top-level-await), it's not possible to export things which came out of WebAssembly module instantiation, in a way that's available to importers when the import completes.
+WebAssembly modules currently can't take part in these graphs. This means that developers who want to use WebAssembly modules have to manually use the WebAssembly JS API. However, the recommended API to compile and instantiate a WebAssembly module is asynchronous, so without [top-level await](https://github.com/tc39/proposal-top-level-await), it's not possible to export things which came out of WebAssembly module instantiation, in a way that's available to importers when the import completes.
 
 ### Unify various WebAssembly module implementations
 
@@ -182,12 +182,6 @@ Instead of including this check in the default semantics of functions, a trampol
 When a WebAssembly module imports a Global, there are two possible modes of operation:
 - If the Global type is immutable (as declared in the importing module), then the exporting module may either export a numeric value or an immutable Global.
 - If the Global type is mutable, then the exporting module must export a mutable Global. The snapshot here is "shallow" in the sense that modifications *within* this particular mutable Global object *will* be visible in the importing module (but, if the exporting module overwrites the entire binding with some unrelated value, this will not be noticed by the importing module).
-
-### Why does this proposal depend on top-level await?
-
-On some platforms, some compilation work may need to happen when instantiating the module, rather than when parsing it, based on the dynamic values of the imports. For example, if a module imports Memory, there may be different instructions generated for different kinds of memory, with the choice made based on what's dynamically available.
-
-Instantiating a WebAssembly module may take a significant amount of time, as it may involve expensive compilation work. For this reason, at some point during evaluation of a WebAssembly module, control is yielded to the event loop, to not block up the main thread. This yield uses the infrastructure of [the TC39 top-level await proposal](https://github.com/tc39/proposal-top-level-await).
 
 ### Can Web APIs be imported via modules?
 
