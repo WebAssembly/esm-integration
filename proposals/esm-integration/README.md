@@ -141,6 +141,14 @@ Some impacts of reading the imports up-front:
 
 See the FAQ for more explanation of the rationale for this design decision, and what features it enables which would be difficult or impossible otherwise.
 
+### Content Security Policy
+
+CSP policies are verified at the time of Wasm compilation through the `HostEnsureCanCompileWasmBytes` abstract
+operation.
+
+Wasm modules loaded through the ES Module system should follow the existing `script-src` policy on the page when
+compiled through the module system hooks. Further refinements to the Wasm CSP policy may then be added in future.
+
 ## FAQ
 
 ### How would this work, in some concrete examples?
