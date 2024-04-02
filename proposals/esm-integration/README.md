@@ -37,9 +37,11 @@ Then by integrating with [Source Phase Imports](https://github.com/tc39/proposal
 
 ```js
 import source myModule from "./myModule.wasm");
-const { foo: foo1 } = await WebAssembly.instantiate(myModule, { ...imports });
-const { foo: foo2 } = await WebAssembly.instantiate(myModule, { ...imports });
+
+const { foo: foo1 } = new WebAssembly.Instance(myModule, { ...imports1 });
 foo1();
+
+const { foo: foo2 } = new WebAssembly.Instance(myModule, { ...imports2 });
 foo2();
 ```
 
@@ -184,9 +186,9 @@ To start using this proposal ahead of that change, create a JavaScript module wh
 
 In many cases, the source phase import can replace instantiate streaming workflows, allowing for better compatibility with JS tools when it is fully supported.
 
-In addition, for dynamically loaded Wasm modules, `import()` and `import.source()` can be used to obtain this in a way that integrates with the security policy (and CSP in browsers) of the module system.
+In addition, for dynamically loaded Wasm modules, `import()` and `import.source()` can be used to obtain these in a way that integrates with the security policy of the module system (and CSP in browsers).
 
-If custom compilation options are needed or if custom streams need to be provided then the JS and Web APIs can provide a useful fallback.
+If custom compilation options are needed or if custom streams need to be provided then the JS and Web APIs can provide a useful fallback, where instantiateStreaming and compileStreaming are the preferred direct APIs to use.
 
 ### Where is the specification for this proposal?
 
