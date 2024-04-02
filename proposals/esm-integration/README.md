@@ -143,12 +143,12 @@ See the FAQ for more explanation of the rationale for this design decision, and 
 
 ### Content Security Policy
 
-CSP policies are verified at the time of Wasm compilation through the `HostEnsureCanCompileWasmBytes` abstract
-operation defined by the [Web Content Security Policy proposal](https://github.com/WebAssembly/content-security-policy).
-
 Wasm modules imported through the ES Module system should be verified for compilation by CSP against the `script-src`
 directive, both for static and dynamic imports. This allows Wasm and JS to be equally supported in the ESM
-integration under CSP policies. Further refinements to the Wasm CSP policy may be added in future.
+integration under CSP policies.
+
+While Wasm is currently fully sandboxed, having equal access to imports to JS provides it equal capabilities to
+execution primitives, so that it should not be considered a weaker capability from an ESM integration perspective.
 
 ## FAQ
 
