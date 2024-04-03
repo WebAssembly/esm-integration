@@ -1,12 +1,12 @@
 # WebAssembly/ES Module Integration
 
-This page describes WebAssembly as an ES module. With this proposal, WebAssembly may be loaded with a JavaScript `import` statement, or a `<script type=module>` tag.
+This page describes WebAssembly as an ES Module. With this proposal, WebAssembly may be loaded with a JavaScript `import` statement, or a `<script type=module>` tag.
 
 This proposal is at Stage 2 in [WebAssembly's process](https://github.com/WebAssembly/meetings/blob/master/process/phases.md).
 
 ## Motivation
 
-### Improve ergonomics of WebAssembly module instantiation
+### Improve Ergonomics of WebAssembly Module Instantiation
 
 Currently, there is an imperative JS API for instantiating WebAssembly modules. This requires users to manually fetch a module file, wire up imports, and run `WebAssembly.instantiate` or `WebAssembly.instantiateStreaming`.
 
@@ -29,86 +29,113 @@ WebAssembly
 A declarative API would improve the ergonomics by making this work happen implicitly.
 
 ```js
-import {foo} from "./myModule.wasm";
+import { foo } from "./myModule.wasm";
 foo();
 ```
 
-### Enable WebAssembly modules to take part in JavaScript module graphs
-
-With the introduction of ES modules, the JS spec provides a way to express module dependency graphs.
-
-These graphs are expressed with import and export statements.
+Then by integrating with [Source Phase Imports](https://github.com/tc39/proposal-source-phase-imports), arbitrary instantiations with custom imports can still be supported.
 
 ```js
-// main.js
+import source myModule from "./myModule.wasm");
 
-import {count, incrementCount} from "./dep.js"
+const { foo: foo1 } = new WebAssembly.Instance(myModule, { ...imports1 });
+foo1();
+
+const { foo: foo2 } = new WebAssembly.Instance(myModule, { ...imports2 });
+foo2();
 ```
+
+For dynamically loaded modules, dynamic `import()` integration is also supported for both phases.
 
 ```js
-//dep.js
+const { foo: foo1 } = await import("./myModule.wasm");
 
-let count = 10;
-
-function incrementCount() {
-    count++;
-}
-
-export {count, incrementCount};
+const myModule = await import.source("./myModule.wasm");
+const { foo: foo2 } = await WebAssembly.instantiate(myModule, { ...imports });
 ```
 
-WebAssembly modules currently can't take part in these graphs. This means that developers who want to use WebAssembly modules have to manually use the WebAssembly JS API. However, the recommended API to compile and instantiate a WebAssembly module is asynchronous, so without [top-level await](https://github.com/tc39/proposal-top-level-await), it's not possible to export things which came out of WebAssembly module instantiation, in a way that's available to importers when the import completes.
+### Unify WebAssembly Tooling Implementations
 
-### Unify various WebAssembly module implementations
+The need for WebAssembly modules integrated with the ES module graph has been broadly identified by JavaScript tools. For example, support for WebAssembly modules has been implemented in ([webpack](https://webpack.js.org/configuration/module/#ruletype), a [Rollup plugin](https://github.com/rollup/plugins/tree/master/packages/wasm) and [Parcel](https://en.parceljs.org/webAssembly.html).
 
-The need for WebAssembly modules integrated with the ES module graph has been broadly identified by JavaScript module implementations. For this reason, support for WebAssembly modules has been implemented in various bundlers ([webpack](https://webpack.js.org/configuration/module/#ruletype), a [Rollup plugin](https://github.com/rollup/rollup-plugin-wasm), [Parcel](https://parceljs.org/webAssembly.html) and [Browserify](https://github.com/browserify/rustify)), browser-based module shims ([System.js](https://guybedford.com/systemjs-2.0#web-assembly-integration)), and experimental Node.js module loaders (including [esm](https://github.com/standard-things/esm) and [the Node.js ecmascript-modules branch](https://github.com/nodejs/ecmascript-modules/pull/46)).
+By standardizing the integration, tools can support building WebAssembly applications providing ergonomic workflows that work with static analysis for working with Wasm on JavaScript platforms in a unified way.
 
-Unfortunately, the semantics implemented by various tools differs, and the ideas in these implementations are not always consistent with future feature plans from the WebAssembly Community Group. This proposal attempts to find a common, future-proof for WebAssembly modules, suitable for implementation in both tools and browsers. Hopefully, over time, tools can transition to use the native browser implementation, once support reaches sufficient levels.
+Node.js has implemented this proposal behind a flag (https://nodejs.org/docs/latest/api/esm.html#wasm-modules, pending source phase supports), while [ES Module Shims](https://github.com/guybedford/es-module-shims#wasm-modules) provides a full browser polyfill.
 
-## Semantics in terms of module stages
+## Implementation
 
-These goals can be addressed by enabling WebAssembly modules to be loaded using the ES module system, as a standard.
+### Source Phase Imports
 
-This system has three phases:
+[Source phase imports](https://github.com/tc39/proposal-source-phase-imports) expose the source phase of the module loading process, corresponding to a `WebAssembly.Module` source.
 
-1. Source — A module record is constructed from Module resources.
-1. Link — Exports and imports are wired up to memory locations.
-1. Evaluation — Top-level module code is run, assigning the value to exports.
+For WebAssembly, the benefit of this import phase is being able to support multiple instantiation and custom instantiation or imports, while still utilizing the ESM integration for portable module resolution and fetching.
 
-The work completed in these phases is defined in two different specifications:
+Source phase objects exposed by the module system must contain `AbstractModuleSource` in their prototype chain, therefore to support these imports for WebAssembly, the prototype of `WebAssembly.Module` is updated accordingly.
 
-- The ECMAScript spec provides methods for loaders to use to parse, link, and evaluate modules.
-- A host-specific spec (e.g., HTML) drives the algorithms defined by ECMAScript, and it describes how to fetch and cache modules.
+### Host Instance Linking
 
-WebAssembly fits into these steps as follows:
+While the source phase import model provides a flexible ESM integration for custom multi-instantiation, integration with the host linking model provides the ability to get directly executed Wasm modules.
 
-### Source Phase
+While many WebAssembly modules may not be functional under this linking model, it allows for a subset of Wasm modules to support direct instancing with access to the JS module graph, that can still be useful in many scenarios.
+
+### Import & Export Embedding
 
 Fetching and parsing modules is a recursive process, which can be thought of as the following steps, defined in the host specification:
+
 1. Figure out what the module specifier is pointing to, and fetch the module.
 1. Parse the module, to find further dependencies.
 1. Fetch and parse all modules that are imported by this parsed module, if they aren't already in the cache.
 
 If any syntax error is reached, the algorithm fails, throwing the error.
 
-In WebAssembly's case, during this phase, "parsing" means parsing the binary format and [validating the module](https://webassembly.github.io/spec/js-api/index.html#dom-webassembly-validate). For comparison, in JavaScript, the [ParseModule](https://tc39.github.io/ecma262/#sec-parsemodule) checks if the module has syntax errors.
-
-In both cases, module parsing identifies the new, named exports that this module defines. In WebAssembly, exports can be functions, WebAssembly.Table objects, WebAssembly.Memory objects, and WebAssembly.Global objects. When future WebAssembly types are exposed through the [WebAssembly JS API](https://webassembly.github.io/spec/js-api/index.html), the intention is to allow them to be exported via WebAssembly ESM modules as well.
+Module parsing identifies the named exports that this module defines. In WebAssembly, exports can be functions, WebAssembly.Table objects, WebAssembly.Memory objects, and WebAssembly.Global objects. When future WebAssembly types are exposed through the [WebAssembly JS API](https://webassembly.github.io/spec/js-api/index.html), the intention is to allow them to be exported via WebAssembly ESM modules as well.
 
 In the proposed HTML integration of WebAssembly modules, the [module name](https://webassembly.github.io/spec/core/syntax/modules.html#syntax-import) in an import is interpreted the same as a JavaScript module specifier: basically, as a URL. The [import maps](https://github.com/wicg/import-maps/) proposal adds more expressiveness to module specifiers.
 
-#### Source Phase Imports
+### "Snapshotting" imports
 
-[Source phase imports](https://github.com/tc39/proposal-source-phase-imports) expose the source phase of the module
-loading process, corresponding to a `WebAssembly.Module` source.
+When imports are provided to WebAssembly modules in the host instance linking model, they are provided directly upfront.
 
-For WebAssembly, the benefit of this import phase is being able to support multiple instantiation and custom
-instantiation or imports, while still utilizing the ESM integration for portable module resolution and fetching.
+- This handling of imports could be called a "snapshotting" process: Later updates to the imported values won't be reflected within the WebAssembly module.
+- Circular WebAssembly modules are not supported: One of them will run first, and that one will find that the exports of the other aren't yet initialized, leading to a ReferenceError.
 
-Source phase objects exposed by the module system must contain `AbstractModuleSource` in their prototype chain,
-therefore to support these imports for WebAssembly, the prototype of `WebAssembly.Module` is updated accordingly.
+See the FAQ for more explanation of the rationale for this design decision, and what features it enables which would be difficult or impossible otherwise.
 
-#### Import Attributes
+### Progressive Implementation Support
+
+It is possible to implement the Wasm-ESM integration in two stages:
+
+1. In the first stage only source phase imports of Wasm are supported (`import source fibModule from "./fib.wasm"`).
+2. In the second stage, evaluation phase imports would be supported too (`import { fib } from "./fib.wasm"`).
+
+If initially implementing just source phase imports, the `GetExportedNames`, `ResolveExport`, `InitializeEnvironment`, and `ExecuteModule` abstract operations can be implemented as abstract operations unconditionally throwing a `SyntaxError` exception. In this case, module fetch and CSP integration is still required to be implemented as specified in this proposal.
+
+Implementers are encouraged to ship both stages at once, but it is deemed OK for implementers to initially ship the first stage and then quickly follow up with the second stage, if this aids "time to ship" in implementations.
+
+### Content Security Policy
+
+Wasm modules imported through the ES Module system should be verified for compilation by CSP against the `script-src` directive, both for static and dynamic imports. This allows Wasm and JS to be equally supported in the ESM
+integration under CSP policies.
+
+While Wasm is currently fully sandboxed, having equal access to imports to JS provides it equal capabilities to execution primitives, so that it should not be considered a weaker capability from an ESM integration perspective.
+
+## FAQ
+
+### Does the source phase replace the instance linking?
+
+Originally the ESM integration only provided the direct host instance linking model, which could be considered to be a restrictive form of linking for only some use cases for Wasm.
+
+Supporting the [source phase](https://github.com/tc39/proposal-source-phase-imports) ESM integration is therefore a more general form of the ESM integration that shares the host resolver, while retaining linking flexibility for Js host embedding of Wasm.
+
+While the source phase does not replace the instance linking model, is does offer a more general and flexible ESM integration.
+
+### How does this relate to the Component Model?
+
+The [Component Model](https://github.com/WebAssembly/component-model) has its own [ESM integration embedding](https://github.com/WebAssembly/component-model/blob/main/design/mvp/Explainer.md#ESM-integration), which is designed to extend the ESM integration specified here.
+
+In components it is possible to import both other components and core modules through the host linker, and it is possible to obtain them either as instances or uninstantiated modules. This linking model of the component model is therefore fully compatible with the linking model of the ESM integration, where these represent the host instance linking and source phases respectively and components effectively as a third module type. Components are distinguished from core Wasm in their leading bytes. Components may be more likely to support a highly usable host instance linking model ESM integration than core Wasm, while their source phase imports in turn would also be useful in virtualization workflows in JS embeddings.
+
+### Why does this proposal not use import attributes?
 
 [Import attributes](https://github.com/tc39/proposal-import-attributes) parameterize module imports in the module system. Currently HTML specifies a `"type"` attribute which is a requirement for CSS or JSON module imports due to their having different security privileges over full execution.
 
@@ -116,43 +143,7 @@ When importing WebAssembly from JavaScript, no `"type"` should be required since
 
 Future Wasm extensions may include supporting attributes for imports from WebAssembly modules.
 
-### Link Phase
-
-Module records include names of imports and exports. The "link" phase checks whether the named imports correspond to things that are exported, and if so, hooking up the imports of one module to the exports of another module.
-
-The ECMAScript specification holds the module's export in a lexical scope, as potentially mutable variables. The importing module will have the ability to read, but not write, the variables in this lexical scope.
-
-At the end of the link phase, the variables in the module's lexical scope are generally uninitialized. From JavaScript, accessing an uninitialized import causes a ReferenceError. JavaScript function declarations are initialized during the Link phase, as part of function hoisting, but WebAssembly function exports are not initialized until the Evaluation phase.
-
-### Evaluation Phase
-
-During evaluation, the code is evaluated to assign values to the exported bindings. In JS, this means running the top-level module code.
-
-In WebAssembly, evaluating a module consists of the following steps:
-1. Read each imported value and converting it into the WebAssembly type which the import was declared as.
-1. Instantiate the WebAssembly module with those imports, and run the module's start function.
-1. Convert the WebAssembly module's exports to JavaScript values, and initialize the exports in the lexical scope to these values.
-
-#### "Snapshotting" imports
-
-Some impacts of reading the imports up-front:
-- The handling of imports could be called a "snapshotting" process: Later updates to the imported values won't be reflected within the WebAssembly module.
-- Circular WebAssembly modules are not supported: One of them will run first, and that one will find that the exports of the other aren't yet initialized, leading to a ReferenceError.
-
-See the FAQ for more explanation of the rationale for this design decision, and what features it enables which would be difficult or impossible otherwise.
-
-### Content Security Policy
-
-Wasm modules imported through the ES Module system should be verified for compilation by CSP against the `script-src`
-directive, both for static and dynamic imports. This allows Wasm and JS to be equally supported in the ESM
-integration under CSP policies.
-
-While Wasm is currently fully sandboxed, having equal access to imports to JS provides it equal capabilities to
-execution primitives, so that it should not be considered a weaker capability from an ESM integration perspective.
-
-## FAQ
-
-### How would this work, in some concrete examples?
+### How would host instantiation work, in some concrete examples?
 
 See some examples of these semantics in [EXAMPLES.md](./EXAMPLES.md).
 
@@ -172,7 +163,7 @@ Note that exports of ES Module Records always have values that can be directly t
 
 WebAssembly module instantiation is when imports are passed in. Even if it's possible to make a trampoline for functions in some cases, or mutate a global, there's no way to indirectly access Memory or Tables. It may be possible to hoist the definition of Globals, Memory or Tables when they are created from WebAssembly, but it's not possible to manipulate those objects when exported from JavaScript, which may initialize these based on the execution of arbitrary JavaScript code.
 
-Future WebAssembly proposals may make this issue even more accute in the context of the [WebAssembly GC proposal](https://github.com/WebAssembly/gc/blob/master/proposals/gc/Overview.md): When WebAssembly modules may import and export types, these types similarly need to be available when the module is instantiated. At they same time, they are exported as a value from another module.
+This is even more accute in the context of the [WebAssembly GC proposal](https://github.com/WebAssembly/gc/blob/master/proposals/gc/Overview.md): When WebAssembly modules may import and export types, these types similarly need to be available when the module is instantiated. At they same time, they are exported as a value from another module.
 
 If instantiation took place earlier (e.g., during the Parse or Link phases), then these imports would not yet be available, and so it would not be possible to properly instantiate the module.
 
@@ -198,14 +189,15 @@ In general, Web APIs are exposed through properties of the JavaScript global obj
 
 To start using this proposal ahead of that change, create a JavaScript module which exports the appropriate Web APIs that you need.
 
-### How can I provide my own imports for a WebAssembly module, rather than have those be supplied by other JavaScript or WebAssembly modules?
+### Is WebAssembly.instantiateStreaming still recommended for custom instantiation?
 
-The WebAssembly JS API and Web APIs provide explicit control over imports and remain available for this purpose. When possible, we recommend using [WebAssembly.instantiateStreaming](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WebAssembly/instantiateStreaming) to create modules with given imports efficiently.
+In many cases, the source phase import can replace instantiate streaming workflows, allowing for better compatibility with JS tools when it is fully supported.
+
+In addition, for dynamically loaded Wasm modules, `import()` and `import.source()` can be used to obtain these in a way that integrates with the security policy of the module system (and CSP in browsers).
+
+If custom compilation options are needed or if custom streams need to be provided then the JS and Web APIs can provide a useful fallback, where instantiateStreaming and compileStreaming are the preferred direct APIs to use.
 
 ### Where is the specification for this proposal?
 
 If you want to dig into the details, see [the updated WebAssembly JS API](https://webassembly.github.io/esm-integration/js-api/index.html#esm-integration) and [the proposed HTML integration PR](https://github.com/whatwg/html/pull/4372).
 
-## Past presentations
-
-For additional context, you can [watch the proposal presentation](https://youtu.be/qR_b5gajwug) or see the slides ([with notes](https://linclark.github.io/wasm-es-modules/slides/2018-03-24/#/0?presenter), [without notes](https://linclark.github.io/wasm-es-modules/slides/2018-03-24/#/)).
