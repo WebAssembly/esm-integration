@@ -8,8 +8,6 @@ The [specifics of the ES Module integration Proposal are found in this subfolder
 
 A formatted version of the spec, including this proposal, is available here: [webassembly.github.io/esm-integration](https://webassembly.github.io/esm-integration).
 
-> Note: It is possible to implement the Wasm-ESM integration in two stages. In the first stage only source phase imports of Wasm are supported (`import source fibModule from "./fib.wasm"`). In the second stage, evaluation phase imports would be supported too (`import { fib } from "./fib.wasm"`). If initially implementing just source phase imports, the `GetExportedNames`, `ResolveExport`, `InitializeEnvironment`, and `ExecuteModule` abstract operations can be implemented as abstract operations unconditionally throwing a `SyntaxError` exception. In this case, module fetch and CSP integration is still required to be implemented as specified in this proposal. Implementers are encouraged to ship both stages at once, but it is deemed OK for implementers to initially ship the first stage and then quickly follow up with the second stage, if this aids "time to ship" in implementations.
-
 Original README from upstream repository follows...
 
 # spec
