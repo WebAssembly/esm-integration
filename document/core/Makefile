@@ -9,6 +9,8 @@ BUILDDIR      = _build
 STATICDIR     = _static
 DOWNLOADDIR   = _download
 NAME          = WebAssembly
+DECISION_URL  = https://github.com/WebAssembly/meetings/blob/main/main/2017/WG-12-06.md
+TAR           = tar
 
 # Internal variables.
 PAPEROPT_a4     = -D latex_paper_size=a4
@@ -89,12 +91,14 @@ bikeshed-keep:
 	  echo Downloaded Bikeshed.
 
 
-.PHONY: index
-index:
-	(cd appendix; ./gen-index-instructions.py)
+GENERATED = appendix/index-instructions.rst
+.INTERMEDIATE: $(GENERATED)
+
+%.rst: %.py
+	(cd `dirname $@`; ./`basename $^`)
 
 .PHONY: pdf
-pdf:	index latexpdf
+pdf:	$(GENERATED) latexpdf
 	mkdir -p $(BUILDDIR)/html/$(DOWNLOADDIR)
 	ln -f $(BUILDDIR)/latex/$(NAME).pdf $(BUILDDIR)/html/$(DOWNLOADDIR)/$(NAME).pdf
 
@@ -103,9 +107,10 @@ pdf:	index latexpdf
 clean:
 	rm -rf $(BUILDDIR)
 	rm -rf $(STATICDIR)
+	rm -f $(GENERATED)
 
 .PHONY: html
-html: index
+html: $(GENERATED)
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	for file in `ls $(BUILDDIR)/html/*.html`; \
 	do \
@@ -121,28 +126,34 @@ html: index
 	@echo "Build finished. The HTML pages are in `pwd`/$(BUILDDIR)/html/."
 
 .PHONY: dirhtml
-dirhtml:
+dirhtml: $(GENERATED)
 	$(SPHINXBUILD) -b dirhtml $(ALLSPHINXOPTS) $(BUILDDIR)/dirhtml
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/dirhtml."
 
 .PHONY: singlehtml
-singlehtml:
+singlehtml: $(GENERATED)
 	$(SPHINXBUILD) -b singlehtml $(ALLSPHINXOPTS) $(BUILDDIR)/singlehtml
 	@echo
 	@echo "Build finished. The HTML page is in $(BUILDDIR)/singlehtml."
 
 .PHONY: bikeshed
-bikeshed:
+bikeshed: $(GENERATED)
 	$(SPHINXBUILD) -b singlehtml -c util/bikeshed \
 		$(ALLSPHINXOPTS) $(BUILDDIR)/bikeshed_singlehtml
-	python util/bikeshed_fixup.py $(BUILDDIR)/bikeshed_singlehtml/index.html \
+	python3 util/bikeshed_fixup.py $(BUILDDIR)/bikeshed_singlehtml/index.html \
 		>$(BUILDDIR)/bikeshed_singlehtml/index_fixed.html
+	@echo ==== Showing contents of _build/bikeshed_singlehtml/index_fixed.html ====
+	@head -n10 _build/bikeshed_singlehtml/index_fixed.html
+	@echo ... skipping $$(expr `cat _build/bikeshed_singlehtml/index_fixed.html | wc -l` - 20) lines ...
+	@tail -n10 _build/bikeshed_singlehtml/index_fixed.html
+	@echo
+	@echo =========================================================================
 	mkdir -p $(BUILDDIR)/bikeshed_mathjax/
-	bikeshed spec index.bs $(BUILDDIR)/bikeshed_mathjax/index.html
+	bikeshed spec $(STATUS) index.bs $(BUILDDIR)/bikeshed_mathjax/index.html
 	mkdir -p $(BUILDDIR)/html/bikeshed/
 	(cd util/katex/ && yarn && yarn build && npm install --only=prod)
-	python util/mathjax2katex.py $(BUILDDIR)/bikeshed_mathjax/index.html \
+	python3 util/mathjax2katex.py $(BUILDDIR)/bikeshed_mathjax/index.html \
 		>$(BUILDDIR)/html/bikeshed/index.html
 	mkdir -p $(BUILDDIR)/html/bikeshed/katex/dist/
 	cp -r util/katex/dist/* $(BUILDDIR)/html/bikeshed/katex/dist/
@@ -154,9 +165,11 @@ bikeshed:
 	@echo "Build finished. The HTML page is in $(BUILDDIR)/html/bikeshed/."
 
 .PHONY: WD-tar
+# macOS tar has no “--transform” option (only GNU tar does), so on macOS,
+# do “brew install tar” & run “make” like this: “TAR=gtar make -e WD-tar”
 WD-tar: bikeshed
 	@echo "Building tar file..."
-	tar cvf \
+	$(TAR) cvf \
 		$(BUILDDIR)/WD.tar \
 		--transform='s|$(BUILDDIR)/html/bikeshed/||' \
 		--transform='s|index.html|Overview.html|' \
@@ -177,6 +190,20 @@ WD-echidna: WD-tar
 	curl 'https://labs.w3.org/echidna/api/request' \
 		--user '$(W3C_USERNAME):$(W3C_PASSWORD)' \
 		-F "tar=@$(BUILDDIR)/WD.tar" \
+		-F "decision=$(DECISION_URL)" | tee $(BUILDDIR)/WD-echidna-id.txt
+	@echo
+	@echo "Published working draft. Check its status at https://labs.w3.org/echidna/api/status?id=`cat $(BUILDDIR)/WD-echidna-id.txt`"
+
+.PHONY: WD-echidna-CI
+WD-echidna-CI: WD-tar
+	@if [ -z $(W3C_ECHIDNA_TOKEN_CORE) ] || \
+			[ -z $(DECISION_URL) ] ; then \
+		echo "Must provide W3C_ECHIDNA_TOKEN_CORE and DECISION_URL environment variables"; \
+		exit 1; \
+	fi
+	curl 'https://labs.w3.org/echidna/api/request' \
+		-F "tar=@$(BUILDDIR)/WD.tar" \
+		-F "token=$(W3C_ECHIDNA_TOKEN_CORE)" \
 		-F "decision=$(DECISION_URL)" | tee $(BUILDDIR)/WD-echidna-id.txt
 	@echo
 	@echo "Published working draft. Check its status at https://labs.w3.org/echidna/api/status?id=`cat $(BUILDDIR)/WD-echidna-id.txt`"
@@ -259,7 +286,7 @@ latex:
 	      "(use \`make latexpdf' here to do that automatically)."
 
 .PHONY: latexpdf
-latexpdf:
+latexpdf: $(GENERATED)
 	$(SPHINXBUILD) -b latex $(ALLSPHINXOPTS) $(BUILDDIR)/latex
 	@echo "Running LaTeX files through pdflatex..."
 	$(MAKE) -C $(BUILDDIR)/latex LATEXMKOPTS=" </dev/null" all-pdf >$(BUILDDIR)/latex/LOG 2>&1 || cat $(BUILDDIR)/latex/LOG
