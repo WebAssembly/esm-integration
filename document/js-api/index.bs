@@ -555,7 +555,7 @@ interface Module {
 </pre>
 
 Per ECMA-262 requirements for Source Phase Imports ([[!SOURCEPHASEIMPORTS]]) integration, the interface prototype object for {{Module}} must have as its \[[Prototype]] set to [=%AbstractModuleSource%.prototype=], as if created by [$OrdinaryObjectCreate$]([=%AbstractModuleSource%.prototype=]), instead of [=%ObjectPrototype%=].
-Furthermore, the interface object for {{Module}} should have as its \[[Prototype]] set to [=%AbstractModuleSource%=], as if created by [$OrdinaryObjectCreate$]([=%AbstractModuleSource%=]), instead of [=%ObjectPrototype%=].
+In addition, the interface object for {{Module}} should have as its \[[Prototype]] set to [=%AbstractModuleSource%=], as if created by [$OrdinaryObjectCreate$]([=%AbstractModuleSource%=]), instead of [=%ObjectPrototype%=].
 
 <div algorithm>
   The <dfn>string value of the extern type</dfn> |type| is
@@ -1368,7 +1368,7 @@ WebAssembly Module Records have the following methods:
 
 </div>
 
-<h3 id="hostgetmodulesourcename">HostGetModuleSourceName</h2>
+<h3 id="hostgetmodulesourcename">HostGetModuleSourceName</h3>
 
 Hosts should implement [$HostGetModuleSourceName$] such that whenever a WebAssembly {{Module}} object is provided with a \[[Module]] internal slot, the string "<code data-x="">WebAssembly.Module</code>" is always returned.
 
