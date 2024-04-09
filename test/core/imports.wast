@@ -30,11 +30,9 @@
   (type $func_f64 (func (param f64)))
 
   (import "spectest" "print_i32" (func (param i32)))
-  ;; JavaScript can't handle i64 yet.
-  ;; (func (import "spectest" "print_i64") (param i64))
+  (func (import "spectest" "print_i64") (param i64))
   (import "spectest" "print_i32" (func $print_i32 (param i32)))
-  ;; JavaScript can't handle i64 yet.
-  ;; (import "spectest" "print_i64" (func $print_i64 (param i64)))
+  (import "spectest" "print_i64" (func $print_i64 (param i64)))
   (import "spectest" "print_f32" (func $print_f32 (param f32)))
   (import "spectest" "print_f64" (func $print_f64 (param f64)))
   (import "spectest" "print_i32_f32" (func $print_i32_f32 (param i32 f32)))
@@ -72,14 +70,12 @@
   (func (export "print64") (param $i i64)
     (local $x f64)
     (local.set $x (f64.convert_i64_s (call $i64->i64 (local.get $i))))
-    ;; JavaScript can't handle i64 yet.
-    ;; (call 1 (local.get $i))
+    (call 1 (local.get $i))
     (call $print_f64_f64
       (f64.add (local.get $x) (f64.const 1))
       (f64.const 53)
     )
-    ;; JavaScript can't handle i64 yet.
-    ;; (call $print_i64 (local.get $i))
+    (call $print_i64 (local.get $i))
     (call $print_f64 (local.get $x))
     (call $print_f64-2 (local.get $x))
     (call_indirect (type $func_f64) (local.get $x) (i32.const 1))
@@ -234,8 +230,7 @@
   (import "spectest" "global_i32" (global $x i32))
   (global $y (import "spectest" "global_i32") i32)
 
-  ;; JavaScript can't handle i64 yet.
-  ;; (import "spectest" "global_i64" (global i64))
+  (import "spectest" "global_i64" (global i64))
   (import "spectest" "global_f32" (global f32))
   (import "spectest" "global_f64" (global f64))
 
@@ -243,12 +238,18 @@
   (func (export "get-1") (result i32) (global.get 1))
   (func (export "get-x") (result i32) (global.get $x))
   (func (export "get-y") (result i32) (global.get $y))
+  (func (export "get-4") (result i64) (global.get 4))
+  (func (export "get-5") (result f32) (global.get 5))
+  (func (export "get-6") (result f64) (global.get 6))
 )
 
 (assert_return (invoke "get-0") (i32.const 666))
 (assert_return (invoke "get-1") (i32.const 666))
 (assert_return (invoke "get-x") (i32.const 666))
 (assert_return (invoke "get-y") (i32.const 666))
+(assert_return (invoke "get-4") (i64.const 666))
+(assert_return (invoke "get-5") (f32.const 666.6))
+(assert_return (invoke "get-6") (f64.const 666.6))
 
 (module (import "test" "global-i32" (global i32)))
 (module (import "test" "global-f32" (global f32)))

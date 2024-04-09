@@ -1,8 +1,8 @@
-# This Makefile uses ocamlbuild but does not rely on ocamlfind or the Opam
+# This Makefile uses dune but does not rely on ocamlfind or the Opam
 # package manager to build. However, Opam package management is available
-# optionally through the check/install/uninstall targets.
+# optionally through the install target.
 #
-# The $(JSLIB) target requires node.js and BuckleScript.
+# The $(JSLIB).js target requires Js_of_ocaml (using ocamlfind).
 #
 # See README.me for instructions.
 
@@ -10,177 +10,119 @@
 # Configuration
 
 NAME =		wasm
-UNOPT = 	$(NAME).debug
-OPT =   	$(NAME)
 LIB =		$(NAME)
-ZIP =		$(NAME).zip
 JSLIB =		wast.js
-WINMAKE =	winmake.bat
+ZIP =		$(NAME).zip
 
-DIRS =		util syntax binary text valid runtime exec script host main
-LIBS =		bigarray
-FLAGS = 	-lexflags -ml -cflags '-w +a-4-27-42-44-45 -warn-error +a-3'
-OCBA =		ocamlbuild $(FLAGS) $(DIRS:%=-I %)
-OCB =		$(OCBA) $(LIBS:%=-libs %)
-JS =		# set to JS shell command to run JS tests
+BUILDDIR =	_build/default
+
+JS =		# set to JS shell command to run JS tests, empty to skip
 
 
 # Main targets
 
-.PHONY:		default opt unopt libopt libunopt jslib all land zip
+.PHONY:		default all ci jslib zip
 
-default:	opt
-debug:		unopt
-opt:		$(OPT)
-unopt:		$(UNOPT)
-libopt:		_build/$(LIB).cmx _build/$(LIB).cmxa
-libunopt:	_build/$(LIB).cmo _build/$(LIB).cma
+default:	$(NAME)
+all:		default partest
+ci:		all jslib zip
+
 jslib:		$(JSLIB)
-all:		unopt opt libunopt libopt test
-land:		$(WINMAKE) all
-zip: 		$(ZIP)
+zip:		$(ZIP)
 
 
-# Building executable
+# Building
 
-empty =
-space =		$(empty) $(empty)
-comma =		,
+.PHONY:		$(NAME) $(JSLIB)
 
-.INTERMEDIATE:	_tags
-_tags:
-		echo >$@ "true: bin_annot"
-		echo >>$@ "true: debug"
-		echo >>$@ "<{$(subst $(space),$(comma),$(DIRS))}/*.cmx>: for-pack($(PACK))"
+$(NAME):
+	rm -f $@
+	dune build $@.exe
+	ln $(BUILDDIR)/$@.exe $@
 
-$(UNOPT):	main.byte
-		mv $< $@
-
-$(OPT):		main.native
-		mv $< $@
-
-.PHONY:		main.byte main.native
-main.byte:	_tags
-		$(OCB) -quiet $@
-
-main.native:	_tags
-		$(OCB) -quiet $@
+$(JSLIB):
+	rm -f $@
+	dune build $(@:%.js=%.bc.js)
+	ln $(BUILDDIR)/$(@:%.js=%.bc.js) $@
 
 
-# Building library
+# Unit tests
 
-FILES =		$(shell ls $(DIRS:%=%/*) | grep '[.]ml[^.]*$$')
-PACK =		$(shell echo `echo $(LIB) | sed 's/^\(.\).*$$/\\1/g' | tr [:lower:] [:upper:]``echo $(LIB) | sed 's/^.\(.*\)$$/\\1/g'`)
+UNITTESTDIR =	unittest
+UNITTESTFILES =	$(shell cd $(UNITTESTDIR) > /dev/null; ls *.ml)
+UNITTESTS =	$(UNITTESTFILES:%.ml=%)
 
-.INTERMEDIATE:	$(LIB).mlpack
-$(LIB).mlpack:	$(DIRS)
-		ls $(FILES) \
-		| sed 's:\(.*/\)\{0,1\}\(.*\)\.[^\.]*:\2:' \
-		| grep -v main \
-		| sort | uniq \
-		>$@
+.PHONY: unittest
 
-.INTERMEDIATE:	$(LIB).mllib
-$(LIB).mllib:
-		echo Wasm >$@
+unittest: $(UNITTESTS:%=unittest/%)
 
-_build/$(LIB).cmo: $(FILES) $(LIB).mlpack _tags Makefile
-		$(OCB) -quiet $(LIB).cmo
-
-_build/$(LIB).cmx: $(FILES) $(LIB).mlpack _tags Makefile
-		$(OCB) -quiet $(LIB).cmx
-
-_build/$(LIB).cma: $(FILES) $(LIB).mllib _tags Makefile
-		$(OCBA) -quiet $(LIB).cma
-
-_build/$(LIB).cmxa: $(FILES) $(LIB).mllib _tags Makefile
-		$(OCBA) -quiet $(LIB).cmxa
+unittest/%:
+	dune build $(@F).exe
+	dune exec ./$(@F).exe
 
 
-# Building JavaScript library
-
-.PHONY:		$(JSLIB)
-$(JSLIB):	$(UNOPT)
-		mkdir -p _build/jslib/src
-		cp meta/jslib/* _build/jslib
-		cp $(DIRS:%=_build/%/*.ml*) meta/jslib/*.ml _build/jslib/src
-		rm _build/jslib/src/*.ml[^i]
-		(cd _build/jslib; ./build.sh ../../$@)
-
-
-# Building Windows build file
-
-$(WINMAKE):	clean
-		echo rem Auto-generated from Makefile! >$@
-		echo set NAME=$(NAME) >>$@
-		echo if \'%1\' neq \'\' set NAME=%1 >>$@
-		$(OCB) main.byte \
-		| grep -v ocamldep \
-		| grep -v mkdir \
-		| sed s:`which ocaml`:ocaml:g \
-		| sed s:main/main.d.byte:%NAME%.exe: \
-		>>$@
-
-
-# Executing test suite
+# Test suite
 
 TESTDIR =	../test/core
-TESTFILES =	$(shell cd $(TESTDIR); ls *.wast)
+TESTFILES =	$(shell cd $(TESTDIR) > /dev/null; ls *.wast; ls [a-z]*/*.wast)
 TESTS =		$(TESTFILES:%.wast=%)
 
-.PHONY:		test debugtest partest
+.PHONY: test partest quiettest
 
-test:		$(OPT)
-		$(TESTDIR)/run.py --wasm `pwd`/$(OPT) $(if $(JS),--js '$(JS)',)
-debugtest:	$(UNOPT)
-		$(TESTDIR)/run.py --wasm `pwd`/$(UNOPT) $(if $(JS),--js '$(JS)',)
+test: $(NAME) unittest
+	$(TESTDIR)/run.py --wasm `pwd`/$(NAME) $(if $(JS),--js '$(JS)',)
 
-test/%:		$(OPT)
-		$(TESTDIR)/run.py --wasm `pwd`/$(OPT) $(if $(JS),--js '$(JS)',) $(TESTDIR)/$(@F).wast
-debugtest/%:	$(UNOPT)
-		$(TESTDIR)/run.py --wasm `pwd`/$(UNOPT) $(if $(JS),--js '$(JS)',) $(TESTDIR)/$(@F).wast
+test/%: $(NAME)
+	$(TESTDIR)/run.py --wasm `pwd`/$(NAME) $(if $(JS),--js '$(JS)',) $(TESTDIR)/$*.wast
 
-run/%:		$(OPT)
-		./$(OPT) $(TESTDIR)/$(@F).wast
-debug/%:	$(UNOPT)
-		./$(UNOPT) $(TESTDIR)/$(@F).wast
+run/%: $(NAME)
+	./$(NAME) $(TESTDIR)/$*.wast
 
-partest: 	$(TESTS:%=quiettest/%)
-		@echo All tests passed.
+partest: $(NAME) unittest
+	make -j10 quiettest
 
-quiettest/%:	$(OPT)
-		@ ( \
-		  $(TESTDIR)/run.py 2>$(@F).out --wasm `pwd`/$(OPT) $(if $(JS),--js '$(JS)',) $(@F:%=$(TESTDIR)/%.wast) && \
-		  rm $(@F).out \
-		) || \
-		cat $(@F).out || rm $(@F).out || exit 1
+quiettest: $(TESTS:%=quiettest/%)
+	@echo All tests passed.
+
+quiettest/%: $(NAME)
+	@ ( \
+	  $(TESTDIR)/run.py 2>$(@F).out --wasm `pwd`/$(NAME) $(if $(JS),--js '$(JS)',) $(TESTDIR)/$*.wast && \
+	  rm $(@F).out \
+	) || \
+	(cat $(@F).out && rm $(@F).out && exit 1)
 
 
-# Miscellaneous targets
+# Packaging
 
-.PHONY:		clean
+.PHONY: install
 
-$(ZIP):		$(WINMAKE)
-		git archive --format=zip --prefix=$(NAME)/ -o $@ HEAD
+install:
+	dune build -p $(NAME) @install
+	dune install
+
+opam-release/%:
+	git tag opam-$*
+	git push --tags
+	rm -f opam-$*.zip
+	wget https://github.com/WebAssembly/spec/archive/opam-$*.zip
+	cp wasm.opam opam
+	echo "url {" >> opam
+	echo "  src: \"https://github.com/WebAssembly/spec/archive/opam-$*.zip\"" >> opam
+	echo "  checksum: \"md5=`md5 -q opam-$*.zip`\"" >> opam
+	echo "}" >> opam
+	rm opam-$*.zip
+	@echo Created file ./opam, submit to github opam-repository/packages/wasm/wasm.$*/opam
+
+$(ZIP):
+	git archive --format=zip --prefix=$(NAME)/ -o $@ HEAD
+
+
+# Cleanup
+
+.PHONY: clean distclean
 
 clean:
-		rm -rf _build/jslib $(LIB).mlpack _tags
-		$(OCB) -clean
+	dune clean
 
-
-# Opam support
-
-.PHONY:		check install uninstall
-
-check:
-		# Check that we can find all relevant libraries
-		# when using ocamlfind
-		ocamlfind query $(LIBS)
-
-install:	_build/$(LIB).cmx _build/$(LIB).cmo
-		ocamlfind install $(LIB) meta/findlib/META _build/$(LIB).o \
-		  $(wildcard _build/$(LIB).cm*) \
-		  $(wildcard $(DIRS:%=%/*.mli))
-
-uninstall:
-		ocamlfind remove $(LIB)
+distclean: clean
+	rm -f $(NAME) $(JSLIB) $(ZIP)

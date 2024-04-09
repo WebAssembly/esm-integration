@@ -29,6 +29,22 @@ Number Types
    \end{array}
 
 
+.. index:: vector type
+   pair: binary format; vector type
+.. _binary-vectype:
+
+Vector Types
+~~~~~~~~~~~~
+
+:ref:`Vector types <syntax-vectype>` are also encoded by a single byte.
+
+.. math::
+   \begin{array}{llclll@{\qquad\qquad}l}
+   \production{vector type} & \Bvectype &::=&
+     \hex{7B} &\Rightarrow& \V128 \\
+   \end{array}
+
+
 .. index:: reference type
    pair: binary format; reference type
 .. _binary-reftype:
@@ -53,12 +69,13 @@ Reference Types
 Value Types
 ~~~~~~~~~~~
 
-:ref:`Value types <syntax-valtype>` are encoded with their respective encoding as a :ref:`number type <binary-numtype>` or :ref:`reference type <binary-reftype>`.
+:ref:`Value types <syntax-valtype>` are encoded with their respective encoding as a :ref:`number type <binary-numtype>`, :ref:`vector type <binary-vectype>`, or :ref:`reference type <binary-reftype>`.
 
 .. math::
    \begin{array}{llclll@{\qquad\qquad}l}
    \production{value type} & \Bvaltype &::=&
      t{:}\Bnumtype &\Rightarrow& t \\ &&|&
+     t{:}\Bvectype &\Rightarrow& t \\ &&|&
      t{:}\Breftype &\Rightarrow& t \\
    \end{array}
 
@@ -74,7 +91,7 @@ Value Types
 Result Types
 ~~~~~~~~~~~~
 
-:ref:`Result types <syntax-resulttype>` are encoded by the respective :ref:`vectors <binary-vec>` of :ref:`value types `<binary-valtype>`.
+:ref:`Result types <syntax-resulttype>` are encoded by the respective :ref:`vectors <binary-vec>` of :ref:`value types <binary-valtype>`.
 
 .. math::
    \begin{array}{llclll@{\qquad\qquad}l}

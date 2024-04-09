@@ -118,17 +118,20 @@ let input_from get_script run =
   | Assert (at, msg) -> error at "assertion failure" msg
   | Abort _ -> false
 
-let input_script start name lexbuf run =
-  input_from (fun _ -> Parse.parse name lexbuf start) run
+let input_script name lexbuf run =
+  input_from (fun () -> Parse.Script.parse name lexbuf) run
+
+let input_script1 name lexbuf run =
+  input_from (fun () -> Parse.Script1.parse name lexbuf) run
 
 let input_sexpr name lexbuf run =
-  input_from (fun _ ->
-    let var_opt, def = Parse.parse name lexbuf Parse.Module in
+  input_from (fun () ->
+    let var_opt, def = Parse.Module.parse name lexbuf in
     [Module (var_opt, def) @@ no_region]) run
 
 let input_binary name buf run =
   let open Source in
-  input_from (fun _ ->
+  input_from (fun () ->
     [Module (None, Encoded (name, buf) @@ no_region) @@ no_region]) run
 
 let input_sexpr_file input file run =
@@ -162,8 +165,8 @@ let input_file file run =
   dispatch_file_ext
     input_binary_file
     (input_sexpr_file input_sexpr)
-    (input_sexpr_file (input_script Parse.Script))
-    (input_sexpr_file (input_script Parse.Script))
+    (input_sexpr_file input_script)
+    (input_sexpr_file input_script)
     input_js_file
     file run
 
@@ -171,7 +174,7 @@ let input_string string run =
   trace ("Running (\"" ^ String.escaped string ^ "\")...");
   let lexbuf = Lexing.from_string string in
   trace "Parsing...";
-  input_script Parse.Script "string" lexbuf run
+  input_script "string" lexbuf run
 
 
 (* Interactive *)
@@ -195,7 +198,7 @@ let lexbuf_stdin buf len =
 let input_stdin run =
   let lexbuf = Lexing.from_function lexbuf_stdin in
   let rec loop () =
-    let success = input_script Parse.Script1 "stdin" lexbuf run in
+    let success = input_script1 "stdin" lexbuf run in
     if not success then Lexing.flush_input lexbuf;
     if Lexing.(lexbuf.lex_curr_pos >= lexbuf.lex_buffer_len - 1) then
       continuing := false;
@@ -252,19 +255,35 @@ let string_of_nan = function
 
 let type_of_result r =
   match r with
-  | LitResult v -> Values.type_of_value v.it
-  | NanResult n -> Types.NumType (Values.type_of_num n.it)
-  | RefResult t -> Types.RefType t
+  | NumResult (NumPat n) -> Types.NumType (Values.type_of_num n.it)
+  | NumResult (NanPat n) -> Types.NumType (Values.type_of_num n.it)
+  | VecResult (VecPat _) -> Types.VecType Types.V128Type
+  | RefResult (RefPat r) -> Types.RefType (Values.type_of_ref r.it)
+  | RefResult (RefTypePat t) -> Types.RefType t
+
+let string_of_num_pat (p : num_pat) =
+  match p with
+  | NumPat n -> Values.string_of_num n.it
+  | NanPat nanop ->
+    match nanop.it with
+    | Values.I32 _ | Values.I64 _ -> assert false
+    | Values.F32 n | Values.F64 n -> string_of_nan n
+
+let string_of_vec_pat (p : vec_pat) =
+  match p with
+  | VecPat (Values.V128 (shape, ns)) ->
+    String.concat " " (List.map string_of_num_pat ns)
+
+let string_of_ref_pat (p : ref_pat) =
+  match p with
+  | RefPat r -> Values.string_of_ref r.it
+  | RefTypePat t -> Types.string_of_refed_type t
 
 let string_of_result r =
   match r with
-  | LitResult v -> Values.string_of_value v.it
-  | NanResult nanop ->
-    (match nanop.it with
-    | Values.I32 _ | Values.I64 _ -> assert false
-    | Values.F32 n | Values.F64 n -> string_of_nan n
-    )
-  | RefResult t -> Types.string_of_refed_type t
+  | NumResult np -> string_of_num_pat np
+  | VecResult vp -> string_of_vec_pat vp
+  | RefResult rp -> string_of_ref_pat rp
 
 let string_of_results = function
   | [r] -> string_of_result r
@@ -321,7 +340,7 @@ let rec run_definition def : Ast.module_ =
     Decode.decode name bs
   | Quoted (_, s) ->
     trace "Parsing quote...";
-    let def' = Parse.string_to_module s in
+    let _, def' = Parse.Module.parse_string s in
     run_definition def'
 
 let run_action act : Values.value list =
@@ -352,34 +371,59 @@ let run_action act : Values.value list =
     | None -> Assert.error act.at "undefined export"
     )
 
-let assert_result at got expect =
+
+let assert_nan_pat n nan =
   let open Values in
+  match n, nan.it with
+  | F32 z, F32 CanonicalNan -> z = F32.pos_nan || z = F32.neg_nan
+  | F64 z, F64 CanonicalNan -> z = F64.pos_nan || z = F64.neg_nan
+  | F32 z, F32 ArithmeticNan ->
+    let pos_nan = F32.to_bits F32.pos_nan in
+    Int32.logand (F32.to_bits z) pos_nan = pos_nan
+  | F64 z, F64 ArithmeticNan ->
+    let pos_nan = F64.to_bits F64.pos_nan in
+    Int64.logand (F64.to_bits z) pos_nan = pos_nan
+  | _, _ -> false
+
+let assert_num_pat n np =
+  match np with
+    | NumPat n' -> n = n'.it
+    | NanPat nanop -> assert_nan_pat n nanop
+
+let assert_vec_pat v p =
+  let open Values in
+  match v, p with
+  | V128 v, VecPat (V128 (shape, ps)) ->
+    let extract = match shape with
+      | V128.I8x16 () -> fun v i -> I32 (V128.I8x16.extract_lane_s i v)
+      | V128.I16x8 () -> fun v i -> I32 (V128.I16x8.extract_lane_s i v)
+      | V128.I32x4 () -> fun v i -> I32 (V128.I32x4.extract_lane_s i v)
+      | V128.I64x2 () -> fun v i -> I64 (V128.I64x2.extract_lane_s i v)
+      | V128.F32x4 () -> fun v i -> F32 (V128.F32x4.extract_lane i v)
+      | V128.F64x2 () -> fun v i -> F64 (V128.F64x2.extract_lane i v)
+    in
+    List.for_all2 assert_num_pat
+      (List.init (V128.num_lanes shape) (extract v)) ps
+
+let assert_ref_pat r p =
+  match r, p with
+  | r, RefPat r' -> r = r'.it
+  | Instance.FuncRef _, RefTypePat Types.FuncRefType
+  | ExternRef _, RefTypePat Types.ExternRefType -> true
+  | _ -> false
+
+let assert_pat v r =
+  let open Values in
+  match v, r with
+  | Num n, NumResult np -> assert_num_pat n np
+  | Vec v, VecResult vp -> assert_vec_pat v vp
+  | Ref r, RefResult rp -> assert_ref_pat r rp
+  | _, _ -> false
+
+let assert_result at got expect =
   if
     List.length got <> List.length expect ||
-    List.exists2 (fun v r ->
-      match r with
-      | LitResult v' -> v <> v'.it
-      | NanResult nanop ->
-        (match nanop.it, v with
-        | F32 CanonicalNan, Num (F32 z) ->
-          z <> F32.pos_nan && z <> F32.neg_nan
-        | F64 CanonicalNan, Num (F64 z) ->
-          z <> F64.pos_nan && z <> F64.neg_nan
-        | F32 ArithmeticNan, Num (F32 z) ->
-          let pos_nan = F32.to_bits F32.pos_nan in
-          Int32.logand (F32.to_bits z) pos_nan <> pos_nan
-        | F64 ArithmeticNan, Num (F64 z) ->
-          let pos_nan = F64.to_bits F64.pos_nan in
-          Int64.logand (F64.to_bits z) pos_nan <> pos_nan
-        | _, _ -> false
-        )
-      | RefResult t ->
-        (match t, v with
-        | Types.FuncRefType, Ref (Instance.FuncRef _)
-        | Types.ExternRefType, Ref (ExternRef _) -> false
-        | _ -> true
-        )
-    ) got expect
+    List.exists2 (fun v r -> not (assert_pat v r)) got expect
   then begin
     print_string "Result: "; print_values got;
     print_string "Expect: "; print_results expect;

@@ -2,6 +2,7 @@
 # -*- coding: latin-1 -*-
 
 import queue
+import multiprocessing
 import os
 import re
 import shelve
@@ -106,7 +107,7 @@ def ReplaceMath(cache, data):
         break
       data = data[:start] + v.replace('#1', data[start+len(k):end]) + data[end:]
   p = subprocess.Popen(
-      ['node', os.path.join(SCRIPT_DIR, 'katex/cli.js'), '--display-mode'],
+      ['node', os.path.join(SCRIPT_DIR, 'katex/cli.js'), '--display-mode', '--trust'],
       stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True)
   ret = p.communicate(input=data)[0]
   if p.returncode != 0:
@@ -160,19 +161,6 @@ def Main():
   data = data.replace(
       '<li class="nav-item nav-item-0"><a href="index.html#document-index">'
       'WebAssembly 1.0</a> »', '')
-  # Drop Index links.
-  data = data.replace(
-      '<li><a class="reference internal" href="index.html#index-type">'
-      '<span class="std std-ref">Index of Types</span></a>', '')
-  data = data.replace(
-      '<li><a class="reference internal" href="index.html#index-instr">'
-      '<span class="std std-ref">Index of Instructions</span></a>', '')
-  data = data.replace(
-      '<li><a class="reference internal" href="index.html#index-rules">'
-      '<span class="std std-ref">Index of Semantic Rules</span></a>', '')
-  data = data.replace(
-      '<li><a class="reference internal" href="genindex.html">'
-      '<span class="std std-ref">Index</span></a>', '')
   # Drop sphinx css.
   data = data.replace(
       '<link href="_static/classic.css" rel="stylesheet" type="text/css">', '')
@@ -242,7 +230,8 @@ def Main():
       sys.stderr.write('.')
 
   q = queue.Queue()
-  for i in range(len(os.sched_getaffinity(0))):
+  for i in range(len(os.sched_getaffinity(0)) if "sched_getaffinity" in dir(os)
+                 else multiprocessing.cpu_count()):
     t = threading.Thread(target=Worker)
     t.daemon = True
     t.start()
