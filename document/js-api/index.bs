@@ -15,8 +15,8 @@ Prepare For TR: true
 
 <pre class='biblio'>
 {
-  "TLA": {
-    "href": "https://tc39.github.io/proposal-top-level-await/",
+  "SOURCEPHASEIMPORTS": {
+    "href": "https://tc39.es/proposal-source-phase-imports/",
     "title": "Top-Level Await"
   },
   "WEBASSEMBLY": {
@@ -102,6 +102,12 @@ urlPrefix: https://tc39.github.io/ecma262/; spec: ECMASCRIPT
         text: GetImportedModule; url: url-GetImportedModule
         text: NewModuleEnvironment; url: sec-newmoduleenvironment
         text: OrdinaryObjectCreate; url: sec-ordinaryobjectcreate
+urlPrefix: https://tc39.github.io/proposal-source-phase-imports/; spec: SOURCEPHASEIMPORTS
+    type: dfn
+        text: %AbstractModuleSource%; url: sec-%abstractmodulesource%-constructor
+        text: %AbstractModuleSource%.prototype; url: sec-properties-of-the-%abstractmodulesource%-prototype-object
+    type: abstract-op
+        text: HostGetModuleSourceName; url: sec-HostGetModuleSourceName
 urlPrefix: https://webassembly.github.io/spec/core/; spec: WebAssembly; type: dfn
     url: valid/modules.html#valid-module
         text: valid
@@ -328,7 +334,6 @@ A {{Module}} object represents a single WebAssembly module. Each {{Module}} obje
 
     * \[[Module]] : a WebAssembly [=/module=]
     * \[[Bytes]] : the source bytes of \[[Module]].
-    * \[[ModuleSourceClassName]] : the string "WebAssembly.Module"
 
 <div algorithm>
   To <dfn>construct a WebAssembly module object</dfn> from a module |module| and source bytes |bytes|, perform the following steps:
@@ -336,7 +341,6 @@ A {{Module}} object represents a single WebAssembly module. Each {{Module}} obje
     1. Let |moduleObject| be a new {{Module}} object.
     1. Set |moduleObject|.\[[Module]] to |module|.
     1. Set |moduleObject|.\[[Bytes]] to |bytes|.
-    1. Set |moduleObject|.\[[ModuleSourceClassName]] to "WebAssembly.Module".
     1. Return |moduleObject|.
 </div>
 
@@ -550,8 +554,8 @@ interface Module {
 };
 </pre>
 
-Per ECMA-262 requirements for source phase import integration, the interface object for {{Module}} must have as its \[[Prototype]] be %AbstractModuleSource%, created as if by ObjectCreate(%AbstractModuleSource%), instead of %ObjectPrototype%.
-In addition, the interface prototype object for {{Module}} must have as its \[[Prototype]] be %AbstractModuleSource.prototype%, created as if by ObjectCreate(%AbstractModuleSource.prototype%), instead of %ObjectPrototype%.
+Per ECMA-262 requirements for Source Phase Imports ([[!SOURCEPHASEIMPORTS]]) integration, the interface prototype object for {{Module}} must have as its \[[Prototype]] set to [=%AbstractModuleSource%.prototype=], as if created by [$OrdinaryObjectCreate$]([=%AbstractModuleSource%.prototype=]), instead of [=%ObjectPrototype%=].
+Furthermore, the interface object for {{Module}} should have as its \[[Prototype]] set to [=%AbstractModuleSource%=], as if created by [$OrdinaryObjectCreate$]([=%AbstractModuleSource%=]), instead of [=%ObjectPrototype%=].
 
 <div algorithm>
   The <dfn>string value of the extern type</dfn> |type| is
@@ -1245,11 +1249,9 @@ This document defines a host environment for WebAssembly. It enables a WebAssemb
 
 <h2 id="esm-integration">Integration with ECMAScript modules</h2>
 
+WebAssembly modules can be used in a module graph with ECMAScript modules and Source Phase Imports.
+
 Note: It is possible to implement the Wasm-ESM integration in two stages. In the first stage only source phase imports of Wasm are supported (`import source fibModule from "./fib.wasm"`). In the second stage, evaluation phase imports would be supported too (`import { fib } from "./fib.wasm"`). If initially implementing just source phase imports, the `GetExportedNames`, `ResolveExport`, `InitializeEnvironment`, and `ExecuteModule` abstract operations can be implemented as abstract operations unconditionally throwing a `SyntaxError` exception. In this case, module fetch and CSP integration is still required to be implemented as specified in this proposal. Implementers are encouraged to ship both stages at once, but it is deemed OK for implementers to initially ship the first stage and then quickly follow up with the second stage, if this aids "time to ship" in implementations.
-
-WebAssembly modules can be used in a module graph with ECMAScript modules.
-
-Because WebAssembly module instantiation is asynchronous, these semantics are built on the top-level await TC39 JavaScript proposal. [[!TLA]]
 
 <dfn export>WebAssembly Module Record</dfn>s are a subclass of [=Cyclic Module Record=] which contain WebAssembly code. WebAssembly Module Records have one additional internal slot:
     * \[[WebAssemblyModule]] : a WebAssembly {{Module}} object
@@ -1365,5 +1367,9 @@ WebAssembly Module Records have the following methods:
 1. Return |module|.
 
 </div>
+
+<h3 id="hostgetmodulesourcename">HostGetModuleSourceName</h2>
+
+Hosts should implement [$HostGetModuleSourceName$] such that whenever a WebAssembly {{Module}} object is provided with a \[[Module]] internal slot, the string "<code data-x="">WebAssembly.Module</code>" is always returned.
 
 Note: See corresponding modifications to HTML in <a href="https://github.com/whatwg/html/pull/4372">PR #4372</a>.
