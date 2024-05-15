@@ -6,7 +6,7 @@
   <meta content="ED" name="w3c-status">
   <meta content="Bikeshed version d765c696b, updated Fri Mar 8 15:58:52 2024 -0800" name="generator">
   <link href="https://www.w3.org/TR/wasm-js-api-2/" rel="canonical">
-  <meta content="fcbb8c853000f0018f71a2610a999b10e4a4f53b" name="revision">
+  <meta content="9bd299768ef503fb8d18639feffeb01d38ecac02" name="revision">
   <meta content="dark light" name="color-scheme">
 <style>
 emu-const {
@@ -721,7 +721,7 @@ var[data-var-color="6"] { background-color: #FFBCF2; box-shadow: 0 0 0 2px #FFBC
   <div class="head">
    <p data-fill-with="logo"><a class="logo" href="https://www.w3.org/"> <img alt="W3C" height="48" src="https://www.w3.org/StyleSheets/TR/2021/logos/W3C" width="72"> </a> </p>
    <h1 class="p-name no-ref" id="title">WebAssembly JavaScript Interface</h1>
-   <p id="w3c-state"><a href="https://www.w3.org/standards/types#ED">Editor’s Draft</a>, <time class="dt-updated" datetime="2024-04-09">9 April 2024</time></p>
+   <p id="w3c-state"><a href="https://www.w3.org/standards/types#ED">Editor’s Draft</a>, <time class="dt-updated" datetime="2024-05-15">15 May 2024</time></p>
    <details open>
     <summary>More details about this document</summary>
     <div data-fill-with="spec-metadata">
@@ -2710,7 +2710,7 @@ In practice, an implementation may run out of resources for valid modules below 
        <li data-md>
         <p>If <var>imports</var>[<var>importedModuleName</var>] does not exist, set <var>imports</var>[<var>importedModuleName</var>] to a new, empty <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#ordered-map" id="ref-for-ordered-map②">map</a>.</p>
        <li data-md>
-        <p>Let <var>importedModule</var> be <a data-link-type="abstract-op" href="https://tc39.github.io/ecma262/#url-GetImportedModule" id="ref-for-url-GetImportedModule">GetImportedModule</a>(<var>record</var>, <var>importedModuleName</var>).</p>
+        <p>Let <var>importedModule</var> be <a data-link-type="abstract-op" href="https://tc39.github.io/ecma262/#sec-GetImportedModule" id="ref-for-sec-GetImportedModule">GetImportedModule</a>(<var>record</var>, <var>importedModuleName</var>).</p>
        <li data-md>
         <p>Let <var>value</var> be ? <var>importedModule</var>.[[Environment]].GetBindingValue(<var>name</var>, true).</p>
        <li data-md>
@@ -2990,7 +2990,7 @@ In practice, an implementation may run out of resources for valid modules below 
      <li><span class="dfn-paneled" id="fce068cc">CreateMethodProperty</span>
      <li><span class="dfn-paneled" id="d7a47d32">DetachArrayBuffer</span>
      <li><span class="dfn-paneled" id="abf85593">Get</span>
-     <li><span class="dfn-paneled" id="01eebf1a">GetImportedModule</span>
+     <li><span class="dfn-paneled" id="8637be05">GetImportedModule</span>
      <li><span class="dfn-paneled" id="d83ccb33">GetIteratorFromMethod</span>
      <li><span class="dfn-paneled" id="5b7339ce">GetMethod</span>
      <li><span class="dfn-paneled" id="dc07163b">IsCallable</span>
@@ -3534,7 +3534,6 @@ let dfnPanelData = {
 "0108e6a0": {"dfnID":"0108e6a0","dfnText":"i32","external":true,"refSections":[{"refs":[{"id":"ref-for-syntax-numtype"},{"id":"ref-for-syntax-numtype\u2460"}],"title":"4. The WebAssembly Namespace"},{"refs":[{"id":"ref-for-syntax-numtype\u2461"},{"id":"ref-for-syntax-numtype\u2462"},{"id":"ref-for-syntax-numtype\u2463"},{"id":"ref-for-syntax-numtype\u2464"},{"id":"ref-for-syntax-numtype\u2465"},{"id":"ref-for-syntax-numtype\u2466"},{"id":"ref-for-syntax-numtype\u2467"},{"id":"ref-for-syntax-numtype\u2468"}],"title":"4.5. Globals"},{"refs":[{"id":"ref-for-syntax-numtype\u2460\u24ea"},{"id":"ref-for-syntax-numtype\u2460\u2460"},{"id":"ref-for-syntax-numtype\u2460\u2461"},{"id":"ref-for-syntax-numtype\u2460\u2462"}],"title":"4.6. Exported Functions"}],"url":"https://webassembly.github.io/spec/core/syntax/types.html#syntax-numtype"},
 "019e7aeb": {"dfnID":"019e7aeb","dfnText":"signif","external":true,"refSections":[{"refs":[{"id":"ref-for-syntax-float"},{"id":"ref-for-syntax-float\u2460"},{"id":"ref-for-syntax-float\u2461"},{"id":"ref-for-syntax-float\u2462"},{"id":"ref-for-syntax-float\u2463"},{"id":"ref-for-syntax-float\u2464"},{"id":"ref-for-syntax-float\u2465"},{"id":"ref-for-syntax-float\u2466"},{"id":"ref-for-syntax-float\u2467"},{"id":"ref-for-syntax-float\u2468"},{"id":"ref-for-syntax-float\u2460\u24ea"},{"id":"ref-for-syntax-float\u2460\u2460"}],"title":"4.6. Exported Functions"}],"url":"https://webassembly.github.io/spec/core/syntax/values.html#syntax-float"},
 "01d93e6a": {"dfnID":"01d93e6a","dfnText":"samevalue","external":true,"refSections":[{"refs":[{"id":"ref-for-sec-samevalue"}],"title":"4.3. Memories"}],"url":"https://tc39.github.io/ecma262/#sec-samevalue"},
-"01eebf1a": {"dfnID":"01eebf1a","dfnText":"GetImportedModule","external":true,"refSections":[{"refs":[{"id":"ref-for-url-GetImportedModule"}],"title":"8.4. ExecuteModule ( [ promiseCapability ] ) Concrete Method"}],"url":"https://tc39.github.io/ecma262/#url-GetImportedModule"},
 "0204d188": {"dfnID":"0204d188","dfnText":"size","external":true,"refSections":[{"refs":[{"id":"ref-for-list-size"},{"id":"ref-for-list-size\u2460"},{"id":"ref-for-list-size\u2461"},{"id":"ref-for-list-size\u2462"},{"id":"ref-for-list-size\u2463"}],"title":"4.6. Exported Functions"}],"url":"https://infra.spec.whatwg.org/#list-size"},
 "048283eb": {"dfnID":"048283eb","dfnText":"address","external":true,"refSections":[{"refs":[{"id":"ref-for-addresses"}],"title":"3.2. WebAssembly JS Object Caches"}],"url":"https://webassembly.github.io/spec/core/exec/runtime.html#addresses"},
 "0656fbb6": {"dfnID":"0656fbb6","dfnText":"+\u221e","external":true,"refSections":[{"refs":[{"id":"ref-for-syntax-float"},{"id":"ref-for-syntax-float\u2460"},{"id":"ref-for-syntax-float\u2461"},{"id":"ref-for-syntax-float\u2462"},{"id":"ref-for-syntax-float\u2463"},{"id":"ref-for-syntax-float\u2464"},{"id":"ref-for-syntax-float\u2465"},{"id":"ref-for-syntax-float\u2466"},{"id":"ref-for-syntax-float\u2467"},{"id":"ref-for-syntax-float\u2468"},{"id":"ref-for-syntax-float\u2460\u24ea"},{"id":"ref-for-syntax-float\u2460\u2460"}],"title":"4.6. Exported Functions"}],"url":"https://webassembly.github.io/spec/core/syntax/values.html#syntax-float"},
@@ -3606,6 +3605,7 @@ let dfnPanelData = {
 "81131be0": {"dfnID":"81131be0","dfnText":"Call","external":true,"refSections":[{"refs":[{"id":"ref-for-sec-call"}],"title":"4.6. Exported Functions"}],"url":"https://tc39.es/ecma262/multipage/abstract-operations.html#sec-call"},
 "84b454ff": {"dfnID":"84b454ff","dfnText":"ordered map","external":true,"refSections":[{"refs":[{"id":"ref-for-ordered-map"}],"title":"3.2. WebAssembly JS Object Caches"},{"refs":[{"id":"ref-for-ordered-map\u2460"},{"id":"ref-for-ordered-map\u2461"}],"title":"8.4. ExecuteModule ( [ promiseCapability ] ) Concrete Method"}],"url":"https://infra.spec.whatwg.org/#ordered-map"},
 "84eac0df": {"dfnID":"84eac0df","dfnText":"mem_grow","external":true,"refSections":[{"refs":[{"id":"ref-for-embed-mem-grow"}],"title":"4.3. Memories"}],"url":"https://webassembly.github.io/spec/core/appendix/embedding.html#embed-mem-grow"},
+"8637be05": {"dfnID":"8637be05","dfnText":"GetImportedModule","external":true,"refSections":[{"refs":[{"id":"ref-for-sec-GetImportedModule"}],"title":"8.4. ExecuteModule ( [ promiseCapability ] ) Concrete Method"}],"url":"https://tc39.github.io/ecma262/#sec-GetImportedModule"},
 "868a40c2": {"dfnID":"868a40c2","dfnText":"table type","external":true,"refSections":[{"refs":[{"id":"ref-for-syntax-tabletype"},{"id":"ref-for-syntax-tabletype\u2460"},{"id":"ref-for-syntax-tabletype\u2461"}],"title":"4.4. Tables"}],"url":"https://webassembly.github.io/spec/core/syntax/types.html#syntax-tabletype"},
 "8780316d": {"dfnID":"8780316d","dfnText":"module_imports","external":true,"refSections":[{"refs":[{"id":"ref-for-embed-module-imports"}],"title":"4. The WebAssembly Namespace"},{"refs":[{"id":"ref-for-embed-module-imports\u2460"}],"title":"4.1. Modules"},{"refs":[{"id":"ref-for-embed-module-imports\u2461"}],"title":"8. Integration with ECMAScript modules"},{"refs":[{"id":"ref-for-embed-module-imports\u2462"}],"title":"8.4. ExecuteModule ( [ promiseCapability ] ) Concrete Method"}],"url":"https://webassembly.github.io/spec/core/appendix/embedding.html#embed-module-imports"},
 "8855a9aa": {"dfnID":"8855a9aa","dfnText":"DOMString","external":true,"refSections":[{"refs":[{"id":"ref-for-idl-DOMString"}],"title":"4.1. Modules"}],"url":"https://webidl.spec.whatwg.org/#idl-DOMString"},
@@ -4362,6 +4362,7 @@ let refsData = {
 "https://tc39.es/proposal-resizablearraybuffer/#sec-isfixedarraybuffer": {"export":true,"for_":[],"level":"","normative":true,"shortname":"resizablearraybuffer proposal","spec":"resizablearraybuffer proposal","status":"anchor-block","text":"isfixedlengtharraybuffer","type":"dfn","url":"https://tc39.es/proposal-resizablearraybuffer/#sec-isfixedarraybuffer"},
 "https://tc39.github.io/ecma262/#current-realm": {"export":true,"for_":[],"level":"","normative":true,"shortname":"ecmascript","spec":"ecmascript","status":"anchor-block","text":"current realm","type":"dfn","url":"https://tc39.github.io/ecma262/#current-realm"},
 "https://tc39.github.io/ecma262/#cyclic-module-record": {"export":true,"for_":[],"level":"","normative":true,"shortname":"ecmascript","spec":"ecmascript","status":"anchor-block","text":"cyclic module record","type":"dfn","url":"https://tc39.github.io/ecma262/#cyclic-module-record"},
+"https://tc39.github.io/ecma262/#sec-GetImportedModule": {"export":true,"for_":[],"level":"","normative":true,"shortname":"ecmascript","spec":"ecmascript","status":"anchor-block","text":"GetImportedModule","type":"abstract-op","url":"https://tc39.github.io/ecma262/#sec-GetImportedModule"},
 "https://tc39.github.io/ecma262/#sec-arraybuffer-objects": {"export":true,"for_":["ECMAScript"],"level":"","normative":true,"shortname":"ecmascript","spec":"ecmascript","status":"anchor-block","text":"ArrayBuffer","type":"interface","url":"https://tc39.github.io/ecma262/#sec-arraybuffer-objects"},
 "https://tc39.github.io/ecma262/#sec-built-in-function-objects": {"export":true,"for_":[],"level":"","normative":true,"shortname":"ecmascript","spec":"ecmascript","status":"anchor-block","text":"built-in function objects","type":"dfn","url":"https://tc39.github.io/ecma262/#sec-built-in-function-objects"},
 "https://tc39.github.io/ecma262/#sec-createdatapropertyorthrow": {"export":true,"for_":[],"level":"","normative":true,"shortname":"ecmascript","spec":"ecmascript","status":"anchor-block","text":"CreateDataPropertyOrThrow","type":"abstract-op","url":"https://tc39.github.io/ecma262/#sec-createdatapropertyorthrow"},
@@ -4374,7 +4375,6 @@ let refsData = {
 "https://tc39.github.io/ecma262/#sec-ordinaryobjectcreate": {"export":true,"for_":[],"level":"","normative":true,"shortname":"ecmascript","spec":"ecmascript","status":"anchor-block","text":"OrdinaryObjectCreate","type":"abstract-op","url":"https://tc39.github.io/ecma262/#sec-ordinaryobjectcreate"},
 "https://tc39.github.io/ecma262/#sec-returnifabrupt-shorthands": {"export":true,"for_":[],"level":"","normative":true,"shortname":"ecmascript","spec":"ecmascript","status":"anchor-block","text":"?","type":"dfn","url":"https://tc39.github.io/ecma262/#sec-returnifabrupt-shorthands"},
 "https://tc39.github.io/ecma262/#sec-samevalue": {"export":true,"for_":[],"level":"","normative":true,"shortname":"ecmascript","spec":"ecmascript","status":"anchor-block","text":"samevalue","type":"dfn","url":"https://tc39.github.io/ecma262/#sec-samevalue"},
-"https://tc39.github.io/ecma262/#url-GetImportedModule": {"export":true,"for_":[],"level":"","normative":true,"shortname":"ecmascript","spec":"ecmascript","status":"anchor-block","text":"GetImportedModule","type":"abstract-op","url":"https://tc39.github.io/ecma262/#url-GetImportedModule"},
 "https://tc39.github.io/ecma262/#ℤ": {"export":true,"for_":[],"level":"","normative":true,"shortname":"ecmascript","spec":"ecmascript","status":"anchor-block","text":"\u2124","type":"dfn","url":"https://tc39.github.io/ecma262/#\u2124"},
 "https://tc39.github.io/ecma262/#𝔽": {"export":true,"for_":[],"level":"","normative":true,"shortname":"ecmascript","spec":"ecmascript","status":"anchor-block","text":"\ud835\udd3d","type":"dfn","url":"https://tc39.github.io/ecma262/#\ud835\udd3d"},
 "https://tc39.github.io/proposal-source-phase-imports/#sec-%abstractmodulesource%-constructor": {"export":true,"for_":[],"level":"","normative":true,"shortname":"sourcephaseimports","spec":"sourcephaseimports","status":"anchor-block","text":"%abstractmodulesource%","type":"dfn","url":"https://tc39.github.io/proposal-source-phase-imports/#sec-%abstractmodulesource%-constructor"},
