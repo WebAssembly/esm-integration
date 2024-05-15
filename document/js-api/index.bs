@@ -58,7 +58,7 @@ urlPrefix: https://tc39.github.io/ecma262/; spec: ECMASCRIPT
     type: abstract-op
         text: CreateDataPropertyOrThrow; url: sec-createdatapropertyorthrow
         text: CreateMethodProperty; url: sec-createmethodproperty
-        text: GetImportedModule; url: url-GetImportedModule
+        text: GetImportedModule; url: sec-GetImportedModule
         text: NewModuleEnvironment; url: sec-newmoduleenvironment
         text: OrdinaryObjectCreate; url: sec-ordinaryobjectcreate
 urlPrefix: https://tc39.github.io/proposal-source-phase-imports/; spec: SOURCEPHASEIMPORTS
