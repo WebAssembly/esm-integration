@@ -180,6 +180,7 @@ urlPrefix: https://tc39.es/proposal-resizablearraybuffer/; spec: ResizableArrayB
 
 <pre class='link-defaults'>
 spec:infra; type:dfn; text:list
+spec:infra; type:dfn; text:byte sequence
 spec:ecma-262; type:exception; for:ECMAScript; text:Error
 spec:ecmascript; type:exception; for:ECMAScript; text:TypeError
 spec:ecmascript; type:exception; for:ECMAScript; text:RangeError
@@ -524,8 +525,8 @@ interface Module {
 };
 </pre>
 
-Per ECMA-262 requirements for Source Phase Imports ([[!SOURCEPHASEIMPORTS]]) integration, the interface prototype object for {{Module}} must have as its \[[Prototype]] set to [=%AbstractModuleSource%.prototype=], as if created by [$OrdinaryObjectCreate$]([=%AbstractModuleSource%.prototype=]), instead of [=%ObjectPrototype%=].
-In addition, the interface object for {{Module}} should have as its \[[Prototype]] set to [=%AbstractModuleSource%=], as if created by [$OrdinaryObjectCreate$]([=%AbstractModuleSource%=]), instead of [=%ObjectPrototype%=].
+Per ECMA-262 requirements for Source Phase Imports ([[!SOURCEPHASEIMPORTS]]) integration, the interface prototype object for {{Module}} must have as its \[[Prototype]] set to [=%AbstractModuleSource%.prototype=], as if created by [$OrdinaryObjectCreate$]([=%AbstractModuleSource%.prototype=]).
+In addition, the interface object for {{Module}} should have as its \[[Prototype]] set to [=%AbstractModuleSource%=], as if created by [$OrdinaryObjectCreate$]([=%AbstractModuleSource%=]).
 
 <div algorithm>
   The <dfn>string value of the extern type</dfn> |type| is
@@ -1337,7 +1338,7 @@ Note: It is possible to implement the Wasm-ESM integration in two stages. In the
     * \[[WebAssemblyModule]] : a WebAssembly {{Module}} object
 
 <div algorithm>
-To <dfn export>parse a WebAssembly module</dfn> given a an {{ArrayBuffer}} |bytes|, a Realm |realm| and object |hostDefined|, perform the following steps.
+To <dfn export>parse a WebAssembly module</dfn> given a <a>byte sequence</a> |bytes|, a Realm |realm| and object |hostDefined|, perform the following steps.
 
 1. Let |stableBytes| be a [=get a copy of the buffer source|copy of the bytes held by the buffer=] |bytes|.
 1. [=Compile a WebAssembly module|Compile the WebAssembly module=] |stableBytes| and store the result as |module|.
@@ -1425,13 +1426,14 @@ WebAssembly Module Records have the following methods:
     1. Let |importedModule| be [$GetImportedModule$](|record|, |importedModuleName|).
     1. Let |value| be ? |importedModule|.\[[Environment]].GetBindingValue(|name|, true).
     1. Set |imports|[|importedModuleName|][|name|] to |value|.
-1. Let |importsObject| be ! [$OrdinaryObjectCreate$](null).
+1. Let |importObject| be ! [$OrdinaryObjectCreate$](null).
 1. For each |key| → |value| of |imports|,
     1. Let |moduleImportsObject| be ! [$OrdinaryObjectCreate$](null).
     1. For each |importedName| → |importedValue| of |value|,
         1. Perform ! [$CreateDataPropertyOrThrow$](|moduleImportsObject|, |importedName|, |importedValue|).
-    1. Perform ! [$CreateDataPropertyOrThrow$](|importsObject|, |key|, |moduleImportsObject|).
-1. Let |instance| be the result of [=Instantiate a WebAssembly module|instantiating the WebAssembly module=] |module| with imports |importsObject|.
+    1. Perform ! [$CreateDataPropertyOrThrow$](|importObject|, |key|, |moduleImportsObject|).
+1. [=Read the imports=] of |module| with imports |importObject|, and let |imports| be the result.
+1. [=Instantiate the core of a WebAssembly module=] |module| with |imports|, and let |instance| be the result.
 1. For each |name| in the [=export name list=] of |record|,
     1. Perform ! |record|.\[[Environment]].InitializeBinding(|name|, ! Get(|instance|.\[[Exports]], |name|)).
 
