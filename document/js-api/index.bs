@@ -1454,4 +1454,4 @@ WebAssembly Module Records have the following methods:
 
 Hosts should implement [$HostGetModuleSourceName$] such that whenever a WebAssembly {{Module}} object is provided with a \[[Module]] internal slot, the string "<code data-x="">WebAssembly.Module</code>" is always returned.
 
-Note: See corresponding modifications to HTML in <a href="https://github.com/whatwg/html/pull/4372">PR #4372</a>.
+Note: See corresponding modifications to HTML in <a href="https://github.com/whatwg/html/pull/10380">PR #10380</a>.
