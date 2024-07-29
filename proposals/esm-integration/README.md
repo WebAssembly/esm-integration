@@ -36,7 +36,7 @@ foo();
 Then by integrating with [Source Phase Imports](https://github.com/tc39/proposal-source-phase-imports), arbitrary instantiations with custom imports can still be supported.
 
 ```js
-import source myModule from "./myModule.wasm");
+import source myModule from "./myModule.wasm";
 
 const { foo: foo1 } = new WebAssembly.Instance(myModule, { ...imports1 });
 foo1();
