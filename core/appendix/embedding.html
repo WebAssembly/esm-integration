@@ -200,8 +200,8 @@ If it does, the post conditions are guaranteed by the semantics.</p>
 </ol>
 <div class="math notranslate nohighlight">
 \[\begin{split}\begin{array}{lclll}
-\mathrm{module\_instantiate}(S, m, \mathit{ev}^\ast) &amp;=&amp; (S', F.\href{../exec/runtime.html#syntax-frame}{\mathsf{module}}) &amp;&amp; (\mathrel{\mbox{if}} \href{../exec/modules.html#exec-instantiation}{\mathrm{instantiate}}(S, m, \mathit{ev}^\ast) \href{../exec/conventions.html#formal-notation}{\hookrightarrow}^\ast S'; F; \epsilon) \\
-\mathrm{module\_instantiate}(S, m, \mathit{ev}^\ast) &amp;=&amp; (S', \href{../appendix/embedding.html#embed-error}{\mathsf{error}}) &amp;&amp; (\mathrel{\mbox{if}} \href{../exec/modules.html#exec-instantiation}{\mathrm{instantiate}}(S, m, \mathit{ev}^\ast) \href{../exec/conventions.html#formal-notation}{\hookrightarrow}^\ast S'; F; \href{../exec/runtime.html#syntax-trap}{\mathsf{trap}}) \\
+\mathrm{module\_instantiate}(S, m, \mathit{ev}^\ast) &amp;=&amp; (S', F.\href{../exec/runtime.html#syntax-frame}{\mathsf{module}}) &amp;&amp; (\mathrel{\mbox{if}} \href{../exec/modules.html#exec-instantiation}{\mathrm{instantiate}}(S, m, \mathit{ev}^\ast) \href{../exec/conventions.html#exec-notation}{\hookrightarrow}^\ast S'; F; \epsilon) \\
+\mathrm{module\_instantiate}(S, m, \mathit{ev}^\ast) &amp;=&amp; (S', \href{../appendix/embedding.html#embed-error}{\mathsf{error}}) &amp;&amp; (\mathrel{\mbox{if}} \href{../exec/modules.html#exec-instantiation}{\mathrm{instantiate}}(S, m, \mathit{ev}^\ast) \href{../exec/conventions.html#exec-notation}{\hookrightarrow}^\ast S'; F; \href{../exec/runtime.html#syntax-trap}{\mathsf{trap}}) \\
 \end{array}\end{split}\]</div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -325,8 +325,8 @@ If it does, the post conditions are guaranteed by the semantics.</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}~ \\
 \begin{array}{lclll}
-\mathrm{func\_invoke}(S, a, v^\ast) &amp;=&amp; (S', {v'}^\ast) &amp;&amp; (\mathrel{\mbox{if}} \href{../exec/modules.html#exec-invocation}{\mathrm{invoke}}(S, a, v^\ast) \href{../exec/conventions.html#formal-notation}{\hookrightarrow}^\ast S'; F; {v'}^\ast) \\
-\mathrm{func\_invoke}(S, a, v^\ast) &amp;=&amp; (S', \href{../appendix/embedding.html#embed-error}{\mathsf{error}}) &amp;&amp; (\mathrel{\mbox{if}} \href{../exec/modules.html#exec-invocation}{\mathrm{invoke}}(S, a, v^\ast) \href{../exec/conventions.html#formal-notation}{\hookrightarrow}^\ast S'; F; \href{../exec/runtime.html#syntax-trap}{\mathsf{trap}}) \\
+\mathrm{func\_invoke}(S, a, v^\ast) &amp;=&amp; (S', {v'}^\ast) &amp;&amp; (\mathrel{\mbox{if}} \href{../exec/modules.html#exec-invocation}{\mathrm{invoke}}(S, a, v^\ast) \href{../exec/conventions.html#exec-notation}{\hookrightarrow}^\ast S'; F; {v'}^\ast) \\
+\mathrm{func\_invoke}(S, a, v^\ast) &amp;=&amp; (S', \href{../appendix/embedding.html#embed-error}{\mathsf{error}}) &amp;&amp; (\mathrel{\mbox{if}} \href{../exec/modules.html#exec-invocation}{\mathrm{invoke}}(S, a, v^\ast) \href{../exec/conventions.html#exec-notation}{\hookrightarrow}^\ast S'; F; \href{../exec/runtime.html#syntax-trap}{\mathsf{trap}}) \\
 \end{array}\end{split}\]</div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
