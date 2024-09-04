@@ -1332,7 +1332,7 @@ This document defines a host environment for WebAssembly. It enables a WebAssemb
 
 WebAssembly modules can be used in a module graph with ECMAScript modules and Source Phase Imports.
 
-Note: While this specification defines both a Source Phase Imports integration and an evaluation/instance phase integration, implementations may choose to implement only the Source Phase Imports as its own smaller proposal without implementing the full evaluation/instance phase import support. In this case, the `ResolveExport` abstract operation should be implemented as returning null, and the `InitializeEnvironment` and `ExecuteModule` abstract operations implemented as unconditionally throwing a `ReferenceError` exception.
+Note: While this specification defines both a Source Phase Imports integration and an evaluation/instance phase integration, implementations may choose to implement only the Source Phase Imports as its own smaller proposal without implementing the full evaluation/instance phase import support. In this case, the `ResolveExport` abstract operation should be implemented as returning null, and the `InitializeEnvironment` and `ExecuteModule` abstract operations implemented as unconditionally throwing a `SyntaxError` exception.
 
 <dfn export>WebAssembly Module Record</dfn>s are a subclass of [=Cyclic Module Record=] which contain WebAssembly code. WebAssembly Module Records have one additional internal slot:
     * \[[WebAssemblyModule]] : a WebAssembly {{Module}} object
