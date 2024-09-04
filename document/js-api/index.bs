@@ -1,5 +1,5 @@
 <pre class='metadata'>
-Title: WebAssembly JavaScript Interface
+Title: WebAssembly JavaScript Interface: ESM Integration
 Shortname: wasm-js-api
 Group: wasm
 Status: ED
