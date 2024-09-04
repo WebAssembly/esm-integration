@@ -2,6 +2,7 @@
 #
 
 # You can set these variables from the command line.
+W3C_STATUS    = ED
 SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
 PAPER         = a4
@@ -9,8 +10,9 @@ BUILDDIR      = _build
 STATICDIR     = _static
 DOWNLOADDIR   = _download
 NAME          = WebAssembly
-DECISION_URL  = https://github.com/WebAssembly/meetings/blob/main/main/2017/WG-12-06.md
+DECISION_URL  = https://github.com/WebAssembly/meetings/blob/main/main/2024/WG-06-12.md
 TAR           = tar
+DEADLINE      = $(shell date -d "+30 days" +%Y-%m-%d 2>/dev/null || date -v +30d +%Y-%m-%d)
 
 # Internal variables.
 PAPEROPT_a4     = -D latex_paper_size=a4
@@ -80,7 +82,7 @@ publish-main: clean main bikeshed-keep deploy
 all:	pdf html bikeshed
 
 .PHONY: main
-main:	pdf html
+main:	macrosok pdf html
 
 # Dirty hack to avoid rebuilding the Bikeshed version for every push.
 .PHONY: bikeshed-keep
@@ -96,6 +98,10 @@ GENERATED = appendix/index-instructions.rst
 
 %.rst: %.py
 	(cd `dirname $@`; ./`basename $^`)
+
+.PHONY: macrosok
+macrosok:	$(GENERATED)
+	sh util/check_macros.sh
 
 .PHONY: pdf
 pdf:	$(GENERATED) latexpdf
@@ -150,7 +156,7 @@ bikeshed: $(GENERATED)
 	@echo
 	@echo =========================================================================
 	mkdir -p $(BUILDDIR)/bikeshed_mathjax/
-	bikeshed spec $(STATUS) index.bs $(BUILDDIR)/bikeshed_mathjax/index.html
+	bikeshed spec --md-status=$(W3C_STATUS) --md-deadline=$(DEADLINE) index.bs $(BUILDDIR)/bikeshed_mathjax/index.html
 	mkdir -p $(BUILDDIR)/html/bikeshed/
 	(cd util/katex/ && yarn && yarn build && npm install --only=prod)
 	python3 util/mathjax2katex.py $(BUILDDIR)/bikeshed_mathjax/index.html \
@@ -192,7 +198,7 @@ WD-echidna: WD-tar
 		-F "tar=@$(BUILDDIR)/WD.tar" \
 		-F "decision=$(DECISION_URL)" | tee $(BUILDDIR)/WD-echidna-id.txt
 	@echo
-	@echo "Published working draft. Check its status at https://labs.w3.org/echidna/api/status?id=`cat $(BUILDDIR)/WD-echidna-id.txt`"
+	@echo "Published $(W3C_STATUS). Check its status at https://labs.w3.org/echidna/api/status?id=`cat $(BUILDDIR)/WD-echidna-id.txt`"
 
 .PHONY: WD-echidna-CI
 WD-echidna-CI: WD-tar
@@ -206,7 +212,7 @@ WD-echidna-CI: WD-tar
 		-F "token=$(W3C_ECHIDNA_TOKEN_CORE)" \
 		-F "decision=$(DECISION_URL)" | tee $(BUILDDIR)/WD-echidna-id.txt
 	@echo
-	@echo "Published working draft. Check its status at https://labs.w3.org/echidna/api/status?id=`cat $(BUILDDIR)/WD-echidna-id.txt`"
+	@echo "Published $(W3C_STATUS). Check its status at https://labs.w3.org/echidna/api/status?id=`cat $(BUILDDIR)/WD-echidna-id.txt`"
 
 .PHONY: diff
 diff: bikeshed
