@@ -1387,6 +1387,8 @@ To <dfn export>parse a WebAssembly module</dfn> given a <a>byte sequence</a> |by
 1. [=Construct a WebAssembly module object=] from |module| and |bytes|, and let |module| be the result.
 1. Let |requestedModules| be a set.
 1. For each (|moduleName|, <var ignore>name</var>, <var ignore>type</var>) in [=module_imports=](|module|.\[[Module]]),
+    1. If |moduleName| starts with the string "wasm:",
+        1. Throw a {{LinkError}} exception.
     1. [=set/Append=] |moduleName| to |requestedModules|.
 1. Return {
       <!-- Abstract Module Records -->
@@ -1409,6 +1411,8 @@ To <dfn export>parse a WebAssembly module</dfn> given a <a>byte sequence</a> |by
       \[[AsyncParentModules]]: &laquo; &raquo;,
       \[[PendingAsyncDependencies]]: ~empty~,
     }.
+
+Node: When integrating with the JS String Builtins proposal, "<code data-x="">builtins: ["js-string"]</code>" should be provided in the above WebAssembly compilation options, with the corresponding builtin names permitted.
 
 Note: From HTML, it's not observable when [=parse a WebAssembly module=] begins, so any work perfomed in compilation may be performed off-thread.
 </div>
