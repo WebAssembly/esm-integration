@@ -6,7 +6,7 @@
   <meta content="ED" name="w3c-status">
   <meta content="Bikeshed version 97a1608be, updated Mon Feb 3 16:09:34 2025 -0800" name="generator">
   <link href="https://www.w3.org/TR/wasm-js-api-2/" rel="canonical">
-  <meta content="493b1bfeedf4880667eeb9bdd556abca62ebd136" name="revision">
+  <meta content="f1c3a983b4883d6035a26b3b2775c6e6e93de124" name="revision">
   <meta content="dark light" name="color-scheme">
 <style>
 emu-const {
@@ -832,8 +832,7 @@ and the <a href="https://www.w3.org/TR/wasm-web-api/">WebAssembly Web API</a>.
       <li><a href="#resolve-export"><span class="secno">9.2</span> <span class="content">ResolveExport ( <var>exportName</var>, <var>resolveSet</var> ) Concrete Method</span></a>
       <li><a href="#module-declaration-environment-setup"><span class="secno">9.3</span> <span class="content">InitializeEnvironment ( ) Concrete Method</span></a>
       <li><a href="#module-execution"><span class="secno">9.4</span> <span class="content">ExecuteModule ( [ <var>promiseCapability</var> ] ) Concrete Method</span></a>
-      <li><a href="#get-module-source"><span class="secno">9.5</span> <span class="content">GetModuleSource ( ) Concrete Method</span></a>
-      <li><a href="#hostgetmodulesourcename"><span class="secno">9.6</span> <span class="content">HostGetModuleSourceName</span></a>
+      <li><a href="#hostgetmodulesourcename"><span class="secno">9.5</span> <span class="content">HostGetModuleSourceName</span></a>
      </ol>
     <li>
      <a href="#change-history"><span class="secno">10</span> <span class="content">Change History</span></a>
@@ -1362,7 +1361,7 @@ If this throws an exception, catch it, <a data-link-type="dfn" href="https://web
   <c- b>static</c-> <a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#idl-sequence" id="ref-for-idl-sequence②"><c- b>sequence</c-></a>&lt;<a class="idl-code" data-link-type="interface" href="https://tc39.github.io/ecma262/#sec-arraybuffer-objects" id="ref-for-sec-arraybuffer-objects"><c- b>ArrayBuffer</c-></a>> <a class="idl-code" data-link-type="method" href="#dom-module-customsections" id="ref-for-dom-module-customsections"><c- g>customSections</c-></a>(<a data-link-type="idl-name" href="#module" id="ref-for-module⑨"><c- n>Module</c-></a> <dfn class="dfn-paneled idl-code" data-dfn-for="Module/customSections(moduleObject, sectionName)" data-dfn-type="argument" data-export id="dom-module-customsections-moduleobject-sectionname-moduleobject"><code><c- g>moduleObject</c-></code></dfn>, <a class="idl-code" data-link-type="interface" href="https://webidl.spec.whatwg.org/#idl-DOMString" id="ref-for-idl-DOMString"><c- b>DOMString</c-></a> <dfn class="dfn-paneled idl-code" data-dfn-for="Module/customSections(moduleObject, sectionName)" data-dfn-type="argument" data-export id="dom-module-customsections-moduleobject-sectionname-sectionname"><code><c- g>sectionName</c-></code></dfn>);
 };
 </pre>
-   <p>Per ECMA-262 requirements for Source Phase Imports (<a data-link-type="biblio" href="#biblio-sourcephaseimports" title="Top-Level Await">[SOURCEPHASEIMPORTS]</a>) integration, the interface prototype object for <code class="idl"><a data-link-type="idl" href="#module" id="ref-for-module①⓪">Module</a></code> must have as its [[Prototype]] set to <a data-link-type="dfn" href="https://tc39.github.io/proposal-source-phase-imports/#sec-properties-of-the-%abstractmodulesource%-prototype-object" id="ref-for-sec-properties-of-the-%abstractmodulesource%-prototype-object">%AbstractModuleSource%.prototype</a>, as if created by <a data-link-type="abstract-op" href="https://tc39.github.io/ecma262/#sec-ordinaryobjectcreate" id="ref-for-sec-ordinaryobjectcreate①">OrdinaryObjectCreate</a>(<a data-link-type="dfn" href="https://tc39.github.io/proposal-source-phase-imports/#sec-properties-of-the-%abstractmodulesource%-prototype-object" id="ref-for-sec-properties-of-the-%abstractmodulesource%-prototype-object①">%AbstractModuleSource%.prototype</a>).
+   <p>Per ECMA-262 requirements for Source Phase Imports (<a data-link-type="biblio" href="#biblio-sourcephaseimports" title="Source Phase Imports">[SOURCEPHASEIMPORTS]</a>) integration, the interface prototype object for <code class="idl"><a data-link-type="idl" href="#module" id="ref-for-module①⓪">Module</a></code> must have as its [[Prototype]] set to <a data-link-type="dfn" href="https://tc39.github.io/proposal-source-phase-imports/#sec-properties-of-the-%abstractmodulesource%-prototype-object" id="ref-for-sec-properties-of-the-%abstractmodulesource%-prototype-object">%AbstractModuleSource%.prototype</a>, as if created by <a data-link-type="abstract-op" href="https://tc39.github.io/ecma262/#sec-ordinaryobjectcreate" id="ref-for-sec-ordinaryobjectcreate①">OrdinaryObjectCreate</a>(<a data-link-type="dfn" href="https://tc39.github.io/proposal-source-phase-imports/#sec-properties-of-the-%abstractmodulesource%-prototype-object" id="ref-for-sec-properties-of-the-%abstractmodulesource%-prototype-object①">%AbstractModuleSource%.prototype</a>).
 In addition, the interface object for <code class="idl"><a data-link-type="idl" href="#module" id="ref-for-module①①">Module</a></code> should have as its [[Prototype]] set to <a data-link-type="dfn" href="https://tc39.github.io/proposal-source-phase-imports/#sec-%abstractmodulesource%-constructor" id="ref-for-sec-%abstractmodulesource%-constructor">%AbstractModuleSource%</a>, as if created by <a data-link-type="abstract-op" href="https://tc39.github.io/ecma262/#sec-ordinaryobjectcreate" id="ref-for-sec-ordinaryobjectcreate②">OrdinaryObjectCreate</a>(<a data-link-type="dfn" href="https://tc39.github.io/proposal-source-phase-imports/#sec-%abstractmodulesource%-constructor" id="ref-for-sec-%abstractmodulesource%-constructor①">%AbstractModuleSource%</a>).</p>
    <div class="algorithm" data-algorithm="string value of the extern type">
      The <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="string-value-of-the-extern-type">string value of the extern type</dfn> <var>type</var> is 
@@ -2628,11 +2627,7 @@ In practice, an implementation may run out of resources for valid modules below 
    <h2 class="heading settled" data-level="9" id="esm-integration"><span class="secno">9. </span><span class="content">Integration with ECMAScript modules</span><a class="self-link" href="#esm-integration"></a></h2>
    <p>WebAssembly modules can be used in a module graph with ECMAScript modules and Source Phase Imports.</p>
    <p class="note" role="note"><span class="marker">Note:</span> While this specification is not yet merged into the main Wasm specification, since it defines both a Source Phase Imports integration and an evaluation/instance phase integration, implementations may choose to implement only the Source Phase Imports as its own smaller proposal without implementing the full evaluation/instance phase import support. In this case, the <code>ResolveExport</code> abstract operation should be implemented as returning null, and the <code>InitializeEnvironment</code> and <code>ExecuteModule</code> abstract operations implemented as unconditionally throwing a <code>SyntaxError</code> exception. This note will be removed when this proposal is upstreamed.</p>
-   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-export id="webassembly-module-record">WebAssembly Module Record</dfn>s are a subclass of <a data-link-type="dfn" href="https://tc39.github.io/ecma262/#cyclic-module-record" id="ref-for-cyclic-module-record">Cyclic Module Record</a> which contain WebAssembly code. WebAssembly Module Records have one additional internal slot:</p>
-   <ul>
-    <li data-md>
-     <p>[[WebAssemblyModule]] : a WebAssembly <code class="idl"><a data-link-type="idl" href="#module" id="ref-for-module①③">Module</a></code> object</p>
-   </ul>
+   <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-export id="webassembly-module-record">WebAssembly Module Record</dfn>s are a subclass of <a data-link-type="dfn" href="https://tc39.github.io/ecma262/#cyclic-module-record" id="ref-for-cyclic-module-record">Cyclic Module Record</a> which contain WebAssembly code.</p>
    <div class="algorithm" data-algorithm="parse a WebAssembly module">
      To <dfn class="dfn-paneled" data-dfn-type="dfn" data-export id="parse-a-webassembly-module">parse a WebAssembly module</dfn> given a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#byte-sequence" id="ref-for-byte-sequence">byte sequence</a> <var>bytes</var>, a Realm <var>realm</var> and object <var>hostDefined</var>, perform the following steps. 
     <ol>
@@ -2655,8 +2650,9 @@ In practice, an implementation may run out of resources for valid modules below 
      <li data-md>
       <p>Return {
   [[Realm]]: <var>realm</var>,
-  [[Environment]]: undefined,
-  [[Namespace]]: undefined,
+  [[Environment]]: ~empty~,
+  [[Namespace]]: ~empty~,
+  [[ModuleSource]]: <var>module</var>,
   [[HostDefined]]: <var>hostDefined</var>,
   [[Status]]: "new",
   [[EvaluationError]]: undefined,
@@ -2670,7 +2666,7 @@ In practice, an implementation may run out of resources for valid modules below 
   [[TopLevelCapability]]: ~empty~
   [[AsyncParentModules]]: « »,
   [[PendingAsyncDependencies]]: ~empty~,
-  [[WebAssemblyModule]]: <var>module</var> }.</p>
+}.</p>
     </ol>
     <p class="note" role="note"><span class="marker">Note:</span> From HTML, it’s not observable when <a data-link-type="dfn" href="#parse-a-webassembly-module" id="ref-for-parse-a-webassembly-module">parse a WebAssembly module</a> begins, so any work perfomed in compilation may be performed off-thread.</p>
    </div>
@@ -2678,7 +2674,7 @@ In practice, an implementation may run out of resources for valid modules below 
      The <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="export-name-list">export name list</dfn> of a WebAssembly Module Record <var>record</var> is defined by the following algorithm: 
     <ol>
      <li data-md>
-      <p>Let <var>module</var> be <var>record</var>’s [[WebAssemblyModule]] internal slot.</p>
+      <p>Let <var>module</var> be <var>record</var>’s [[ModuleSource]] internal slot.</p>
      <li data-md>
       <p>Let <var>exports</var> be an empty <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list" id="ref-for-list④">list</a>.</p>
      <li data-md>
@@ -2737,7 +2733,7 @@ In practice, an implementation may run out of resources for valid modules below 
      <li data-md>
       <p>Let <var>record</var> be this WebAssembly Module Record.</p>
      <li data-md>
-      <p>Let <var>module</var> be <var>record</var>.[[WebAssemblyModule]].</p>
+      <p>Let <var>module</var> be <var>record</var>.[[ModuleSource]].</p>
      <li data-md>
       <p>Let <var>imports</var> be a new, empty <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#ordered-map" id="ref-for-ordered-map①">map</a>.</p>
      <li data-md>
@@ -2781,19 +2777,8 @@ In practice, an implementation may run out of resources for valid modules below 
       <p class="note" role="note"><span class="marker">Note:</span> exported bindings are left uninitialized, i.e., in TDZ.</p>
     </ol>
    </div>
-   <div class="algorithm" data-algorithm="GetModuleSource">
-    <h3 class="heading settled" data-level="9.5" id="get-module-source"><span class="secno">9.5. </span><span class="content">GetModuleSource ( ) Concrete Method</span><a class="self-link" href="#get-module-source"></a></h3>
-    <ol>
-     <li data-md>
-      <p>Let <var>record</var> be this WebAssembly Module Record.</p>
-     <li data-md>
-      <p>Let <var>module</var> be <var>record</var>.[[WebAssemblyModule]].</p>
-     <li data-md>
-      <p>Return <var>module</var>.</p>
-    </ol>
-   </div>
-   <h3 class="heading settled" data-level="9.6" id="hostgetmodulesourcename"><span class="secno">9.6. </span><span class="content">HostGetModuleSourceName</span><a class="self-link" href="#hostgetmodulesourcename"></a></h3>
-   <p>Hosts should implement <a data-link-type="abstract-op" href="https://tc39.github.io/proposal-source-phase-imports/#sec-HostGetModuleSourceName" id="ref-for-sec-HostGetModuleSourceName">HostGetModuleSourceName</a> such that whenever a WebAssembly <code class="idl"><a data-link-type="idl" href="#module" id="ref-for-module①④">Module</a></code> object is provided with a [[Module]] internal slot, the string "<code data-x>WebAssembly.Module</code>" is always returned.</p>
+   <h3 class="heading settled" data-level="9.5" id="hostgetmodulesourcename"><span class="secno">9.5. </span><span class="content">HostGetModuleSourceName</span><a class="self-link" href="#hostgetmodulesourcename"></a></h3>
+   <p>Hosts should implement <a data-link-type="abstract-op" href="https://tc39.github.io/proposal-source-phase-imports/#sec-HostGetModuleSourceName" id="ref-for-sec-HostGetModuleSourceName">HostGetModuleSourceName</a> such that whenever a WebAssembly <code class="idl"><a data-link-type="idl" href="#module" id="ref-for-module①③">Module</a></code> object is provided with a [[Module]] internal slot, the string "<code data-x>WebAssembly.Module</code>" is always returned.</p>
    <p class="note" role="note"><span class="marker">Note:</span> See corresponding modifications to HTML in <a href="https://github.com/whatwg/html/pull/10380">PR #10380</a>.</p>
    <h2 class="heading settled" data-level="10" id="change-history"><span class="secno">10. </span><span class="content">Change History</span><a class="self-link" href="#change-history"></a></h2>
    <p><em>This section is non-normative.</em></p>
@@ -3255,7 +3240,7 @@ Multiple tables can be exported and imported to and from JavaScript.
    <dt id="biblio-rfc2119">[RFC2119]
    <dd>S. Bradner. <a href="https://datatracker.ietf.org/doc/html/rfc2119"><cite>Key words for use in RFCs to Indicate Requirement Levels</cite></a>. March 1997. Best Current Practice. URL: <a href="https://datatracker.ietf.org/doc/html/rfc2119">https://datatracker.ietf.org/doc/html/rfc2119</a>
    <dt id="biblio-sourcephaseimports">[SOURCEPHASEIMPORTS]
-   <dd><a href="https://tc39.es/proposal-source-phase-imports/"><cite>Top-Level Await</cite></a>. URL: <a href="https://tc39.es/proposal-source-phase-imports/">https://tc39.es/proposal-source-phase-imports/</a>
+   <dd><a href="https://tc39.es/proposal-source-phase-imports/"><cite>Source Phase Imports</cite></a>. URL: <a href="https://tc39.es/proposal-source-phase-imports/">https://tc39.es/proposal-source-phase-imports/</a>
    <dt id="biblio-webassembly">[WEBASSEMBLY]
    <dd><a href="https://webassembly.github.io/spec/core/"><cite>WebAssembly Core Specification</cite></a>. Draft. URL: <a href="https://webassembly.github.io/spec/core/">https://webassembly.github.io/spec/core/</a>
    <dt id="biblio-webidl">[WEBIDL]
@@ -3654,7 +3639,7 @@ let dfnPanelData = {
 "5f90bbfb": {"dfnID":"5f90bbfb","dfnText":"undefined","external":true,"refSections":[{"refs":[{"id":"ref-for-idl-undefined"}],"title":"5.4. Tables"}],"url":"https://webidl.spec.whatwg.org/#idl-undefined"},
 "60e61e1a": {"dfnID":"60e61e1a","dfnText":"namespace object","external":true,"refSections":[{"refs":[{"id":"ref-for-dfn-namespace-object"},{"id":"ref-for-dfn-namespace-object\u2460"}],"title":"5.7. Error Objects"}],"url":"https://webidl.spec.whatwg.org/#dfn-namespace-object"},
 "61356085": {"dfnID":"61356085","dfnText":"embedding interface","external":true,"refSections":[{"refs":[{"id":"ref-for-appending/embedding.html"}],"title":"1. Introduction"}],"url":"https://webassembly.github.io/spec/core/#appending/embedding.html"},
-"62c0c794": {"dfnID":"62c0c794","dfnText":"HostGetModuleSourceName","external":true,"refSections":[{"refs":[{"id":"ref-for-sec-HostGetModuleSourceName"}],"title":"9.6. HostGetModuleSourceName"}],"url":"https://tc39.github.io/proposal-source-phase-imports/#sec-HostGetModuleSourceName"},
+"62c0c794": {"dfnID":"62c0c794","dfnText":"HostGetModuleSourceName","external":true,"refSections":[{"refs":[{"id":"ref-for-sec-HostGetModuleSourceName"}],"title":"9.5. HostGetModuleSourceName"}],"url":"https://tc39.github.io/proposal-source-phase-imports/#sec-HostGetModuleSourceName"},
 "649608b9": {"dfnID":"649608b9","dfnText":"list","external":true,"refSections":[{"refs":[{"id":"ref-for-list"}],"title":"3. Notation"},{"refs":[{"id":"ref-for-list\u2460"},{"id":"ref-for-list\u2461"},{"id":"ref-for-list\u2462"}],"title":"5.6. Exported Functions"},{"refs":[{"id":"ref-for-list\u2463"}],"title":"9. Integration with ECMAScript modules"}],"url":"https://infra.spec.whatwg.org/#list"},
 "69ce1dac": {"dfnID":"69ce1dac","dfnText":"memory type","external":true,"refSections":[{"refs":[{"id":"ref-for-syntax-memtype"}],"title":"5.3. Memories"}],"url":"https://webassembly.github.io/spec/core/syntax/types.html#syntax-memtype"},
 "6b815fdd": {"dfnID":"6b815fdd","dfnText":"is empty","external":true,"refSections":[{"refs":[{"id":"ref-for-list-is-empty"}],"title":"5. The WebAssembly Namespace"}],"url":"https://infra.spec.whatwg.org/#list-is-empty"},
@@ -3899,7 +3884,7 @@ let dfnPanelData = {
 "instantiate-the-core-of-a-webassembly-module": {"dfnID":"instantiate-the-core-of-a-webassembly-module","dfnText":"instantiate the core of a WebAssembly module","external":false,"refSections":[{"refs":[{"id":"ref-for-instantiate-the-core-of-a-webassembly-module"},{"id":"ref-for-instantiate-the-core-of-a-webassembly-module\u2460"}],"title":"5. The WebAssembly Namespace"},{"refs":[{"id":"ref-for-instantiate-the-core-of-a-webassembly-module\u2461"}],"title":"5.2. Instances"},{"refs":[{"id":"ref-for-instantiate-the-core-of-a-webassembly-module\u2462"}],"title":"9.4. ExecuteModule ( [ promiseCapability ] ) Concrete Method"}],"url":"#instantiate-the-core-of-a-webassembly-module"},
 "memory": {"dfnID":"memory","dfnText":"Memory","external":false,"refSections":[{"refs":[{"id":"ref-for-memory"}],"title":"4.1. Interaction of the WebAssembly Store with JavaScript"},{"refs":[{"id":"ref-for-memory\u2460"}],"title":"4.2. WebAssembly JS Object Caches"},{"refs":[{"id":"ref-for-memory\u2461"}],"title":"5. The WebAssembly Namespace"},{"refs":[{"id":"ref-for-memory\u2462"},{"id":"ref-for-memory\u2463"},{"id":"ref-for-memory\u2464"},{"id":"ref-for-memory\u2465"},{"id":"ref-for-memory\u2466"}],"title":"5.3. Memories"},{"refs":[{"id":"ref-for-memory\u2467"}],"title":"6.2. Out of Memory"}],"url":"#memory"},
 "memory-object-cache": {"dfnID":"memory-object-cache","dfnText":"Memory object cache","external":false,"refSections":[{"refs":[{"id":"ref-for-memory-object-cache"},{"id":"ref-for-memory-object-cache\u2460"},{"id":"ref-for-memory-object-cache\u2461"},{"id":"ref-for-memory-object-cache\u2462"}],"title":"5.3. Memories"}],"url":"#memory-object-cache"},
-"module": {"dfnID":"module","dfnText":"Module","external":false,"refSections":[{"refs":[{"id":"ref-for-module"},{"id":"ref-for-module\u2460"},{"id":"ref-for-module\u2461"},{"id":"ref-for-module\u2462"},{"id":"ref-for-module\u2463"},{"id":"ref-for-module\u2464"},{"id":"ref-for-module\u2465"}],"title":"5. The WebAssembly Namespace"},{"refs":[{"id":"ref-for-module\u2466"},{"id":"ref-for-module\u2467"},{"id":"ref-for-module\u2468"},{"id":"ref-for-module\u2460\u24ea"},{"id":"ref-for-module\u2460\u2460"}],"title":"5.1. Modules"},{"refs":[{"id":"ref-for-module\u2460\u2461"}],"title":"5.2. Instances"},{"refs":[{"id":"ref-for-module\u2460\u2462"}],"title":"9. Integration with ECMAScript modules"},{"refs":[{"id":"ref-for-module\u2460\u2463"}],"title":"9.6. HostGetModuleSourceName"}],"url":"#module"},
+"module": {"dfnID":"module","dfnText":"Module","external":false,"refSections":[{"refs":[{"id":"ref-for-module"},{"id":"ref-for-module\u2460"},{"id":"ref-for-module\u2461"},{"id":"ref-for-module\u2462"},{"id":"ref-for-module\u2463"},{"id":"ref-for-module\u2464"},{"id":"ref-for-module\u2465"}],"title":"5. The WebAssembly Namespace"},{"refs":[{"id":"ref-for-module\u2466"},{"id":"ref-for-module\u2467"},{"id":"ref-for-module\u2468"},{"id":"ref-for-module\u2460\u24ea"},{"id":"ref-for-module\u2460\u2460"}],"title":"5.1. Modules"},{"refs":[{"id":"ref-for-module\u2460\u2461"}],"title":"5.2. Instances"},{"refs":[{"id":"ref-for-module\u2460\u2462"}],"title":"9.5. HostGetModuleSourceName"}],"url":"#module"},
 "name-of-the-webassembly-function": {"dfnID":"name-of-the-webassembly-function","dfnText":"name of the WebAssembly function","external":false,"refSections":[{"refs":[{"id":"ref-for-name-of-the-webassembly-function"}],"title":"5.6. Exported Functions"}],"url":"#name-of-the-webassembly-function"},
 "namespacedef-webassembly": {"dfnID":"namespacedef-webassembly","dfnText":"WebAssembly","external":false,"refSections":[{"refs":[{"id":"ref-for-namespacedef-webassembly"}],"title":"5.1. Modules"},{"refs":[{"id":"ref-for-namespacedef-webassembly\u2460"}],"title":"5.2. Instances"},{"refs":[{"id":"ref-for-namespacedef-webassembly\u2461"}],"title":"5.3. Memories"},{"refs":[{"id":"ref-for-namespacedef-webassembly\u2462"}],"title":"5.4. Tables"},{"refs":[{"id":"ref-for-namespacedef-webassembly\u2463"}],"title":"5.5. Globals"},{"refs":[{"id":"ref-for-namespacedef-webassembly\u2464"},{"id":"ref-for-namespacedef-webassembly\u2465"}],"title":"5.7. Error Objects"}],"url":"#namespacedef-webassembly"},
 "parse-a-webassembly-module": {"dfnID":"parse-a-webassembly-module","dfnText":"parse a WebAssembly module","external":false,"refSections":[{"refs":[{"id":"ref-for-parse-a-webassembly-module"}],"title":"9. Integration with ECMAScript modules"}],"url":"#parse-a-webassembly-module"},
