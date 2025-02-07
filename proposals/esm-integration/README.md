@@ -112,6 +112,13 @@ If initially implementing just source phase imports, the `GetExportedNames`, `Re
 
 Implementers are encouraged to ship both stages at once, but it is deemed OK for implementers to initially ship the first stage and then quickly follow up with the second stage, if this aids "time to ship" in implementations.
 
+### Content Security Policy
+
+Wasm modules imported through the ES Module system should be verified for compilation by CSP against the `script-src` directive, both for static and dynamic imports. This allows Wasm and JS to be equally supported in the ESM
+integration under CSP policies.
+
+While Wasm is currently fully sandboxed, having equal access to imports to JS provides it equal capabilities to execution primitives, so that it should not be considered a weaker capability from an ESM integration perspective.
+
 ## FAQ
 
 ### Does the source phase replace the instance linking?
@@ -128,7 +135,7 @@ The [Component Model](https://github.com/WebAssembly/component-model) has its ow
 
 In components it is possible to import both other components and core modules through the host linker, and it is possible to obtain them either as instances or uninstantiated modules. This linking model of the component model is therefore fully compatible with the linking model of the ESM integration, where these represent the host instance linking and source phases respectively and components effectively as a third module type. Components are distinguished from core Wasm in their leading bytes. Components may be more likely to support a highly usable host instance linking model ESM integration than core Wasm, while their source phase imports in turn would also be useful in virtualization workflows in JS embeddings.
 
-### Why does this proposal not use import attribtues?
+### Why does this proposal not use import attributes?
 
 [Import attributes](https://github.com/tc39/proposal-import-attributes) parameterize module imports in the module system. Currently HTML specifies a `"type"` attribute which is a requirement for CSS or JSON module imports due to their having different security privileges over full execution.
 
