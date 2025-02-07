@@ -565,7 +565,7 @@ interface Module {
 </pre>
 
 Per ECMA-262 requirements for Source Phase Imports ([[!SOURCEPHASEIMPORTS]]) integration, the interface prototype object for {{Module}} must have as its \[[Prototype]] set to [=%AbstractModuleSource%.prototype=], as if created by [$OrdinaryObjectCreate$]([=%AbstractModuleSource%.prototype=]).
-In addition, the interface object for {{Module}} should have as its \[[Prototype]] set to [=%AbstractModuleSource%=], as if created by [$OrdinaryObjectCreate$]([=%AbstractModuleSource%=]).
+In addition, the interface object for {{Module}} must have as its \[[Prototype]] set to [=%AbstractModuleSource%=], as if created by [$OrdinaryObjectCreate$]([=%AbstractModuleSource%=]).
 
 <div algorithm>
   The <dfn>string value of the extern type</dfn> |type| is
