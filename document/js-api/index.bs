@@ -1410,7 +1410,7 @@ To <dfn export>parse a WebAssembly module</dfn> given a <a>byte sequence</a> |by
       \[[PendingAsyncDependencies]]: ~empty~,
     }.
 
-Node: When integrating with the JS String Builtins proposal, "<code data-x="">builtins: ["js-string"]</code>" should be provided in the WebAssembly compilation options, with the corresponding builtin names permitted.
+Note: When integrating with the JS String Builtins proposal, "<code data-x="">builtins: ["js-string"]</code>" should be provided in the WebAssembly compilation options, with the corresponding builtin names permitted.
 
 Note: From HTML, it's not observable when [=parse a WebAssembly module=] begins, so any work perfomed in compilation may be performed off-thread.
 </div>
