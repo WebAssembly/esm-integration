@@ -1381,12 +1381,12 @@ Note: While this specification is not yet merged into the main Wasm specificatio
 <dfn export>WebAssembly Module Record</dfn>s are a subclass of [=Cyclic Module Record=] which contain WebAssembly code.
 
 <div algorithm>
-To <dfn export>parse a WebAssembly module</dfn> given a <a>byte sequence</a> |bytes|, a Realm |realm| and object |hostDefined|, perform the following steps.
+To <dfn export>parse a WebAssembly module</dfn> given a <a>byte sequence</a> |bytes|, a Realm |realm|, an optional string |wasmBuiltinAttribute| and object |hostDefined|, perform the following steps.
 
 1. Let |stableBytes| be a [=get a copy of the buffer source|copy of the bytes held by the buffer=] |bytes|.
 1. [=Compile a WebAssembly module|Compile the WebAssembly module=] |stableBytes| and store the result as |module|.
 1. If |module| is [=error=], throw a {{CompileError}} exception.
-1. Note: When integrating with the JS String Builtins proposal, |builtinSetNames| should be passed in the following step as « "js-strings" » and |importedStringModule| as null.
+1. Note: When integrating with the JS String Builtins proposal, |builtinSetNames| should be passed in the following step as « "js-string" » and |importedStringModule| as null.
 1. [=Construct a WebAssembly module object=] from |module| and |bytes|, and let |module| be the result.
 1. Let |requestedModules| be a set.
 1. For each (|moduleName|, |name|, |type|) in [=module_imports=](|module|.\[[Module]]),
@@ -1420,6 +1420,16 @@ To <dfn export>parse a WebAssembly module</dfn> given a <a>byte sequence</a> |by
 Note: While this spec is not currently merged with the JS String Builtins proposal, the steps to take when merging are noted here for reference.
 
 Note: From HTML, it's not observable when [=parse a WebAssembly module=] begins, so any work perfomed in compilation may be performed off-thread.
+</div>
+
+<div algorithm>
+<dfn>Validate and canonicalize the WebAssembly builtin attribute</dfn> given an optional string |wasmBuiltinAttribute| is defined by the following algorithm:
+
+1. If |wasmBuiltinAttribute| is not defined, or if it is equal to "all" or "js-string",
+    1. Return "js-string".
+1. If |wasmBuiltinAttribute| is equal to "none",
+    1. Return null.
+1. Throw a {{TypeError}} exception.
 </div>
 
 <div algorithm>
