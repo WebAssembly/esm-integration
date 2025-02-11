@@ -1389,10 +1389,10 @@ To <dfn export>parse a WebAssembly module</dfn> given a <a>byte sequence</a> |by
 1. Note: When integrating with the JS String Builtins proposal, |builtinSetNames| should be passed in the following step as « "js-strings" » and |importedStringModule| as null.
 1. [=Construct a WebAssembly module object=] from |module| and |bytes|, and let |module| be the result.
 1. Let |requestedModules| be a set.
-1. For each (|moduleName|, |name|, <var ignore>type</var>) in [=module_imports=](|module|.\[[Module]]),
+1. For each (|moduleName|, |name|, |type|) in [=module_imports=](|module|.\[[Module]]),
     1. Note: The following step only applies when integrating with the JS String Builtins proposal.
-    1. If [=Find a builtin=] with (|moduleName|, |name|) and builtins |module|.\[[BuiltinSets]] is not null, then [=iteration/continue=].
-        1. [=set/Append=] |moduleName| to |requestedModules|.
+    1. If [=Find a builtin=] with (|moduleName|, |name|, |type|) and builtins |module|.\[[BuiltinSets]] is not null, then [=iteration/continue=].
+    1. [=set/Append=] |moduleName| to |requestedModules|.
 1. Let |moduleRecord| be {
       <!-- Abstract Module Records -->
       \[[Realm]]: |realm|,
