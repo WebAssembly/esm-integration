@@ -1431,6 +1431,7 @@ Note: From HTML, it's not observable when [=parse a WebAssembly module=] begins,
 1. If |wasmBuiltinAttribute| is equal to "none",
     1. Return null.
 1. Throw a {{TypeError}} exception.
+
 </div>
 
 <div algorithm>
