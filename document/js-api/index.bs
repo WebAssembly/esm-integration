@@ -349,6 +349,7 @@ A {{Module}} object represents a single WebAssembly module. Each {{Module}} obje
 
     * \[[Module]] : a WebAssembly [=/module=]
     * \[[Bytes]] : the source bytes of \[[Module]].
+    * \[[ModuleRecord]] : the <a>WebAssembly Module Record</a> if this WebAssembly module is associated with one.
 
 <div algorithm>
   To <dfn>construct a WebAssembly module object</dfn> from a module |module| and source bytes |bytes|, perform the following steps:
@@ -356,6 +357,7 @@ A {{Module}} object represents a single WebAssembly module. Each {{Module}} obje
     1. Let |moduleObject| be a new {{Module}} object.
     1. Set |moduleObject|.\[[Module]] to |module|.
     1. Set |moduleObject|.\[[Bytes]] to |bytes|.
+    1. Set |moduleObject|.\[[ModuleRecord]] to null.
     1. Return |moduleObject|.
 </div>
 
@@ -565,7 +567,7 @@ interface Module {
 </pre>
 
 Per ECMA-262 requirements for Source Phase Imports ([[!SOURCEPHASEIMPORTS]]) integration, the interface prototype object for {{Module}} must have as its \[[Prototype]] set to [=%AbstractModuleSource%.prototype=], as if created by [$OrdinaryObjectCreate$]([=%AbstractModuleSource%.prototype=]).
-In addition, the interface object for {{Module}} should have as its \[[Prototype]] set to [=%AbstractModuleSource%=], as if created by [$OrdinaryObjectCreate$]([=%AbstractModuleSource%=]).
+In addition, the interface object for {{Module}} must have as its \[[Prototype]] set to [=%AbstractModuleSource%=], as if created by [$OrdinaryObjectCreate$]([=%AbstractModuleSource%=]).
 
 <div algorithm>
   The <dfn>string value of the extern type</dfn> |type| is
@@ -1389,7 +1391,7 @@ To <dfn export>parse a WebAssembly module</dfn> given a <a>byte sequence</a> |by
 1. For each (|moduleName|, <var ignore>name</var>, <var ignore>type</var>) in [=module_imports=](|module|.\[[Module]]),
     1. If |moduleName| is not equal to "wasm:js-strings",
         1. [=set/Append=] |moduleName| to |requestedModules|.
-1. Return {
+1. Let |moduleRecord| be {
       <!-- Abstract Module Records -->
       \[[Realm]]: |realm|,
       \[[Environment]]: ~empty~,
@@ -1410,8 +1412,10 @@ To <dfn export>parse a WebAssembly module</dfn> given a <a>byte sequence</a> |by
       \[[AsyncParentModules]]: &laquo; &raquo;,
       \[[PendingAsyncDependencies]]: ~empty~,
     }.
+1. Set |module|.\[[ModuleRecord]] to |moduleRecord|.
+1. Return |moduleRecord|.
 
-Note: When integrating with the JS String Builtins proposal, "<code data-x="">builtins: ["js-string"]</code>" should be provided in the WebAssembly compilation options, with the corresponding builtin names permitted.
+Note: When integrating with the JS String Builtins proposal, "<code data-x="">builtins: ["js-string"]</code>" should be provided in the WebAssembly compilation options.
 
 Note: From HTML, it's not observable when [=parse a WebAssembly module=] begins, so any work perfomed in compilation may be performed off-thread.
 </div>
@@ -1443,6 +1447,13 @@ WebAssembly Module Records have the following methods:
 1. Let |record| be this WebAssembly Module Record.
 1. If the [=export name list=] of |record| contains |exportName|, return { \[[Module]]: |record|, \[[BindingName]]: |exportName| }.
 1. Otherwise, return null.
+
+</div>
+
+<div algorithm=GetModuleSourceKind>
+
+<h3 id="get-module-source-kind">GetModuleSourceKind ( ) Concrete Method</h3>
+1. Return "WebAssembly.Module".
 
 </div>
 
@@ -1485,9 +1496,38 @@ WebAssembly Module Records have the following methods:
 
 </div>
 
-<h3 id="hostgetmodulesourcename">HostGetModuleSourceName</h3>
-
-Hosts should implement [$HostGetModuleSourceName$] such that whenever a WebAssembly {{Module}} object is provided with a \[[Module]] internal slot, the string "<code data-x="">WebAssembly.Module</code>" is always returned.
+<h3 id="hostgetmodulesourcemodulerecord">HostGetModuleSourceModuleRecord ( |specifier| )</h3>
+1. If |specifier| is a WebAssembly {{Module}} object with a \[[Module]] internal slot,
+    1. If |specifier|.\[[Module]].\[[ModuleRecord]] is null,
+        1. Let |realm| be the current agent's realm record.
+        1. Let |requestedModules| be a set.
+        1. For each (|moduleName|, <var ignore>name</var>, <var ignore>type</var>) in [=module_imports=](|specifier|.\[[Module]]),
+            1. [=set/Append=] |moduleName| to |requestedModules|.
+        1. Let |moduleRecord| be {
+              <!-- Abstract Module Records -->
+              \[[Realm]]: |realm|,
+              \[[Environment]]: ~empty~,
+              \[[Namespace]]: ~empty~,
+              \[[ModuleSource]]: |module|,
+              \[[HostDefined]]: ~empty~,
+              <!-- Cyclic Module Records -->
+              \[[Status]]: "new",
+              \[[EvaluationError]]: undefined,
+              \[[DFSIndex]]: undefined,
+              \[[DFSAncestorIndex]]: undefined,
+              \[[RequestedModules]]: |requestedModules|,
+              \[[LoadedModules]]: &laquo; &raquo;,
+              \[[CycleRoot]]: ~empty~,
+              \[[HasTLA]]: false,
+              \[[AsyncEvaluation]]: false,
+              \[[TopLevelCapability]]: ~empty~
+              \[[AsyncParentModules]]: &laquo; &raquo;,
+              \[[PendingAsyncDependencies]]: ~empty~,
+            }.
+        1. Set |module|.\[[ModuleRecord]] to |moduleRecord|.
+        1. Return |moduleRecord|.
+    1. Return |specifier|.\[[Module]].\[[ModuleRecord]].
+1. Return ~not-a-source~.
 
 Note: See corresponding modifications to HTML in <a href="https://github.com/whatwg/html/pull/10380">PR #10380</a>.
 
