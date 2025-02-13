@@ -56,11 +56,11 @@ const { foo: foo2 } = await WebAssembly.instantiate(myModule, { ...imports });
 
 ### Unify WebAssembly Tooling Implementations
 
-The need for WebAssembly modules integrated with the ES module graph has been broadly identified by JavaScript tools. For example, support for WebAssembly modules has been implemented in ([webpack](https://webpack.js.org/configuration/module/#ruletype), a [Rollup plugin](https://github.com/rollup/plugins/tree/master/packages/wasm) and [Parcel](https://en.parceljs.org/webAssembly.html).
+The need for WebAssembly modules integrated with the ES module graph has been broadly identified by JavaScript tools. For example, support for WebAssembly modules has been implemented in [webpack](https://webpack.js.org/configuration/module/#ruletype), a [Rollup plugin](https://github.com/rollup/plugins/tree/master/packages/wasm) and [Parcel](https://en.parceljs.org/webAssembly.html).
 
 By standardizing the integration, tools can support building WebAssembly applications providing ergonomic workflows that work with static analysis for working with Wasm on JavaScript platforms in a unified way.
 
-Node.js has implemented this proposal behind a flag (https://nodejs.org/docs/latest/api/esm.html#wasm-modules, pending source phase supports), while [ES Module Shims](https://github.com/guybedford/es-module-shims#wasm-modules) provides a full browser polyfill.
+For server runtimes, [Deno has implemented](https://deno.com/blog/v2.1#first-class-wasm-support) this proposal and [Node.js' implementation is behind a flag](https://nodejs.org/docs/latest/api/esm.html#wasm-modules) (both pending source phase supports), while [ES Module Shims](https://github.com/guybedford/es-module-shims#wasm-modules) provides a full browser polyfill.
 
 ## Implementation
 
