@@ -327,7 +327,7 @@ The |MSTART| component of a module declares the :ref:`function index <syntax-fun
    The module and its exports are not accessible externally before this initialization has completed.
 
 
-.. index:: ! export, name, index, function index, table index, memory index, global index, function, table, memory, global, instantiation
+.. index:: ! export, direct export, indirect export, re-export, name, index, function index, table index, memory index, global index, function, table, memory, global, instantiation
    pair: abstract syntax; export
    single: function; export
    single: table; export
@@ -356,6 +356,32 @@ Each export is labeled by a unique :ref:`name <syntax-name>`.
 Exportable definitions are :ref:`functions <syntax-func>`, :ref:`tables <syntax-table>`, :ref:`memories <syntax-mem>`, and :ref:`globals <syntax-global>`,
 which are referenced through a respective descriptor.
 
+A *direct export* is one where the export references a function, table, memory, or global instance that is defined within the module itself rather than being imported.
+
+An *indirect export* (or *re-export*) is one where the export references a function, table, memory, or global that the module imports.
+
+The import corresponding to an export description is given by:
+
+.. math::
+   \begin{array}{lllll}
+   \production{import for export} & \importforexport(m, \exportdesc) &=&
+     \begin{cases}
+       m.\MIMPORTS[\X{idx}] & (\iff \exportdesc = \EDFUNC~\X{idx} \wedge \X{idx} < |\etfuncs(m.\MIMPORTS)|) \\
+       m.\MIMPORTS[\X{fidx} + \X{idx}] & (\iff \exportdesc = \EDTABLE~\X{idx} \wedge \X{idx} < |\ettables(m.\MIMPORTS)| \\
+       & \quad \wedge \X{fidx} = |\etfuncs(m.\MIMPORTS)|) \\
+       m.\MIMPORTS[\X{fidx} + \X{tidx} + \X{idx}] & (\iff \exportdesc = \EDMEM~\X{idx} \wedge \X{idx} < |\etmems(m.\MIMPORTS)| \\
+       & \quad \wedge \X{fidx} = |\etfuncs(m.\MIMPORTS)| \wedge \X{tidx} = |\ettables(m.\MIMPORTS)|) \\
+       m.\MIMPORTS[\X{fidx} + \X{tidx} + \X{midx} + \X{idx}] & (\iff \exportdesc = \EDGLOBAL~\X{idx} \wedge \X{idx} < |\etglobals(m.\MIMPORTS)| \\
+       & \quad \wedge \X{fidx} = |\etfuncs(m.\MIMPORTS)| \wedge \X{tidx} = |\ettables(m.\MIMPORTS)| \\
+       & \quad \wedge \X{midx} = |\etmems(m.\MIMPORTS)|) \\
+       \epsilon & (\otherwise) \\
+     \end{cases} \\
+   \end{array}
+
+For embedder convenience, we also define:
+
+* :math:``\isdirectexport(m, \exportdesc) = (\importforexport(m, \exportdesc) = \epsilon)`
+* :math:``\isindirectexport(m, \exportdesc) = (\importforexport(m, \exportdesc) \neq \epsilon)`
 
 Conventions
 ...........
