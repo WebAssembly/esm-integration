@@ -141,7 +141,7 @@ Modules
 .. _embed-extern-subtype:
 
 :math:`\F{module\_extern\_subtype}(\externtype_1, \externtype_2) : \bool`
-.......................................................................
+.........................................................................
 
 1. If :math:`\externtype_1` and :math:`\externtype_2` are both of the form :math:`\ETFUNC~\functype_1` and :math:`\ETFUNC~\functype_2` respectively:
 
@@ -253,7 +253,7 @@ Modules
 .. _embed-direct-exports:
 
 :math:`\F{module\_direct\_exports}(\module) : (\name, \externtype)^\ast`
-.......................................................................
+........................................................................
 
 1. Pre-condition: :math:`\module` is :ref:`valid <valid-module>` with external import types :math:`\externtype^\ast` and external export types :math:`{\externtype'}^\ast`.
 
@@ -280,7 +280,7 @@ Modules
 .. _embed-indirect-exports:
 
 :math:`\F{module\_indirect\_exports}(\module) : (\name, \name, \name)^\ast`
-................................................................
+...........................................................................
 
 1. Pre-condition: :math:`\module` is :ref:`valid <valid-module>` with external import types :math:`\externtype^\ast` and external export types :math:`{\externtype'}^\ast`.
 
