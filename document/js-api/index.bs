@@ -1452,7 +1452,7 @@ WebAssembly Module Records have the following methods:
 1. [=list/iterate|For each=] Record |r| of |resolveSet|,
     1. If |record| and |r|.\[[Module]] are the same Module Record and |exportName| is |r|.\[[ExportName]],
         1. Return null.
-1. Append the record { \[[Module]]: |record|, [[ExportName]]: |exportName| } to |resolveSet|.
+1. Append the record { \[[Module]]: |record|, \[[ExportName]]: |exportName| } to |resolveSet|.
 1. [=list/iterate|For each=] (|name|, |importedModuleName|, |importName|, <var ignore>type</var>) in [=module_indirect_exports=](|module|),
     1. If |name| is equal to |exportName|,
         1. Let |importedModule| be [$GetImportedModule$](|record|, |importedModuleName|).
@@ -1482,12 +1482,19 @@ WebAssembly Module Records have the following methods:
 1. Let |env| be [$NewModuleEnvironment$](null).
 1. Set |record|.\[[Environment]] to |env|.
 1. Let |module| be |record|.\[[ModuleSource]].\[[Module]].
-1. [=list/iterate|For each=] (|importedModuleName|, |name|, |type|) in [=module_imports=](|module|),
+1. [=list/iterate|For each=] (|importedModuleName|, |name|, <var ignore>type</var>) in [=module_imports=](|module|),
     1. Let |importedModule| be [$GetImportedModule$](|record|, |importedModuleName|).
     1. Let |resolution| be |importedModule|.ResolveExport(|name|).
     1. If |resolution| is null or ~AMBIGUOUS~, throw a {{SyntaxError}} exception.
+1. [=list/iterate|For each=] (|name|, |importedModuleName|, |importName|, <var ignore>type</var>) in [=module_indirect_exports=](|module|),
+    1. Let |importedModule| be [$GetImportedModule$](|record|, |importedModuleName|).
+    1. Let |resolved| be [=?=] |importedModule|.ResolveExport(|importName|).
+    1. Assert |resolved| is not null or ~AMBIGUOUS~.
+    1. If |resolved|.\[[Module]] is not a WebAssembly Module Record,
+        1. Note: This case corresponds to indirect exports to non-WebAssembly bindings, which are always snapshotted.
+        1. Perform [=!=] |env|.CreateImmutableBinding(|name|, true).
 1. [=list/iterate|For each=] (|name|, |externtype|) of [=module_direct_exports=](|module|),
-    1. If |type| is of the form [=global=] [=var=] |valtype|,
+    1. If |externtype| is of the form [=global=] [=var=] <var ignore>valtype</var>,
         1. Perform [=!=] |env|.CreateMutableBinding(|name|, false).
     1. Otherwise,
         1. Perform [=!=] |env|.CreateImmutableBinding(|name|, true).
@@ -1499,14 +1506,14 @@ WebAssembly Module Records have the following methods:
 <h3 id="module-execution">ExecuteModule ( [ |promiseCapability| ] ) Concrete Method</h3>
 1. Assert: |promiseCapability| was not provided.
 1. Let |record| be this WebAssembly Module Record.
-1. Let |module| be |record|.\[[ModuleSource]]\.[[Module]].
+1. Let |module| be |record|.\[[ModuleSource]].\[[Module]].
 1. Let |imports| be « ».
 1. [=list/iterate|For each=] (|importedModuleName|, |name|, |importtype|) in [=module_imports=](|module|),
     1. Let |importedModule| be [$GetImportedModule$](|record|, |importedModuleName|).
     1. Let |resolution| be |importedModule|.ResolveExport(|name|).
     1. If |resolution|.\[[Module]] is a WebAssembly Module Record,
         1. Let |resolutionInstance| be |resolution|.\[[Module]].\[[Instance]].
-        1. Let |resolutionModule| be |resolution|.\[[Module]].\[[ModuleSource]]\.[[Module]].
+        1. Let |resolutionModule| be |resolution|.\[[Module]].\[[ModuleSource]].\[[Module]].
         1. Let |resolutionName| be |resolution|.\[[BindingName]].
         1. Let |externval| be [=instance_export=](|resolutionInstance|, |resolutionName|).
         1. Assert: |externval| is not [=error=].
@@ -1523,7 +1530,7 @@ WebAssembly Module Records have the following methods:
                 1. Let |funcaddr| be the value of |v|'s \[[FunctionAddress]] internal slot.
             1. Otherwise,
                 1. [=Create a host function=] from |v| and |functype|, and let |funcaddr| be the result.
-                1. Let |index| be the number of external functions in |imports|. This value |index| is known as the <dfn>index of the host function</dfn> |funcaddr|.
+                1. Let <var ignore>index</var> be the number of external functions in |imports|, defining the [=index of the host function=] |funcaddr|.
             1. Let |externfunc| be the [=external value=] [=external value|func=] |funcaddr|.
             1. [=list/Append=] |externfunc| to |imports|.
         1. If |importtype| is of the form [=global=] |mut| |valtype|,
@@ -1565,9 +1572,9 @@ WebAssembly Module Records have the following methods:
             1. Note: When integrating with shared globals, they will be excluded here similarly to v128 above.
             1. Perform [=!=] |record|.\[[Environment]].InitializeBinding(|name|, [=ToJSValue=](|global_value|)).
             1. Associate all future mutations to the mutable value at |globaladdr| with the ECMA-262 binding record for |name| in
-              |record|.\[[Environment]], such that |record|.\[[Environment]].GetBindingValue(|resolution|.\[[BindingName]], true)
-              always returns [=ToJSValue=]([=global_read=](|store|, |globaladdr|)) for the current [=surrounding agent=]'s
-              [=associated store=] |store|.
+                |record|.\[[Environment]], such that |record|.\[[Environment]].GetBindingValue(|resolution|.\[[BindingName]], true)
+                always returns [=ToJSValue=]([=global_read=](|store|, |globaladdr|)) for the current [=surrounding agent=]'s
+                [=associated store=] |store|.
     1. If |externtype| is of the form [=mem=] <var ignore>memtype</var>,
         1. Assert: |externval| is of the form [=external value|mem=] |memaddr|.
         1. Let [=external value|mem=] |memaddr| be |externval|.
