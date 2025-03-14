@@ -380,8 +380,8 @@ The import corresponding to an export description is given by:
 
 For embedder convenience, we also define:
 
-* :math:``\isdirectexport(m, \exportdesc) = (\importforexport(m, \exportdesc) = \epsilon)`
-* :math:``\isindirectexport(m, \exportdesc) = (\importforexport(m, \exportdesc) \neq \epsilon)`
+* :math:`\isdirectexport(m, \exportdesc) = (\importforexport(m, \exportdesc) = \epsilon)`
+* :math:`\isindirectexport(m, \exportdesc) = (\importforexport(m, \exportdesc) \neq \epsilon)`
 
 Conventions
 ...........
