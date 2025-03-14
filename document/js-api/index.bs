@@ -1513,6 +1513,8 @@ WebAssembly Module Records have the following methods:
     1. Let |resolution| be |importedModule|.ResolveExport(|name|).
     1. If |resolution|.\[[Module]] is a WebAssembly Module Record,
         1. Let |resolutionInstance| be |resolution|.\[[Module]].\[[Instance]].
+        1. If |resolutionInstance| is ~empty~ then,
+            1. Throw a {ReferenceError}.
         1. Let |resolutionModule| be |resolution|.\[[Module]].\[[ModuleSource]].\[[Module]].
         1. Let |resolutionName| be |resolution|.\[[BindingName]].
         1. Let |externval| be [=instance_export=](|resolutionInstance|, |resolutionName|).
