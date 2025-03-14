@@ -263,7 +263,7 @@ Modules
 
 4. For each :math:`\export_i` in :math:`\export^\ast` and corresponding :math:`\externtype'_i` in :math:`{\externtype'}^\ast`, do:
 
-  a. Let :math:`\import_j = \exportimport(\module, \export_i.\EDESC)`.
+  a. Let :math:`\import_j = \edexportimport(\module, \export_i.\EDESC)`.
 
   b. If :math:`\import_j = \epsilon`, then append the pair :math:`(\export_i.\ENAME, \externtype'_i)` to :math:`\X{result}`.
 
@@ -274,7 +274,7 @@ Modules
    \begin{array}{lclll}
    \F{module\_direct\_exports}(m) &=& (\X{ex}.\ENAME, \externtype')^\ast \\
      && \qquad (\iff \X{ex}^\ast = m.\MEXPORTS \\
-     && \qquad\quad \wedge~\exportimport(m, \X{ex}.\EDESC) = \epsilon \\
+     && \qquad\quad \wedge~\edexportimport(m, \X{ex}.\EDESC) = \epsilon \\
      && \qquad\quad \wedge~\vdashmodule m : \externtype^\ast \to {\externtype'}^\ast \\
      && \qquad\quad \wedge~\externtype' = \X{ex}.\EDESC) \\
    \end{array}
@@ -296,7 +296,7 @@ Modules
 
 5. For each :math:`\export_i` in :math:`\export^\ast`, do:
 
-  a. Let :math:`\import_j = \exportimport(\module, \export_i.\EDESC)`.
+  a. Let :math:`\import_j = \edexportimport(\module, \export_i.\EDESC)`.
 
   b. If :math:`\import_j \neq \epsilon`, then:
 
@@ -309,7 +309,7 @@ Modules
    \begin{array}{lclll}
    \F{module\_indirect\_exports}(m) &=& (\X{ex}.\ENAME, \X{im}.\IMODULE, \X{im}.\INAME)^\ast \\
      && \qquad (\iff \X{ex}^\ast = m.\MEXPORTS \\
-     && \qquad\quad \wedge~\X{im} = \exportimport(m, \X{ex}.\EDESC) \\
+     && \qquad\quad \wedge~\X{im} = \edexportimport(m, \X{ex}.\EDESC) \\
      && \qquad\quad \wedge~\X{im} \neq \epsilon \\
      && \qquad\quad \wedge~\vdashmodule m : \externtype^\ast \to {\externtype'}^\ast) \\
    \end{array}

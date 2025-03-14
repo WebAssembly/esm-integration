@@ -360,19 +360,23 @@ A *direct export* is one where the export references a function, table, memory, 
 
 An *indirect export* (or *re-export*) is one where the export references a function, table, memory, or global that the module imports.
 
-For an export :math:`\export` in module :math:`m`, the export is direct when :math:`\exportimport(m, \export.\EDESC) = \epsilon` and indirect otherwise, where
-the import corresponding to an export description is defined by:
+For an export :math:`\export` in module :math:`m`, the export is direct when :math:`\edexportimport(m, \export.\EDESC) = \epsilon` and indirect otherwise, where
+the import corresponding to an export descriptor is defined by:
 
 .. math::
    \begin{array}{lclll}
    \F{exportimport}(m, \exportdesc) &=& m.\MIMPORTS[i] && (\iff \exportdesc = \EDFUNC~\funcidx \\
-     &&&& \quad \wedge~\exists~i~\colon \ m.\MIMPORTS[i].\IDESC = \IDFUNC~\typeidx \\
+     &&&& \quad \wedge~\exists~i~\colon~\funcidx = |\{j ~|~ j < i \\
+     &&&& \quad \quad \wedge~m.\MIMPORTS[j].\IDESC = \IDFUNC~\typeidx' \}|) \\
    \F{exportimport}(m, \exportdesc) &=& m.\MIMPORTS[i] && (\iff \exportdesc = \EDTABLE~\tableidx \\
-     &&&& \quad \wedge~\exists~i~\colon \ m.\MIMPORTS[i].\IDESC = \IDTABLE~\tabletype \\
+     &&&& \quad \wedge~\exists~i~\colon~\tableidx = |\{j ~|~ j < i \\
+     &&&& \quad \quad \wedge~m.\MIMPORTS[j].\IDESC = \IDTABLE~\tabletype' \}|) \\
    \F{exportimport}(m, \exportdesc) &=& m.\MIMPORTS[i] && (\iff \exportdesc = \EDMEM~\memidx \\
-     &&&& \quad \wedge~\exists~i~\colon \ m.\MIMPORTS[i].\IDESC = \IDMEM~\memtype \\
+     &&&& \quad \wedge~\exists~i~\colon~\memidx = |\{j ~|~ j < i \\
+     &&&& \quad \quad \wedge~m.\MIMPORTS[j].\IDESC = \IDMEM~\memtype' \}|) \\
    \F{exportimport}(m, \exportdesc) &=& m.\MIMPORTS[i] && (\iff \exportdesc = \EDGLOBAL~\globalidx \\
-     &&&& \quad \wedge~\exists~i~\colon \ m.\MIMPORTS[i].\IDESC = \IDGLOBAL~\globaltype \\
+     &&&& \quad \wedge~\exists~i~\colon~\globalidx = |\{j ~|~ j < i \\
+     &&&& \quad \quad \wedge~m.\MIMPORTS[j].\IDESC = \IDGLOBAL~\globaltype' \}|) \\
    \F{exportimport}(m, \exportdesc) &=& \epsilon && (\otherwise) \\
    \end{array}
 
