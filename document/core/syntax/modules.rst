@@ -356,12 +356,12 @@ Each export is labeled by a unique :ref:`name <syntax-name>`.
 Exportable definitions are :ref:`functions <syntax-func>`, :ref:`tables <syntax-table>`, :ref:`memories <syntax-mem>`, and :ref:`globals <syntax-global>`,
 which are referenced through a respective descriptor.
 
-A *direct export* is one where the export references a function, table, memory, or global instance that is defined within the module itself rather than being imported. 
+A *direct export* is one where the export references a function, table, memory, or global that is defined within the module itself rather than being imported. 
 
 An *indirect export* (or *re-export*) is one where the export references a function, table, memory, or global that the module imports.
 
 For an export :math:`\export` in module :math:`m`, the export is direct when :math:`\edexportimport(m, \export.\EDESC) = \epsilon` and indirect otherwise, where
-the import corresponding to an export descriptor is defined by:
+the import corresponding to an export descriptor :math:`\export.\EDESC` is defined by:
 
 .. math::
    \begin{array}{lclll}
