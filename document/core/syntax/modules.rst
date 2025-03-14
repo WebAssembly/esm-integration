@@ -356,32 +356,26 @@ Each export is labeled by a unique :ref:`name <syntax-name>`.
 Exportable definitions are :ref:`functions <syntax-func>`, :ref:`tables <syntax-table>`, :ref:`memories <syntax-mem>`, and :ref:`globals <syntax-global>`,
 which are referenced through a respective descriptor.
 
-A *direct export* is one where the export references a function, table, memory, or global instance that is defined within the module itself rather than being imported.
+A *direct export* is one where the export references a function, table, memory, or global instance that is defined within the module itself rather than being imported. 
 
 An *indirect export* (or *re-export*) is one where the export references a function, table, memory, or global that the module imports.
 
-The import corresponding to an export description is given by:
+For an export :math:`\export` in module :math:`m`, the export is direct when :math:`\exportimport(m, \export.\EDESC) = \epsilon` and indirect otherwise, where
+the import corresponding to an export description is defined by:
 
 .. math::
-   \begin{array}{lllll}
-   \production{import for export} & \importforexport(m, \exportdesc) &=&
-     \begin{cases}
-       m.\MIMPORTS[\X{idx}] & (\iff \exportdesc = \EDFUNC~\X{idx} \wedge \X{idx} < |\etfuncs(m.\MIMPORTS)|) \\
-       m.\MIMPORTS[\X{fidx} + \X{idx}] & (\iff \exportdesc = \EDTABLE~\X{idx} \wedge \X{idx} < |\ettables(m.\MIMPORTS)| \\
-       & \quad \wedge \X{fidx} = |\etfuncs(m.\MIMPORTS)|) \\
-       m.\MIMPORTS[\X{fidx} + \X{tidx} + \X{idx}] & (\iff \exportdesc = \EDMEM~\X{idx} \wedge \X{idx} < |\etmems(m.\MIMPORTS)| \\
-       & \quad \wedge \X{fidx} = |\etfuncs(m.\MIMPORTS)| \wedge \X{tidx} = |\ettables(m.\MIMPORTS)|) \\
-       m.\MIMPORTS[\X{fidx} + \X{tidx} + \X{midx} + \X{idx}] & (\iff \exportdesc = \EDGLOBAL~\X{idx} \wedge \X{idx} < |\etglobals(m.\MIMPORTS)| \\
-       & \quad \wedge \X{fidx} = |\etfuncs(m.\MIMPORTS)| \wedge \X{tidx} = |\ettables(m.\MIMPORTS)| \\
-       & \quad \wedge \X{midx} = |\etmems(m.\MIMPORTS)|) \\
-       \epsilon & (\otherwise) \\
-     \end{cases} \\
+   \begin{array}{lclll}
+   \F{exportimport}(m, \exportdesc) &=& m.\MIMPORTS[i] && (\iff \exportdesc = \EDFUNC~\funcidx \\
+     &&&& \quad \wedge~\exists~i~\colon \ m.\MIMPORTS[i].\IDESC = \IDFUNC~\typeidx \\
+   \F{exportimport}(m, \exportdesc) &=& m.\MIMPORTS[i] && (\iff \exportdesc = \EDTABLE~\tableidx \\
+     &&&& \quad \wedge~\exists~i~\colon \ m.\MIMPORTS[i].\IDESC = \IDTABLE~\tabletype \\
+   \F{exportimport}(m, \exportdesc) &=& m.\MIMPORTS[i] && (\iff \exportdesc = \EDMEM~\memidx \\
+     &&&& \quad \wedge~\exists~i~\colon \ m.\MIMPORTS[i].\IDESC = \IDMEM~\memtype \\
+   \F{exportimport}(m, \exportdesc) &=& m.\MIMPORTS[i] && (\iff \exportdesc = \EDGLOBAL~\globalidx \\
+     &&&& \quad \wedge~\exists~i~\colon \ m.\MIMPORTS[i].\IDESC = \IDGLOBAL~\globaltype \\
+   \F{exportimport}(m, \exportdesc) &=& \epsilon && (\otherwise) \\
    \end{array}
 
-For embedder convenience, we also define:
-
-* :math:`\isdirectexport(m, \exportdesc) = (\importforexport(m, \exportdesc) = \epsilon)`
-* :math:`\isindirectexport(m, \exportdesc) = (\importforexport(m, \exportdesc) \neq \epsilon)`
 
 Conventions
 ...........

@@ -163,11 +163,11 @@ Modules
 
 .. math::
    \begin{array}{lclll}
-   \F{module\_extern\_subtype}(\externtype_1, \externtype_2) &=& \TRUE && (\iff \vdashexterntypematch \externtype_1 \matchesexterntype \externtype_2) \\
+   \F{module\_extern\_subtype}(\externtype_1, \externtype_2) &\iff& \vdashexterntypematch \externtype_1 \matchesexterntype \externtype_2 \\
    \end{array}
 
 .. note::
-   This function encapsulates the external type matching relation defined in the core specification. It allows for checking compatibility of external types when linking modules or validating imports against exports. The current implementation uses the exact matching rules from the core specification, but this function provides a single point for potential future extensions to the type system.
+   This function encapsulates the external type matching relation defined in the :ref:`Import Subtyping <match>` of the validation section, where the :math:`\vdashexterntypematch \externtype_1 \matchesexterntype \externtype_2` judgment establishes compatibility between external types. This allows for explicit checking of type compatibility when linking modules or validating imports against exports.
 
 .. index:: instantiation, module instance
 .. _embed-module-instantiate:
@@ -263,7 +263,9 @@ Modules
 
 4. For each :math:`\export_i` in :math:`\export^\ast` and corresponding :math:`\externtype'_i` in :math:`{\externtype'}^\ast`, do:
 
-   a. If :math:`\isdirectexport(\module, \export_i.\EDESC)`, then append the pair :math:`(\export_i.\ENAME, \externtype'_i)` to :math:`\X{result}`.
+  a. Let :math:`\import_j = \exportimport(\module, \export_i.\EDESC)`.
+
+  b. If :math:`\import_j = \epsilon`, then append the pair :math:`(\export_i.\ENAME, \externtype'_i)` to :math:`\X{result}`.
 
 5. Return :math:`\X{result}`.
 
@@ -271,8 +273,10 @@ Modules
    ~ \\
    \begin{array}{lclll}
    \F{module\_direct\_exports}(m) &=& (\X{ex}.\ENAME, \externtype')^\ast \\
-   && \qquad (\iff \X{ex} \in m.\MEXPORTS \wedge \externtype' \in {\externtype'}^\ast \wedge {} \vdashmodule m : \externtype^\ast \to {\externtype'}^\ast \\
-   && \qquad\quad \wedge \isdirectexport(m, \X{ex}.\EDESC)) \\
+     && \qquad (\iff \X{ex}^\ast = m.\MEXPORTS \\
+     && \qquad\quad \wedge~\exportimport(m, \X{ex}.\EDESC) = \epsilon \\
+     && \qquad\quad \wedge~\vdashmodule m : \externtype^\ast \to {\externtype'}^\ast \\
+     && \qquad\quad \wedge~\externtype' = \X{ex}.\EDESC) \\
    \end{array}
 
 
@@ -292,11 +296,11 @@ Modules
 
 5. For each :math:`\export_i` in :math:`\export^\ast`, do:
 
-   a. If :math:`\isindirectexport(\module, \export_i.\EDESC)`, then:
+  a. Let :math:`\import_j = \exportimport(\module, \export_i.\EDESC)`.
 
-      i. Let :math:`\import_j` be the import corresponding to the index in :math:`\export_i.\EDESC`.
+  b. If :math:`\import_j \neq \epsilon`, then:
 
-      ii. Append the triple :math:`(\export_i.\ENAME, \import_j.\IMODULE, \import_j.\INAME)` to :math:`\X{result}`.
+     i. Append the triple :math:`(\export_i.\ENAME, \import_j.\IMODULE, \import_j.\INAME)` to :math:`\X{result}`.
 
 6. Return :math:`\X{result}`.
 
@@ -304,8 +308,10 @@ Modules
    ~ \\
    \begin{array}{lclll}
    \F{module\_indirect\_exports}(m) &=& (\X{ex}.\ENAME, \X{im}.\IMODULE, \X{im}.\INAME)^\ast \\
-   && \qquad (\iff \X{ex} \in m.\MEXPORTS \wedge \X{im} \in m.\MIMPORTS \wedge {} \vdashmodule m : \externtype^\ast \to {\externtype'}^\ast \\
-   && \qquad\quad \wedge \isindirectexport(m, \X{ex}.\EDESC) \wedge \X{im} = \importforexport(m, \X{ex}.\EDESC)) \\
+     && \qquad (\iff \X{ex}^\ast = m.\MEXPORTS \\
+     && \qquad\quad \wedge~\X{im} = \exportimport(m, \X{ex}.\EDESC) \\
+     && \qquad\quad \wedge~\X{im} \neq \epsilon \\
+     && \qquad\quad \wedge~\vdashmodule m : \externtype^\ast \to {\externtype'}^\ast) \\
    \end{array}
 
 
