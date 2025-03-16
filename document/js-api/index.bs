@@ -123,12 +123,9 @@ urlPrefix: https://webassembly.github.io/spec/core/; spec: WebAssembly; type: df
     text: store_init; url: appendix/embedding.html#embed-store-init
     text: module_decode; url: appendix/embedding.html#embed-module-decode
     text: module_validate; url: appendix/embedding.html#embed-module-validate
-    text: module_extern_subtype; url: appendix/embedding.html#embed-module-extern-subtype
     text: module_instantiate; url: appendix/embedding.html#embed-module-instantiate
     text: module_imports; url: appendix/embedding.html#embed-module-imports
     text: module_exports; url: appendix/embedding.html#embed-module-exports
-    text: module_direct_exports; url: appendix/embedding.html#embed-module-direct-exports
-    text: module_inirect_exports; url: appendix/embedding.html#embed-module-indirect-exports
     text: instance_export; url: appendix/embedding.html#embed-instance-export
     text: func_alloc; url: appendix/embedding.html#embed-func-alloc
     text: func_type; url: appendix/embedding.html#embed-func-type
@@ -1394,8 +1391,6 @@ To <dfn export>parse a WebAssembly module</dfn> given a <a>byte sequence</a> |by
 1. [=list/iterate|For each=] (|moduleName|, <var ignore>name</var>, <var ignore>type</var>) in [=module_imports=](|module|.\[[Module]]),
     1. [=set/Append=] |moduleName| to |requestedModules|.
 1. Let |moduleRecord| be {
-      <!-- WebAssembly Module Records -->
-      \[[Instance]]: ~empty~,
       <!-- Abstract Module Records -->
       \[[Realm]]: |realm|,
       \[[Environment]]: ~empty~,
@@ -1445,24 +1440,8 @@ WebAssembly Module Records have the following methods:
 
 <div algorithm=ResolveExport>
 
-<h3 id="resolve-export">ResolveExport ( |exportName|, |resolveSet| ) Concrete Method</h3>
-1. If |resolveSet| is not present, set |resolveSet| to « ».
+<h3 id="resolve-export">ResolveExport ( |exportName|, <var ignore>resolveSet</var> ) Concrete Method</h3>
 1. Let |record| be this WebAssembly Module Record.
-1. Let |module| be |record|.\[[ModuleSource]].\[[Module]].
-1. [=list/iterate|For each=] Record |r| of |resolveSet|,
-    1. If |record| and |r|.\[[Module]] are the same Module Record and |exportName| is |r|.\[[ExportName]],
-        1. Return null.
-1. Append the record { \[[Module]]: |record|, \[[ExportName]]: |exportName| } to |resolveSet|.
-1. [=list/iterate|For each=] (|name|, |importedModuleName|, |importName|, <var ignore>type</var>) in [=module_indirect_exports=](|module|),
-    1. If |name| is equal to |exportName|,
-        1. Let |importedModule| be [$GetImportedModule$](|record|, |importedModuleName|).
-        1. Let |resolved| be [=?=] |importedModule|.ResolveExport(|importName|, |resolveSet|).
-        1. If |resolved| is null or ~AMBIGUOUS~,
-            1. Return |resolved|.
-        1. If |resolved|.\[[Module]] is a WebAssembly Module Record,
-            1. Return |resolved|.
-        1. Note: This fall-through case allows indirect exports referencing JS values to be treated as captured direct bindings in the environment record,
-            with live bindings unsupported. Only live bindings between Wasm globals are supported for Wasm exports.
 1. If the [=export name list=] of |record| contains |exportName|, return { \[[Module]]: |record|, \[[BindingName]]: |exportName| }.
 1. Otherwise, return null.
 
@@ -1481,23 +1460,8 @@ WebAssembly Module Records have the following methods:
 1. Let |record| be this WebAssembly Module Record.
 1. Let |env| be [$NewModuleEnvironment$](null).
 1. Set |record|.\[[Environment]] to |env|.
-1. Let |module| be |record|.\[[ModuleSource]].\[[Module]].
-1. [=list/iterate|For each=] (|importedModuleName|, |name|, <var ignore>type</var>) in [=module_imports=](|module|),
-    1. Let |importedModule| be [$GetImportedModule$](|record|, |importedModuleName|).
-    1. Let |resolution| be |importedModule|.ResolveExport(|name|).
-    1. If |resolution| is null or ~AMBIGUOUS~, throw a {{SyntaxError}} exception.
-1. [=list/iterate|For each=] (|name|, |importedModuleName|, |importName|, <var ignore>type</var>) in [=module_indirect_exports=](|module|),
-    1. Let |importedModule| be [$GetImportedModule$](|record|, |importedModuleName|).
-    1. Let |resolved| be [=?=] |importedModule|.ResolveExport(|importName|).
-    1. Assert |resolved| is not null or ~AMBIGUOUS~.
-    1. If |resolved|.\[[Module]] is not a WebAssembly Module Record,
-        1. Note: This case corresponds to indirect exports to non-WebAssembly bindings, which are always snapshotted.
-        1. Perform [=!=] |env|.CreateImmutableBinding(|name|, true).
-1. [=list/iterate|For each=] (|name|, |externtype|) of [=module_direct_exports=](|module|),
-    1. If |externtype| is of the form [=global=] [=var=] <var ignore>valtype</var>,
-        1. Perform [=!=] |env|.CreateMutableBinding(|name|, false).
-    1. Otherwise,
-        1. Perform [=!=] |env|.CreateImmutableBinding(|name|, true).
+1. For each |name| in the [=export name list=] of |record|,
+    1. Perform ! |env|.CreateImmutableBinding(|name|, true).
 
 </div>
 
@@ -1605,8 +1569,6 @@ will always reflect the current mutable global export value as interpreted throu
         1. [=list/iterate|For each=] (|moduleName|, <var ignore>name</var>, <var ignore>type</var>) in [=module_imports=](|module|),
             1. [=set/Append=] |moduleName| to |requestedModules|.
         1. Let |moduleRecord| be {
-              <!-- WebAssembly Module Records -->
-              \[[Instance]]: ~empty~,
               <!-- Abstract Module Records -->
               \[[Realm]]: |realm|,
               \[[Environment]]: ~empty~,
