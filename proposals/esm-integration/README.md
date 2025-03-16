@@ -94,22 +94,23 @@ In the proposed HTML integration of WebAssembly modules, the [module name](https
 
 ### "Snapshotting" imports
 
-When imports are provided to WebAssembly modules in the host instance linking model from JavaScript, they are provided directly upfront.
+When imports are provided to WebAssembly modules in the host instance linking model, they are provided directly upfront.
 
 - This handling of imports could be called a "snapshotting" process: Later updates to the imported values won't be reflected within the WebAssembly module.
-- Circular WebAssembly module bindings are not supported for direct exports: One of them will run first, and that one will find that the exports of the other aren't yet initialized, leading to a ReferenceError. Indirect exports (reexports) can be supported early in Wasm cycles, where a WebAssembly module exports the same binding it imports.
+- Circular WebAssembly modules are not supported: One of them will run first, and that one will find that the exports of the other aren't yet initialized, leading to a ReferenceError.
 
 See the FAQ for more explanation of the rationale for this design decision, and what features it enables which would be difficult or impossible otherwise.
 
-### Live binding exports
+### Progressive Implementation Support
 
-WebAssembly modules support live exports bindings for mutable globals by reflecting the infallible ToJsValue() representation of their mutable global exports on their JavaScript environment bindings record.
+It is possible to implement the Wasm-ESM integration in two stages:
 
-For bindings that are exported from bindings that were initially imported i.e. indirect exports or reexports:
+1. In the first stage only source phase imports of Wasm are supported (`import source fibModule from "./fib.wasm"`).
+2. In the second stage, evaluation phase imports would be supported too (`import { fib } from "./fib.wasm"`).
 
-1. WebAssembly modules that have indirect exports to JavaScript modules, these values are snapshotted at the time of execution of the WebAssembly module and reflected as captured bindings and not live bindings on the exports, even if the underlying JavaScript module might have modifications to the binding later on.
+If initially implementing just source phase imports, the `GetExportedNames`, `ResolveExport`, `InitializeEnvironment`, and `ExecuteModule` abstract operations can be implemented as abstract operations unconditionally throwing a `SyntaxError` exception. In this case, module fetch and CSP integration is still required to be implemented as specified in this proposal.
 
-2. WebAssembly modules that have indirect exports to WebAssembly modules, where those modules directly export mutable globals, support the live mutable global reference without capturing the import.
+Implementers are encouraged to ship both stages at once, but it is deemed OK for implementers to initially ship the first stage and then quickly follow up with the second stage, if this aids "time to ship" in implementations.
 
 ## FAQ
 
@@ -119,7 +120,7 @@ Originally the ESM integration only provided the direct host instance linking mo
 
 Supporting the [source phase](https://github.com/tc39/proposal-source-phase-imports) ESM integration is therefore a more general form of the ESM integration that shares the host resolver, while retaining linking flexibility for Js host embedding of Wasm.
 
-While the source phase does not replace the instance linking model, is does offer a more general and flexible ESM integration as an addition.
+While the source phase does not replace the instance linking model, is does offer a more general and flexible ESM integration.
 
 ### How does this relate to the Component Model?
 
@@ -149,7 +150,7 @@ The conversion is based on the type that the import and export was declared as, 
 
 ### When one WebAssembly module imports another one, will there be overhead due to converting back and forth to JS values?
 
-Bindings between WebAssembly modules, even those that are indirect through indirect exports (reexports) are directly linked, without needing to go through JS wrapping and unwrapping.
+Note that exports of ES Module Records always have values that can be directly treated as JavaScript values. Although we're talking about conversions to and from JavaScript for these exports, it's expected that, in native implementations, the conversion to and from Javascript would "cancel out" and not lead to the use of wrappers in practice.
 
 ### Why are WebAssembly modules instantiated during the "Evaluation" phase?
 
@@ -171,11 +172,9 @@ Instead of including this check in the default semantics of functions, a trampol
 
 ### What does snapshotting imports mean for importing globals?
 
-Imports are only snapshotted when they resolve to a JavaScript module. For imports that resolve to WebAssembly modules, these are always directly bound.
-
-When a WebAssembly module imports a Global, that resolves to a module after resolving the binding through any indirect exports (reexports):
-- If the resolved module is a JavaScript module, then the exporting module may either export a direct value or a `WebAssembly.Global` of the same type.
-- If the resolved module is a WebAssembly module, then the exporting module must export a global that is an extern subtype of the importing global.
+When a WebAssembly module imports a Global, there are two possible modes of operation:
+- If the Global type is immutable (as declared in the importing module), then the exporting module may either export a numeric value or an immutable Global.
+- If the Global type is mutable, then the exporting module must export a mutable Global. The snapshot here is "shallow" in the sense that modifications *within* this particular mutable Global object *will* be visible in the importing module (but, if the exporting module overwrites the entire binding with some unrelated value, this will not be noticed by the importing module).
 
 ### Can Web APIs be imported via modules?
 

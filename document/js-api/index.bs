@@ -156,6 +156,7 @@ urlPrefix: https://webassembly.github.io/spec/core/; spec: WebAssembly; type: df
     text: memory address; url: exec/runtime.html#syntax-memaddr
     text: global address; url: exec/runtime.html#syntax-globaladdr
     text: extern address; url: exec/runtime.html#syntax-externaddr
+    text: extern subtype; url: valid/types.html#match-externtype
     text: page size; url: exec/runtime.html#page-size
     url: syntax/types.html#syntax-numtype
         text: i32
@@ -1163,7 +1164,7 @@ Note: Exported Functions do not have a \[[Construct]] method and thus it is not 
         1. Let |values| be [=?=] [$IteratorToList$]([=?=] [$GetIteratorFromMethod$](|ret|, |method|)).
         1. Let |wasmValues| be a new, empty [=list=].
         1. If |values|'s [=list/size=] is not |resultsSize|, throw a {{TypeError}} exception.
-        1. [=list/iterate|For each=] |value| and |resultType| in |values| and |results|, paired linearly,
+        1. For each |value| and |resultType| in |values| and |results|, paired linearly,
             1. [=list/Append=] [=ToWebAssemblyValue=](|value|, |resultType|) to |wasmValues|.
         1. Return |wasmValues|.
 </div>
@@ -1388,9 +1389,11 @@ To <dfn export>parse a WebAssembly module</dfn> given a <a>byte sequence</a> |by
 1. If |module| is [=error=], throw a {{CompileError}} exception.
 1. [=Construct a WebAssembly module object=] from |module| and |bytes|, and let |module| be the result.
 1. Let |requestedModules| be a set.
-1. [=list/iterate|For each=] (|moduleName|, <var ignore>name</var>, <var ignore>type</var>) in [=module_imports=](|module|.\[[Module]]),
+1. For each (|moduleName|, <var ignore>name</var>, <var ignore>type</var>) in [=module_imports=](|module|.\[[Module]]),
     1. [=set/Append=] |moduleName| to |requestedModules|.
 1. Let |moduleRecord| be {
+      <!-- WebAssembly Module Records -->
+      \[[Instance]]: ~empty~,
       <!-- Abstract Module Records -->
       \[[Realm]]: |realm|,
       \[[Environment]]: ~empty~,
@@ -1422,7 +1425,7 @@ The <dfn>export name list</dfn> of a WebAssembly Module Record |record| is defin
 
 1. Let |module| be |record|'s \[[ModuleSource]] internal slot.
 1. Let |exports| be an empty [=list=].
-1. [=list/iterate|For each=] (|name|, <var ignore>type</var>) in [=module_exports=](|module|.\[[Module]])
+1. For each (|name|, <var ignore>type</var>) in [=module_exports=](|module|.\[[Module]])
     1. [=list/Append=] |name| to the end of |exports|.
 1. Return |exports|.
 
@@ -1483,9 +1486,9 @@ WebAssembly Module Records have the following methods:
         1. Let |resolutionName| be |resolution|.\[[BindingName]].
         1. Let |externval| be [=instance_export=](|resolutionInstance|, |resolutionName|).
         1. Assert: |externval| is not [=error=].
-        1. Assert: [=module_direct_exports=](|resolutionModule|) contains an element (|resolutionName|, <var ignore>type</var>).
-        1. Let |externtype| be the value of |type| for the element (|resolutionName|, |type|) in [=module_direct_exports=](|resolutionModule|).
-        1. If [=module_extern_subtype=](|externtype|, |importtype|) is false, throw a {{LinkError}} exception.
+        1. Assert: [=module_exports=](|resolutionModule|) contains an element (|resolutionName|, <var ignore>type</var>).
+        1. Let |externtype| be the value of |type| for the element (|resolutionName|, |type|) in [=module_exports=](|resolutionModule|).
+        1. If |importtype| is not an [=extern subtype=] of |externtype|, throw a {{LinkError}} exception.
         1. [=list/Append=] |externval| to |imports|.
     1. Otherwise,
         1. Let |env| be |resolution|.\[[Module]].\[[Environment]].
@@ -1500,13 +1503,15 @@ WebAssembly Module Records have the following methods:
             1. Let |externfunc| be the [=external value=] [=external value|func=] |funcaddr|.
             1. [=list/Append=] |externfunc| to |imports|.
         1. If |importtype| is of the form [=global=] |mut| |valtype|,
+            1. Let |store| be the [=surrounding agent=]'s [=associated store=].
             1. If |v| [=implements=] {{Global}},
                 1. Let |globaladdr| be |v|.\[[Global]].
+                1. Let |targetmut| <var ignore>valuetype</var> be [=global_type=](|store|, |globaladdr|).
+                    1. If |mut| is [=const=] and |targetmut| is [=var=], throw a {{TypeError}}.
             1. Otherwise,
-                1. If |valtype| is [=v128=],
-                    1. Throw a {{LinkError}} exception.
+                1. If |valtype| is [=v128=], throw a {{LinkError}} exception.
+                1. If |mut| is [=var=], throw a {{TypeError}}.
                 1. Let |value| be [=?=] [=ToWebAssemblyValue=](|v|, |valtype|).
-                1. Let |store| be the [=surrounding agent=]'s [=associated store=].
                 1. Let (|store|, |globaladdr|) be [=global_alloc=](|store|, |mut| |valtype|, |value|).
                 1. Set the [=surrounding agent=]'s [=associated store=] to |store|.
             1. Let |externglobal| be [=external value|global=] |globaladdr|.
@@ -1522,53 +1527,34 @@ WebAssembly Module Records have the following methods:
             1. [=list/Append=] |externtable| to |imports|.
 1. [=Instantiate the core of a WebAssembly module=] |module| with |imports|, and let |instance| be the result.
 1. Set |record|.\[[Instance]] to |instance|.
-1. [=list/iterate|For each=] (|name|, |externtype|) of [=module_direct_exports=](|module|),
-    1. Let |externval| be [=instance_export=](|instance|, |name|).
-    1. Assert: |externval| is not [=error=].
-    1. If |externtype| is of the form [=func=] <var ignore>functype</var>,
-        1. Assert: |externval| is of the form [=external value|func=] |funcaddr|.
-        1. Let [=external value|func=] |funcaddr| be |externval|.
-        1. Let |func| be the result of creating [=a new Exported Function=] from |funcaddr|.
-        1. Perform [=!=] |record|.\[[Environment]].InitializeBinding(|name|, |func|).
+1. [=list/iterate|For each=] (|name|, |externtype|) of [=module_exports=](|module|),
     1. If |externtype| is of the form [=global=] |mut| |globaltype|,
         1. Assert: |externval| is of the form [=external value|global=] |globaladdr|.
         1. Let [=external value|global=] |globaladdr| be |externval|.
         1. Let |global_value| be [=global_read=](|store|, |globaladdr|).
         1. If |globaltype| is not [=v128=],
-            1. Note: When integrating with shared globals, they will be excluded here similarly to v128 above.
+            1. Note: The condition above leaves unsupported JS values as uninitialized in TDZ and therefore as a reference error on
+                access. When integrating with shared globals, they may be excluded here similarly to v128 above. 
             1. Perform [=!=] |record|.\[[Environment]].InitializeBinding(|name|, [=ToJSValue=](|global_value|)).
-            1. Associate all future mutations to the mutable value at |globaladdr| with the ECMA-262 binding record for |name| in
+            1. If |mut| is [=var=], then associate all future mutations of |globaladdr| with the ECMA-262 binding record for |name| in
                 |record|.\[[Environment]], such that |record|.\[[Environment]].GetBindingValue(|resolution|.\[[BindingName]], true)
                 always returns [=ToJSValue=]([=global_read=](|store|, |globaladdr|)) for the current [=surrounding agent=]'s
                 [=associated store=] |store|.
-    1. If |externtype| is of the form [=mem=] <var ignore>memtype</var>,
-        1. Assert: |externval| is of the form [=external value|mem=] |memaddr|.
-        1. Let [=external value|mem=] |memaddr| be |externval|.
-        1. Let |memory| be [=create a memory object|a new Memory object=] created from |memaddr|.
-        1. Perform [=!=] |record|.\[[Environment]].InitializeBinding(|name|, |memory|).
-    1. If |externtype| is of the form [=table=] <var ignore>tabletype</var>,
-        1. Assert: |externval| is of the form [=external value|table=] |tableaddr|.
-        1. Let [=external value|table=] |tableaddr| be |externval|.
-        1. Let |table| be [=create a Table object|a new Table object=] created from |tableaddr|.
-        1. Perform [=!=] |record|.\[[Environment]].InitializeBinding(|name|, |table|).
-
-Note: The export bindings for a WebAssembly Module Record are designed to mirror the live bindings of all directly exported values. Values not
-supported in JS are left uninitialized and in TDZ, while still being accesible to Wasm importers. Indirect exports (re-exports) referencing
-JavaScript values will capture the [=ToWebAssemblyValue=] interpretation at the time of execution, while indirect exports resolving to other Wasm
-modules will support Wasm live bindings. For exported mutable globals that are supported in JavaScript, the live bindings on the environment record
-will always reflect the current mutable global export value as interpreted through the infallible [=ToJSValue=] interpretation.
+    1. Otherwise,
+        1. Perform ! |record|.\[[Environment]].InitializeBinding(|name|, ! Get(|instance|.\[[Exports]], |name|)).
 
 </div>
 
 <h3 id="hostgetmodulesourcemodulerecord">HostGetModuleSourceModuleRecord ( |specifier| )</h3>
 1. If |specifier| is a WebAssembly {{Module}} object with a \[[Module]] internal slot,
-    1. Let |module| be |specifier|.\[[Module]].
-    1. If |module|.\[[ModuleRecord]] is null,
+    1. If |specifier|.\[[Module]].\[[ModuleRecord]] is null,
         1. Let |realm| be the current agent's realm record.
         1. Let |requestedModules| be a set.
-        1. [=list/iterate|For each=] (|moduleName|, <var ignore>name</var>, <var ignore>type</var>) in [=module_imports=](|module|),
+        1. For each (|moduleName|, <var ignore>name</var>, <var ignore>type</var>) in [=module_imports=](|specifier|.\[[Module]]),
             1. [=set/Append=] |moduleName| to |requestedModules|.
         1. Let |moduleRecord| be {
+              <!-- WebAssembly Module Records -->
+              \[[Instance]]: ~empty~,
               <!-- Abstract Module Records -->
               \[[Realm]]: |realm|,
               \[[Environment]]: ~empty~,
@@ -1591,7 +1577,7 @@ will always reflect the current mutable global export value as interpreted throu
             }.
         1. Set |module|.\[[ModuleRecord]] to |moduleRecord|.
         1. Return |moduleRecord|.
-    1. Return |module|.\[[ModuleRecord]].
+    1. Return |specifier|.\[[Module]].\[[ModuleRecord]].
 1. Return ~not-a-source~.
 
 Note: See corresponding modifications to HTML in <a href="https://github.com/whatwg/html/pull/10380">PR #10380</a>.

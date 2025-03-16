@@ -123,12 +123,16 @@ for (let index = 0; index < length; index++)
 | table       | `WebAssembly.Table` object  |
 | function    | WebAssembly exported function |
 
+Wasm bindings cannot be reassigned as it can in JS, so the exported value will not change in their object identity. But the value that it points to (e.g. `.value` in the case of `WebAssembly.Global`) can change.
+
 1. JS module is parsed
 1. wasm module is parsed
 1. wasm module has a lexical environment created for its exports. All exports are initially in TDZ.
 1. JS module is instantiated. Imports are bound to the same memory locations.
 1. wasm module is instantiated evaluated. Functions are initialized. Memories and tables are initialized and filled with data/elem sections. Globals are initialized and initializer expressions are evaluated. The start function runs.
 1. JS module is evaluated. All values are available.
+
+The value of the export for `WebAssembly.Global` is provided directly on the JS namespace object, with mutable globals reflected as live bindings to JS.
 
 #### Example
 
@@ -177,7 +181,7 @@ Wasm exports can be imported as accurate, immutable bindings to other wasm modul
 
 ### wasm imports <- JS re-exports <- wasm exports
 
-Any wasm exports that are re-exported via a JS module will be available to the other wasm module as accurate bindings. If the binding is a mutable global, then that binding will be a live export binding in JS reflecting changes to the Wasm global value. When imported from JS, the first and second Wasm modules will yield the same Wasm identities for the multiply exported Wasm objects.
+Any wasm exports that are re-exported via a JS module will be available to the other wasm module as accurate, immutable bindings. The wasm export gets wrapped into a JS object (e.g. `WebAssembly.Global`) and then unwrapped to the wasm import in the importing wasm module. When imported from JS, the first and second Wasm modules will yield the same object identities for the multiply exported Wasm objects.
 
 #### Example
 
@@ -213,7 +217,7 @@ export {memoryExport} from "./b.wasm";
 
 1. JS module is parsed
 1. wasm module is parsed
-1. wasm module has a lexical environment created for its exports. All direct exports are initially in TDZ, indirect exports are available as they resolve.
+1. wasm module has a lexical environment created for its exports. All exports are initially in TDZ.
 1. JS module is instantiated. All imports (including functions) from the wasm module are memory locations holding undefined.
 1. wasm module is instantiated and evaluated. Snapshots of imports are taken. Export bindings are initialized.
 1. JS module is evaluated. 
@@ -251,8 +255,8 @@ export function functionExport() {
 1. wasm module is parsed
 1. JS module is parsed
 1. JS module is instantiated. 
-1. wasm module has a lexical environment created for its exports. All direct exports are initially in TDZ, indirect exports are available as they resolve.
-1. JS module is evaluated. wasm exports in TDZ lead to a ReferenceError if used.
+1. wasm module has a lexical environment created for its exports. All exports are initially in TDZ.
+1. JS module is evaluated. wasm exports lead to a ReferenceError if used.
 1. wasm module is instantiated and evaluated; wasm-exported bindings are updated to their appropriate JS API-exposed values. 
 
 #### Examples
