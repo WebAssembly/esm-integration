@@ -1507,10 +1507,10 @@ WebAssembly Module Records have the following methods:
             1. If |v| [=implements=] {{Global}},
                 1. Let |globaladdr| be |v|.\[[Global]].
                 1. Let |targetmut| <var ignore>valuetype</var> be [=global_type=](|store|, |globaladdr|).
-                    1. If |mut| is [=const=] and |targetmut| is [=var=], throw a {{TypeError}}.
+                    1. If |mut| is [=const=] and |targetmut| is [=var=], throw a {{LinkError}} exception.
             1. Otherwise,
                 1. If |valtype| is [=v128=], throw a {{LinkError}} exception.
-                1. If |mut| is [=var=], throw a {{TypeError}}.
+                1. If |mut| is [=var=], throw a {{LinkError}} exception.
                 1. Let |value| be [=?=] [=ToWebAssemblyValue=](|v|, |valtype|).
                 1. Let (|store|, |globaladdr|) be [=global_alloc=](|store|, |mut| |valtype|, |value|).
                 1. Set the [=surrounding agent=]'s [=associated store=] to |store|.
@@ -1542,6 +1542,11 @@ WebAssembly Module Records have the following methods:
                 [=associated store=] |store|.
     1. Otherwise,
         1. Perform ! |record|.\[[Environment]].InitializeBinding(|name|, ! Get(|instance|.\[[Exports]], |name|)).
+
+Note: The linking semantics here for Wasm to Wasm modules are identical to the WebAssembly JS API semantics as if passing the
+the exports object as the imports object in instantiation. When linking Wasm module imports to JS module exports, the JS API semantics
+are exactly followed as well. It is only in the case of importing Wasm from JS that WebAssembly.Global unwrapping is observable on the
+WebAssembly Module Record Environment Record.
 
 </div>
 
