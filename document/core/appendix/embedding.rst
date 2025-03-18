@@ -217,6 +217,71 @@ Modules
      && \qquad (\iff \X{ex}^\ast = m.\MEXPORTS \wedge {} \vdashmodule m : \externtype^\ast \to {\externtype'}^\ast) \\
    \end{array}
 
+.. index:: direct export
+.. _embed-direct-exports:
+
+
+:math:`\F{module\_direct\_exports}(\module) : (\name, \externtype)^\ast`
+........................................................................
+
+1. Pre-condition: :math:`\module` is :ref:`valid <valid-module>` with external import types :math:`\externtype^\ast` and external export types :math:`{\externtype'}^\ast`.
+
+2. Let :math:`\export^\ast` be the :ref:`exports <syntax-export>` :math:`\module.\MEXPORTS`.
+
+3. Let :math:`\X{result}` be the empty sequence.
+
+4. For each :math:`\export_i` in :math:`\export^\ast` and corresponding :math:`\externtype'_i` in :math:`{\externtype'}^\ast`, do:
+
+  a. Let :math:`\import_j = \edexportimport(\module, \export_i.\EDESC)`.
+
+  b. If :math:`\import_j = \epsilon`, then append the pair :math:`(\export_i.\ENAME, \externtype'_i)` to :math:`\X{result}`.
+
+5. Return :math:`\X{result}`.
+
+.. math::
+   ~ \\
+   \begin{array}{lclll}
+   \F{module\_direct\_exports}(m) &=& (\X{ex}.\ENAME, \externtype')^\ast \\
+     && \qquad (\iff \X{ex}^\ast = m.\MEXPORTS \\
+     && \qquad\quad \wedge~\edexportimport(m, \X{ex}.\EDESC) = \epsilon \\
+     && \qquad\quad \wedge~\vdashmodule m : \externtype^\ast \to {\externtype'}^\ast \\
+     && \qquad\quad \wedge~\externtype' = \X{ex}.\EDESC) \\
+   \end{array}
+.. index:: indirect export, re-export
+.. _embed-indirect-exports:
+
+
+:math:`\F{module\_indirect\_exports}(\module) : (\name, \name, \name)^\ast`
+...........................................................................
+
+1. Pre-condition: :math:`\module` is :ref:`valid <valid-module>` with external import types :math:`\externtype^\ast` and external export types :math:`{\externtype'}^\ast`.
+
+2. Let :math:`\import^\ast` be the :ref:`imports <syntax-import>` :math:`\module.\MIMPORTS`.
+
+3. Let :math:`\export^\ast` be the :ref:`exports <syntax-export>` :math:`\module.\MEXPORTS`.
+
+4. Let :math:`\X{result}` be the empty sequence.
+
+5. For each :math:`\export_i` in :math:`\export^\ast`, do:
+
+  a. Let :math:`\import_j = \edexportimport(\module, \export_i.\EDESC)`.
+
+  b. If :math:`\import_j \neq \epsilon`, then:
+
+     i. Append the triple :math:`(\export_i.\ENAME, \import_j.\IMODULE, \import_j.\INAME)` to :math:`\X{result}`.
+
+6. Return :math:`\X{result}`.
+
+.. math::
+   ~ \\
+   \begin{array}{lclll}
+   \F{module\_indirect\_exports}(m) &=& (\X{ex}.\ENAME, \X{im}.\IMODULE, \X{im}.\INAME)^\ast \\
+     && \qquad (\iff \X{ex}^\ast = m.\MEXPORTS \\
+     && \qquad\quad \wedge~\X{im} = \edexportimport(m, \X{ex}.\EDESC) \\
+     && \qquad\quad \wedge~\X{im} \neq \epsilon \\
+     && \qquad\quad \wedge~\vdashmodule m : \externtype^\ast \to {\externtype'}^\ast) \\
+   \end{array}
+
 
 .. index:: module, module instance
 .. _embed-instance:

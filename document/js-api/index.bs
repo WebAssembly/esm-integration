@@ -126,6 +126,8 @@ urlPrefix: https://webassembly.github.io/spec/core/; spec: WebAssembly; type: df
     text: module_instantiate; url: appendix/embedding.html#embed-module-instantiate
     text: module_imports; url: appendix/embedding.html#embed-module-imports
     text: module_exports; url: appendix/embedding.html#embed-module-exports
+    text: module_direct_exports; url: appendix/embedding.html#embed-module-direct-exports
+    text: module_inirect_exports; url: appendix/embedding.html#embed-module-indirect-exports
     text: instance_export; url: appendix/embedding.html#embed-instance-export
     text: func_alloc; url: appendix/embedding.html#embed-func-alloc
     text: func_type; url: appendix/embedding.html#embed-func-type
@@ -1443,8 +1445,24 @@ WebAssembly Module Records have the following methods:
 
 <div algorithm=ResolveExport>
 
-<h3 id="resolve-export">ResolveExport ( |exportName|, <var ignore>resolveSet</var> ) Concrete Method</h3>
+<h3 id="resolve-export">ResolveExport ( |exportName|, |resolveSet| ) Concrete Method</h3>
+1. If |resolveSet| is not present, set |resolveSet| to « ».
 1. Let |record| be this WebAssembly Module Record.
+1. Let |module| be |record|.\[[ModuleSource]].\[[Module]].
+1. [=list/iterate|For each=] Record |r| of |resolveSet|,
+    1. If |record| and |r|.\[[Module]] are the same Module Record and |exportName| is |r|.\[[ExportName]],
+        1. Return null.
+1. Append the record { \[[Module]]: |record|, \[[ExportName]]: |exportName| } to |resolveSet|.
+1. [=list/iterate|For each=] (|name|, |importedModuleName|, |importName|, <var ignore>type</var>) in [=module_indirect_exports=](|module|),
+    1. If |name| is equal to |exportName|,
+        1. Let |importedModule| be [$GetImportedModule$](|record|, |importedModuleName|).
+        1. Let |resolved| be [=?=] |importedModule|.ResolveExport(|importName|, |resolveSet|).
+        1. If |resolved| is null or ~AMBIGUOUS~,
+            1. Return |resolved|.
+        1. If |resolved|.\[[Module]] is a WebAssembly Module Record,
+            1. Return |resolved|.
+        1. Note: This fall-through case allows indirect exports referencing JS values to be treated as captured direct bindings in the environment record,
+            with live bindings unsupported. Only live bindings between Wasm globals are supported for Wasm exports.
 1. If the [=export name list=] of |record| contains |exportName|, return { \[[Module]]: |record|, \[[BindingName]]: |exportName| }.
 1. Otherwise, return null.
 
@@ -1463,8 +1481,23 @@ WebAssembly Module Records have the following methods:
 1. Let |record| be this WebAssembly Module Record.
 1. Let |env| be [$NewModuleEnvironment$](null).
 1. Set |record|.\[[Environment]] to |env|.
-1. For each |name| in the [=export name list=] of |record|,
-    1. Perform ! |env|.CreateImmutableBinding(|name|, true).
+1. Let |module| be |record|.\[[ModuleSource]].\[[Module]].
+1. [=list/iterate|For each=] (|importedModuleName|, |name|, <var ignore>type</var>) in [=module_imports=](|module|),
+    1. Let |importedModule| be [$GetImportedModule$](|record|, |importedModuleName|).
+    1. Let |resolution| be |importedModule|.ResolveExport(|name|).
+    1. If |resolution| is null or ~AMBIGUOUS~, throw a {{SyntaxError}} exception.
+1. [=list/iterate|For each=] (|name|, |importedModuleName|, |importName|, <var ignore>type</var>) in [=module_indirect_exports=](|module|),
+    1. Let |importedModule| be [$GetImportedModule$](|record|, |importedModuleName|).
+    1. Let |resolved| be [=?=] |importedModule|.ResolveExport(|importName|).
+    1. Assert: |resolved| is not null or ~AMBIGUOUS~.
+    1. If |resolved|.\[[Module]] is not a WebAssembly Module Record,
+        1. Note: This case corresponds to indirect exports to non-WebAssembly Module Record environment records, which are always snapshotted.
+        1. Perform [=!=] |env|.CreateImmutableBinding(|name|, true).
+1. [=list/iterate|For each=] (|name|, |externtype|) of [=module_direct_exports=](|module|),
+    1. If |externtype| is of the form [=global=] [=var=] <var ignore>valtype</var>,
+        1. Perform [=!=] |env|.CreateMutableBinding(|name|, false).
+    1. Otherwise,
+        1. Perform [=!=] |env|.CreateImmutableBinding(|name|, true).
 
 </div>
 
@@ -1482,14 +1515,15 @@ WebAssembly Module Records have the following methods:
         1. Let |resolutionInstance| be |resolution|.\[[Module]].\[[Instance]].
         1. If |resolutionInstance| is ~empty~ then,
             1. Throw a {LinkError} exception.
-        1. Let |resolutionModule| be |resolution|.\[[Module]].\[[ModuleSource]].\[[Module]].
-        1. Let |resolutionName| be |resolution|.\[[BindingName]].
-        1. Let |externval| be [=instance_export=](|resolutionInstance|, |resolutionName|).
-        1. Assert: |externval| is not [=error=].
-        1. Assert: [=module_exports=](|resolutionModule|) contains an element (|resolutionName|, <var ignore>type</var>).
-        1. Let |externtype| be the value of |type| for the element (|resolutionName|, |type|) in [=module_exports=](|resolutionModule|).
-        1. If |importtype| is not an [=extern subtype=] of |externtype|, throw a {{LinkError}} exception.
-        1. [=list/Append=] |externval| to |imports|.
+        1. Otherwise,
+            1. Let |resolutionModule| be |resolution|.\[[Module]].\[[ModuleSource]].\[[Module]].
+            1. Let |resolutionName| be |resolution|.\[[BindingName]].
+            1. Let |externval| be [=instance_export=](|resolutionInstance|, |resolutionName|).
+            1. Assert: |externval| is not [=error=].
+            1. Assert: [=module_exports=](|resolutionModule|) contains an element (|resolutionName|, <var ignore>type</var>).
+            1. Let |externtype| be the value of |type| for the element (|resolutionName|, |type|) in [=module_exports=](|resolutionModule|).
+            1. If |importtype| is not an [=extern subtype=] of |externtype|, throw a {{LinkError}} exception.
+            1. [=list/Append=] |externval| to |imports|.
     1. Otherwise,
         1. Let |env| be |resolution|.\[[Module]].\[[Environment]].
         1. Let |v| be [=?=] |env|.GetBindingValue(|resolution|.\[[BindingName]], true).
@@ -1528,23 +1562,24 @@ WebAssembly Module Records have the following methods:
 1. [=Instantiate the core of a WebAssembly module=] |module| with |imports|, and let |instance| be the result.
 1. Set |record|.\[[Instance]] to |instance|.
 1. [=list/iterate|For each=] (|name|, |externtype|) of [=module_exports=](|module|),
-    1. If |externtype| is of the form [=global=] |mut| |globaltype|,
-        1. Assert: |externval| is of the form [=external value|global=] |globaladdr|.
-        1. Let [=external value|global=] |globaladdr| be |externval|.
-        1. Let |global_value| be [=global_read=](|store|, |globaladdr|).
-        1. If |globaltype| is not [=v128=],
-            1. Note: The condition above leaves unsupported JS values as uninitialized in TDZ and therefore as a reference error on
-                access. When integrating with shared globals, they may be excluded here similarly to v128 above.
-            1. Perform [=!=] |record|.\[[Environment]].InitializeBinding(|name|, [=ToJSValue=](|global_value|)).
-            1. If |mut| is [=var=], then associate all future mutations of |globaladdr| with the ECMA-262 binding record for |name| in
-                |record|.\[[Environment]], such that |record|.\[[Environment]].GetBindingValue(|resolution|.\[[BindingName]], true)
-                always returns [=ToJSValue=]([=global_read=](|store|, |globaladdr|)) for the current [=surrounding agent=]'s
-                [=associated store=] |store|.
-    1. Otherwise,
-        1. Perform ! |record|.\[[Environment]].InitializeBinding(|name|, ! Get(|instance|.\[[Exports]], |name|)).
+    1. |record|.\[[Environment]].HasBinding(|name|) is true,
+        1. If |externtype| is of the form [=global=] |mut| |globaltype|,
+            1. Assert: |externval| is of the form [=external value|global=] |globaladdr|.
+            1. Let [=external value|global=] |globaladdr| be |externval|.
+            1. Let |global_value| be [=global_read=](|store|, |globaladdr|).
+            1. If |globaltype| is not [=v128=],
+                1. Note: The condition above leaves unsupported JS values as uninitialized in TDZ and therefore as a reference error on
+                    access. When integrating with shared globals, they may be excluded here similarly to v128 above.
+                1. Perform [=!=] |record|.\[[Environment]].InitializeBinding(|name|, [=ToJSValue=](|global_value|)).
+                1. If |mut| is [=var=], then associate all future mutations of |globaladdr| with the ECMA-262 binding record for |name| in
+                    |record|.\[[Environment]], such that |record|.\[[Environment]].GetBindingValue(|resolution|.\[[BindingName]], true)
+                    always returns [=ToJSValue=]([=global_read=](|store|, |globaladdr|)) for the current [=surrounding agent=]'s
+                    [=associated store=] |store|.
+        1. Otherwise,
+            1. Perform ! |record|.\[[Environment]].InitializeBinding(|name|, ! Get(|instance|.\[[Exports]], |name|)).
 
 Note: The linking semantics here for Wasm to Wasm modules are identical to the WebAssembly JS API semantics as if passing the
-the exports object as the imports object in instantiation. When linking Wasm module imports to JS module exports, the JS API semantics
+the exports object as the imports object in instantiation. When linking Wasm module imports to JS module bindings, the JS API semantics
 are exactly followed as well. It is only in the case of importing Wasm from JS that WebAssembly.Global unwrapping is observable on the
 WebAssembly Module Record Environment Record.
 
