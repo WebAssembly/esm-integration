@@ -346,6 +346,7 @@
 .. |edtables| mathdef:: \xref{syntax/modules}{syntax-exportdesc}{\F{tables}}
 .. |edmems| mathdef:: \xref{syntax/modules}{syntax-exportdesc}{\F{mems}}
 .. |edglobals| mathdef:: \xref{syntax/modules}{syntax-exportdesc}{\F{globals}}
+.. |edexportimport| mathdef:: \xref{syntax/modules}{syntax-export}{\F{exportimport}}
 
 
 .. Instructions, terminals

@@ -327,7 +327,7 @@ The |MSTART| component of a module declares the :ref:`function index <syntax-fun
    The module and its exports are not accessible externally before this initialization has completed.
 
 
-.. index:: ! export, name, index, function index, table index, memory index, global index, function, table, memory, global, instantiation
+.. index:: ! export, direct export, indirect export, re-export, name, index, function index, table index, memory index, global index, function, table, memory, global, instantiation
    pair: abstract syntax; export
    single: function; export
    single: table; export
@@ -355,6 +355,30 @@ The |MEXPORTS| component of a module defines a set of *exports* that become acce
 Each export is labeled by a unique :ref:`name <syntax-name>`.
 Exportable definitions are :ref:`functions <syntax-func>`, :ref:`tables <syntax-table>`, :ref:`memories <syntax-mem>`, and :ref:`globals <syntax-global>`,
 which are referenced through a respective descriptor.
+
+A *direct export* is one where the export references a function, table, memory, or global that is defined within the module itself rather than being imported. 
+
+An *indirect export* (or *re-export*) is one where the export references a function, table, memory, or global that the module imports.
+
+For an export :math:`\export` in module :math:`m`, the export is direct when :math:`\edexportimport(m, \export.\EDESC) = \epsilon` and indirect otherwise, where
+the import corresponding to an export descriptor :math:`\export.\EDESC` is defined by:
+
+.. math::
+   \begin{array}{lclll}
+   \F{exportimport}(m, \exportdesc) &=& m.\MIMPORTS[i] && (\iff \exportdesc = \EDFUNC~\funcidx \\
+     &&&& \quad \wedge~\exists~i~\colon~\funcidx = |\{j ~|~ j < i \\
+     &&&& \quad \quad \wedge~m.\MIMPORTS[j].\IDESC = \IDFUNC~\typeidx' \}|) \\
+   \F{exportimport}(m, \exportdesc) &=& m.\MIMPORTS[i] && (\iff \exportdesc = \EDTABLE~\tableidx \\
+     &&&& \quad \wedge~\exists~i~\colon~\tableidx = |\{j ~|~ j < i \\
+     &&&& \quad \quad \wedge~m.\MIMPORTS[j].\IDESC = \IDTABLE~\tabletype' \}|) \\
+   \F{exportimport}(m, \exportdesc) &=& m.\MIMPORTS[i] && (\iff \exportdesc = \EDMEM~\memidx \\
+     &&&& \quad \wedge~\exists~i~\colon~\memidx = |\{j ~|~ j < i \\
+     &&&& \quad \quad \wedge~m.\MIMPORTS[j].\IDESC = \IDMEM~\memtype' \}|) \\
+   \F{exportimport}(m, \exportdesc) &=& m.\MIMPORTS[i] && (\iff \exportdesc = \EDGLOBAL~\globalidx \\
+     &&&& \quad \wedge~\exists~i~\colon~\globalidx = |\{j ~|~ j < i \\
+     &&&& \quad \quad \wedge~m.\MIMPORTS[j].\IDESC = \IDGLOBAL~\globaltype' \}|) \\
+   \F{exportimport}(m, \exportdesc) &=& \epsilon && (\otherwise) \\
+   \end{array}
 
 
 Conventions
