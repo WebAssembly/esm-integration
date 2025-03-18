@@ -1481,7 +1481,7 @@ WebAssembly Module Records have the following methods:
     1. If |resolution|.\[[Module]] is a WebAssembly Module Record,
         1. Let |resolutionInstance| be |resolution|.\[[Module]].\[[Instance]].
         1. If |resolutionInstance| is ~empty~ then,
-            1. Throw a {ReferenceError}.
+            1. Throw a {LinkError} exception.
         1. Let |resolutionModule| be |resolution|.\[[Module]].\[[ModuleSource]].\[[Module]].
         1. Let |resolutionName| be |resolution|.\[[BindingName]].
         1. Let |externval| be [=instance_export=](|resolutionInstance|, |resolutionName|).
@@ -1534,7 +1534,7 @@ WebAssembly Module Records have the following methods:
         1. Let |global_value| be [=global_read=](|store|, |globaladdr|).
         1. If |globaltype| is not [=v128=],
             1. Note: The condition above leaves unsupported JS values as uninitialized in TDZ and therefore as a reference error on
-                access. When integrating with shared globals, they may be excluded here similarly to v128 above. 
+                access. When integrating with shared globals, they may be excluded here similarly to v128 above.
             1. Perform [=!=] |record|.\[[Environment]].InitializeBinding(|name|, [=ToJSValue=](|global_value|)).
             1. If |mut| is [=var=], then associate all future mutations of |globaladdr| with the ECMA-262 binding record for |name| in
                 |record|.\[[Environment]], such that |record|.\[[Environment]].GetBindingValue(|resolution|.\[[BindingName]], true)
