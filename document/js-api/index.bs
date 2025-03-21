@@ -1447,6 +1447,17 @@ WebAssembly Module Records have the following methods:
 
 </div>
 
+<div algorithm=ModuleSourcesEqual>
+
+<h3 id="module-sources-equal">ModuleSourcesEqual ( |otherRecord| ) Concrete Method</h3>
+1. If |otherRecord| is not a WebAssemly Module Record, return false.
+1. Let |record| be this WebAssembly Module Record.
+1. Let |module| be |record|.\[[ModuleSource]].
+1. Let |otherModule| be |otherRecord|.\[[ModuleSource]].
+1. Return true if |module|.\[[Bytes]] is equal to |otherModule|.\[[Bytes]], and false otherwise.
+
+</div>
+
 <div algorithm=GetModuleSourceKind>
 
 <h3 id="get-module-source-kind">GetModuleSourceKind ( ) Concrete Method</h3>
