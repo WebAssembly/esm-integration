@@ -619,6 +619,7 @@ In addition, the interface object for {{Module}} must have as its \[[Prototype]]
     1. If |module| is [=error=], throw a {{CompileError}} exception.
     1. Set **this**.\[[Module]] to |module|.
     1. Set **this**.\[[Bytes]] to |stableBytes|.
+    1. Set **this**.\[[ModuleRecord]] to null.
 
 Note: Some implementations enforce a size limitation on |bytes|. Use of this API is discouraged, in favor of asynchronous APIs.
 </div>
@@ -1383,7 +1384,7 @@ Note: While this specification is not yet merged into the main Wasm specificatio
 <div algorithm>
 To <dfn export>create a WebAssembly Module Record</dfn> given a WebAssembly module object |moduleObject|, a Realm |realm| and object |hostDefined|, perform the following steps.
 
-1. Assert: |moduleObject|.\[[ModuleRecord]] is not defined.
+1. Assert: |moduleObject|.\[[ModuleRecord]] is null.
 1. Let |requestedModules| be a set.
 1. For each (|moduleName|, <var ignore>name</var>, <var ignore>type</var>) in [=module_imports=](|moduleObject|.\[[Module]]),
     1. [=set/Append=] |moduleName| to |requestedModules|.
