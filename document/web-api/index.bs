@@ -65,6 +65,7 @@ urlPrefix: https://html.spec.whatwg.org/; spec: HTML; type: dfn
     text: default script fetch options; url: #default-script-fetch-options
     text: current settings object; url: #current-settings-object
     text: CORS-same-origin; url: #cors-same-origin
+    text: creating a WebAssembly Module Script; url: #creating-a-webassembly-module-script
 url:https://fetch.spec.whatwg.org/#concept-body-consume-body;text:consume body;type:dfn;spec:FETCH
 </pre>
 
@@ -174,32 +175,27 @@ The [=serialization steps=], given |value|, |serialized|, and |forStorage|, are:
 
 The [=deserialization steps=], given |serialized|, |value|, and |targetRealm| are:
 
+    1. If |targetRealm|'s corresponding [=agent cluster=] is not |serialized|.\[[AgentCluster]], then throw a "<a exception>DataCloneError</a>" {{DOMException}}.
+
     1. Let |bytes| be the [=sub-deserialization=] of |serialized|.\[[Bytes]].
+
+    1. Set |value|.\[[Bytes]] to |bytes|.
+    
+    1. [=Compile a WebAssembly module=] from |bytes| and set |value|.\[[Module]] to the result.
+
+    1. Assert: there was no compile error as this same module was previously compiled successfully.
 
     1. Let |rooted| be the [=sub-deserialization=] of |serialized|.\[[Rooted]].
 
-    1. Let |baseURL| be the [=sub-deserialization=] of |serialized|.\[[BaseURL]].
+    1. If |rooted| is true then,
 
-    1. If |rooted| is false then,
-
-        1. Set |value|.\[[Bytes]] to |bytes|.
-
-        1. If |targetRealm|'s corresponding [=agent cluster=] is not |serialized|.\[[AgentCluster]], then throw a "<a exception>DataCloneError</a>" {{DOMException}}.
-
-        1. [=Compile a WebAssembly module=] from |bytes| and set |value|.\[[Module]] to the result.
-
-    1. Otherwise,
+        1. Let |baseURL| be the [=sub-deserialization=] of |serialized|.\[[BaseURL]].
 
         1. Let |settings| be the [=current settings object=].
 
         1. Let |fetchOptions| be the [=default script fetch options=].
 
-        1. Let |moduleScript| be the result of [=creating a WebAssembly module script=] given |bytes|, |settings|, |baseURL|, |fetchOptions|, true.
-
-        1. [=Parse a WebAssembly module=] given |bytes|, [=current Realm=] and |moduleScript| and set |value|.\[[Module]] to the result.
-
-    1. Assert: there was no compile error as this same module was previously compiled successfully.
-
+        1. Let <var ignore>moduleScript</var> be the result of [=creating a WebAssembly module script=] given |value|, |settings|, |baseURL|, |fetchOptions|, true.
 
 Engines should attempt to share/reuse internal compiled code when performing
 a structured serialization, although in corner cases like CPU upgrade or browser

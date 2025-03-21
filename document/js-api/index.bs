@@ -1381,14 +1381,11 @@ Note: While this specification is not yet merged into the main Wasm specificatio
 <dfn export>WebAssembly Module Record</dfn>s are a subclass of [=Cyclic Module Record=] which contain WebAssembly code.
 
 <div algorithm>
-To <dfn export>parse a WebAssembly module</dfn> given a <a>byte sequence</a> |bytes|, a Realm |realm| and object |hostDefined|, perform the following steps.
+To <dfn export>create a WebAssembly Module Record</dfn> given a WebAssembly module object |moduleObject|, a Realm |realm| and object |hostDefined|, perform the following steps.
 
-1. Let |stableBytes| be a [=get a copy of the buffer source|copy of the bytes held by the buffer=] |bytes|.
-1. [=Compile a WebAssembly module|Compile the WebAssembly module=] |stableBytes| and store the result as |module|.
-1. If |module| is [=error=], throw a {{CompileError}} exception.
-1. [=Construct a WebAssembly module object=] from |module| and |bytes|, and let |module| be the result.
+1. Assert: |moduleObject|.\[[ModuleRecord]] is not defined.
 1. Let |requestedModules| be a set.
-1. For each (|moduleName|, <var ignore>name</var>, <var ignore>type</var>) in [=module_imports=](|module|.\[[Module]]),
+1. For each (|moduleName|, <var ignore>name</var>, <var ignore>type</var>) in [=module_imports=](|moduleObject|.\[[Module]]),
     1. [=set/Append=] |moduleName| to |requestedModules|.
 1. Let |moduleRecord| be {
       <!-- Abstract Module Records -->
@@ -1411,7 +1408,7 @@ To <dfn export>parse a WebAssembly module</dfn> given a <a>byte sequence</a> |by
       \[[AsyncParentModules]]: &laquo; &raquo;,
       \[[PendingAsyncDependencies]]: ~empty~,
     }.
-1. Set |module|.\[[ModuleRecord]] to |moduleRecord|.
+1. Set |moduleObject|.\[[ModuleRecord]] to |moduleRecord|.
 1. Return |moduleRecord|.
 
 Note: From HTML, it's not observable when [=parse a WebAssembly module=] begins, so any work perfomed in compilation may be performed off-thread.
