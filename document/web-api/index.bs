@@ -155,7 +155,7 @@ The [=serialization steps=], given |value|, |serialized|, and |forStorage|, are:
 
     1. Let |rooted| be false.
 
-    1. If |value|.\[[ModuleRecord]] is not empty and |value|.\[[ModuleRecord]].\[[HostDefined]] is not empty,
+    1. If |value|.\[[ModuleRecord]] is not null and |value|.\[[ModuleRecord]].\[[HostDefined]] is not empty,
 
         1. Let |moduleScript| be |value|.\[[ModuleRecord]].\[[HostDefined]].
 
@@ -195,7 +195,7 @@ The [=deserialization steps=], given |serialized|, |value|, and |targetRealm| ar
 
         1. Let |fetchOptions| be the [=default script fetch options=].
 
-        1. Let <var ignore>moduleScript</var> be the result of [=creating a WebAssembly module script=] given |value|, |settings|, |baseURL|, |fetchOptions|, true.
+        1. Let <var ignore>moduleScript</var> be the result of [=creating a WebAssembly module script=] given |value|.\[[Module]], |settings|, |baseURL|, |fetchOptions|, true.
 
 Engines should attempt to share/reuse internal compiled code when performing
 a structured serialization, although in corner cases like CPU upgrade or browser

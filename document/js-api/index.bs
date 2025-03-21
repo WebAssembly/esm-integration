@@ -1392,7 +1392,7 @@ To <dfn export>create a WebAssembly Module Record</dfn> given a WebAssembly modu
       \[[Realm]]: |realm|,
       \[[Environment]]: ~empty~,
       \[[Namespace]]: ~empty~,
-      \[[ModuleSource]]: |module|,
+      \[[ModuleSource]]: |moduleObject|,
       \[[HostDefined]]: |hostDefined|,
       <!-- Cyclic Module Records -->
       \[[Status]]: "new",
@@ -1411,7 +1411,7 @@ To <dfn export>create a WebAssembly Module Record</dfn> given a WebAssembly modu
 1. Set |moduleObject|.\[[ModuleRecord]] to |moduleRecord|.
 1. Return |moduleRecord|.
 
-Note: From HTML, it's not observable when [=parse a WebAssembly module=] begins, so any work perfomed in compilation may be performed off-thread.
+Note: From HTML, it's not observable when [=create a WebAssembly Module Record=] begins, so any work perfomed in compilation may be performed off-thread.
 </div>
 
 <div algorithm>
