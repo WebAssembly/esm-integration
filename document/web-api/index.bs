@@ -60,7 +60,11 @@ urlPrefix: https://webassembly.github.io/spec/js-api/; spec: WASMJS
         text: asynchronously compile a webassembly module; url: #asynchronously-compile-a-webassembly-module
         text: instantiate a promise of a module; url: #instantiate-a-promise-of-a-module
         text: Exported Function; url: #exported-function
-url:https://html.spec.whatwg.org/#cors-same-origin;text:CORS-same-origin;type:dfn;spec:HTML
+urlPrefix: https://html.spec.whatwg.org/; spec: HTML; type: dfn
+    text: rooted source; url: #concept-script-rooted-source
+    text: default script fetch options; url: #default-script-fetch-options
+    text: current settings object; url: #current-settings-object
+    text: CORS-same-origin; url: #cors-same-origin
 url:https://fetch.spec.whatwg.org/#concept-body-consume-body;text:consume body;type:dfn;spec:FETCH
 </pre>
 
@@ -160,7 +164,7 @@ The [=serialization steps=], given |value|, |serialized|, and |forStorage|, are:
 
             1. Set |serialized|.\[[Rooted]] to true.
 
-            1. Set |serialized|.\[[BaseURL]] to |moduleScript|'s <span data-x"concept-script-base-url">base URL</span>.
+            1. Set |serialized|.\[[BaseURL]] to |moduleScript|'s [=base URL=].
 
     1. If |rooted| is false,
 
