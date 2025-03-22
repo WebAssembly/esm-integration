@@ -199,5 +199,4 @@ If custom compilation options are needed or if custom streams need to be provide
 
 ### Where is the specification for this proposal?
 
-If you want to dig into the details, see [the updated WebAssembly JS API](https://webassembly.github.io/esm-integration/js-api/index.html#esm-integration) and [the proposed HTML integration PR](https://github.com/whatwg/html/pull/4372).
-
+If you want to dig into the details, see [the updated WebAssembly JS API](https://webassembly.github.io/esm-integration/js-api/index.html#esm-integration) and [th HTML integration PR](https://github.com/whatwg/html/pull/10380).

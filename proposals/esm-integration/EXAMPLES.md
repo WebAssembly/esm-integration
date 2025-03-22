@@ -81,6 +81,15 @@ export const count = new WebAssembly.Global({
 }, 42);
 ```
 
+Note that counter.js could equivalently be written:
+
+```js
+// counter.js
+export let count = 42;
+```
+
+Which would still be picked up as a global import value, although changes to the JS value would not affect the WebAssembly global value (live bindings are only supported for Wasm module exports).
+
 ##### External type imports
 
 ```wasm
@@ -109,7 +118,7 @@ for (let index = 0; index < length; index++)
 
 | export type | imported value            |
 |-------------|---------------------------|
-| global      | `WebAssembly.Global` object |
+| global      | The corresponding JS value for the global |
 | memory      | `WebAssembly.Memory` object |
 | table       | `WebAssembly.Table` object  |
 | function    | WebAssembly exported function |
@@ -123,16 +132,16 @@ Wasm bindings cannot be reassigned as it can in JS, so the exported value will n
 1. wasm module is instantiated evaluated. Functions are initialized. Memories and tables are initialized and filled with data/elem sections. Globals are initialized and initializer expressions are evaluated. The start function runs.
 1. JS module is evaluated. All values are available.
 
-Currently, the value of the export for something like `WebAssembly.Global` would be accessed using the `.value` property on the JS object. However, when host bindings are in place, these could be annotated with a host binding that turns it into a real live binding that points directly to the value's address.
+The value of the export for `WebAssembly.Global` is provided directly on the JS namespace object, with mutable globals reflected as live bindings to JS.
 
 #### Example
 
 ```js
 // main.js
 import {count, increment} from "./counter.wasm";
-console.log(count.value); // logs 5
+console.log(count); // logs 5
 increment();
-console.log(count.value); // logs 6
+console.log(count); // logs 6
 ```
 ```wasm
 ;; counter.wat --> counter.wasm
