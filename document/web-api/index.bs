@@ -65,7 +65,7 @@ urlPrefix: https://html.spec.whatwg.org/; spec: HTML; type: dfn
     text: default script fetch options; url: #default-script-fetch-options
     text: current settings object; url: #current-settings-object
     text: CORS-same-origin; url: #cors-same-origin
-    text: creating a WebAssembly Module Script; url: #creating-a-webassembly-module-script
+    text: create a WebAssembly Module Script; url: #creating-a-webassembly-module-script
 url:https://fetch.spec.whatwg.org/#concept-body-consume-body;text:consume body;type:dfn;spec:FETCH
 </pre>
 
