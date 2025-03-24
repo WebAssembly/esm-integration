@@ -155,7 +155,7 @@ The [=serialization steps=], given |value|, |serialized|, and |forStorage|, are:
 
     1. Let |rooted| be false.
 
-    1. If |value|.\[[ModuleRecord]] is not null and |value|.\[[ModuleRecord]].\[[HostDefined]] is not empty,
+    1. If |value|.\[[ModuleRecord]] is not null and |value|.\[[ModuleRecord]].\[[HostDefined]] is not empty:
 
         1. Let |moduleScript| be |value|.\[[ModuleRecord]].\[[HostDefined]].
 
@@ -167,7 +167,7 @@ The [=serialization steps=], given |value|, |serialized|, and |forStorage|, are:
 
             1. Set |serialized|.\[[BaseURL]] to |moduleScript|'s [=base URL=].
 
-    1. If |rooted| is false,
+    1. If |rooted| is false:
 
         1. Set |serialized|.\[[Rooted]] to false.
 
@@ -187,7 +187,7 @@ The [=deserialization steps=], given |serialized|, |value|, and |targetRealm| ar
 
     1. Let |rooted| be the [=sub-deserialization=] of |serialized|.\[[Rooted]].
 
-    1. If |rooted| is true then,
+    1. If |rooted| is true:
 
         1. Let |baseURL| be the [=sub-deserialization=] of |serialized|.\[[BaseURL]].
 
