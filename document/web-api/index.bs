@@ -195,7 +195,7 @@ The [=deserialization steps=], given |serialized|, |value|, and |targetRealm| ar
 
         1. Let |fetchOptions| be the [=default script fetch options=].
 
-        1. Let <var ignore>moduleScript</var> be the result of [=creating a WebAssembly module script=] given |value|.\[[Module]], |settings|, |baseURL|, |fetchOptions|, true.
+        1. [=Create a WebAssembly module script=] given |value|.\[[Module]], |settings|, |baseURL|, |fetchOptions|, and true.
 
 Engines should attempt to share/reuse internal compiled code when performing
 a structured serialization, although in corner cases like CPU upgrade or browser
