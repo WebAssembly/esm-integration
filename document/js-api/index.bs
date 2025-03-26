@@ -390,7 +390,7 @@ A {{Module}} object represents a single WebAssembly module. Each {{Module}} obje
     1. [=list/iterate|For each=] (|moduleName|, |componentName|, |externtype|) of [=module_imports=](|module|),
         1. Let |o| be [=?=] [$Get$](|importObject|, |moduleName|).
         1. If |o| [=is not an Object=], throw a {{TypeError}} exception.
-        1. If |o| [=is a Module namespace exotic object=] then,
+        1. If |o| [=is a Module Namespace exotic object=] then,
             1. Let |binding| be [=?=] |o|.\[[Module]].ResolveExport(|componentName|).
             1. Let |module| be |binding|.\[[Module]].
             1. If |module| is a [=WebAssembly Module Record=] and |binding|.\[[BindingName]] is not ~NAMESPACE~ then,
