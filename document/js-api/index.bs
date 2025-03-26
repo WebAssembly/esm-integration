@@ -80,6 +80,7 @@ urlPrefix: https://tc39.github.io/ecma262/; spec: ECMASCRIPT
         text: Cyclic Module Record; url: cyclic-module-record
         text: GetMethod; url: sec-getmethod
         text: ToBigInt64; url: #sec-tobigint64
+        text: Module Namespace exotic object; url: #sec-module-namespace-exotic-objects
     type: abstract-op
         text: CreateDataPropertyOrThrow; url: sec-createdatapropertyorthrow
         text: CreateMethodProperty; url: sec-createmethodproperty
@@ -389,6 +390,16 @@ A {{Module}} object represents a single WebAssembly module. Each {{Module}} obje
     1. [=list/iterate|For each=] (|moduleName|, |componentName|, |externtype|) of [=module_imports=](|module|),
         1. Let |o| be [=?=] [$Get$](|importObject|, |moduleName|).
         1. If |o| [=is not an Object=], throw a {{TypeError}} exception.
+        1. If |o| [=is a Module namespace exotic object=] then,
+            1. Let |binding| be [=?=] |o|.\[[Module]].ResolveExport(|componentName|).
+            1. Let |module| be |binding|.\[[Module]].
+            1. If |module| is a [=WebAssembly Module Record=] and |binding|.\[[BindingName]] is not ~NAMESPACE~ then,
+                1. Let |moduleSource| be |module|.\[[ModuleSource]].
+                1. Let |importtype| be the value of |type| for the element (|binding|.\[[BindingName]], |type|) in [=module_exports=](|moduleSource|.\[[Module]]).
+                1. If |importtype| is not an [=extern subtype=] of |externtype|, throw a {{LinkError}} exception.
+                    1. Let |externval| be [=instance_export=](|module|.\[[Instance]], |binding|.\[[BindingName]]).
+                    1. [=list/Append=] |externval| to |imports|.
+                    1. Break.
         1. Let |v| be [=?=] [$Get$](|o|, |componentName|).
         1. If |externtype| is of the form [=func=] |functype|,
             1. If [$IsCallable$](|v|) is false, throw a {{LinkError}} exception.
