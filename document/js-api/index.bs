@@ -539,7 +539,7 @@ The verification of WebAssembly type requirements is deferred to the
 
 <div algorithm>
   The <dfn method for="WebAssembly">namespaceInstance(|namespace|)</dfn> method, when invoked, performs the following steps:
-    1. If |namespace| is not a [=is a Module Namespace exotic object=], [=throw=] a {{TypeError}} exception.
+    1. If |namespace| is not a [=Module Namespace exotic object=], [=throw=] a {{TypeError}} exception.
     1. If |namespace|.\[[Module]] is not a [=WebAssembly Module Record=], [=throw=] a {{TypeError}} exception.
     1. Let |module| be |namespace|.\[[Module]].
     1. Return |module|.\[[Instance]].
