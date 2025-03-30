@@ -319,8 +319,6 @@ namespace WebAssembly {
 
     Promise&lt;Instance> instantiate(
         Module moduleObject, optional object importObject);
-
-    Instance namespaceInstance(ModuleNamespace namespace);
 };
 </pre>
 
@@ -537,14 +535,6 @@ The verification of WebAssembly type requirements is deferred to the
     1. [=asynchronously instantiate a WebAssembly module|Asynchronously instantiate the WebAssembly module=] |moduleObject| importing |importObject|, and return the result.
 </div>
 
-<div algorithm>
-  The <dfn method for="WebAssembly">namespaceInstance(|namespace|)</dfn> method, when invoked, performs the following steps:
-    1. If |namespace| is not a [=Module Namespace exotic object=], [=throw=] a {{TypeError}} exception.
-    1. If |namespace|.\[[Module]] is not a [=WebAssembly Module Record=], [=throw=] a {{TypeError}} exception.
-    1. Let |module| be |namespace|.\[[Module]].
-    1. Return |module|.\[[Instance]].
-</div>
-
 Note: A follow-on streaming API is documented in the <a href="https://webassembly.github.io/spec/web-api/index.html">WebAssembly Web API</a>.
 
 <h3 id="modules">Modules</h3>
@@ -642,6 +632,7 @@ Note: Some implementations enforce a size limitation on |bytes|. Use of this API
 interface Instance {
   constructor(Module module, optional object importObject);
   readonly attribute object exports;
+  static Instance namespaceInstance(ModuleNamespace moduleNamespace);
 };
 </pre>
 
@@ -657,6 +648,14 @@ Note: The use of this synchronous API is discouraged, as some implementations so
 
 <div algorithm>
     The getter of the <dfn attribute for="Instance">exports</dfn> attribute of {{Instance}} returns **this**.\[[Exports]].
+</div>
+
+<div algorithm>
+    The <dfn method for="Instance">namespaceInstance(|moduleNamespace|)</dfn> method, when invoked, performs the following steps:
+    1. Assert: |namespace| is a [=Module Namespace exotic object=].
+    1. If |namespace|.\[[Module]] is not a [=WebAssembly Module Record=], [=throw=] a {{TypeError}} exception.
+    1. Let |module| be |namespace|.\[[Module]].
+    1. Return |module|.\[[Instance]].
 </div>
 
 <h3 id="memories">Memories</h3>
