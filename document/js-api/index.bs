@@ -1493,8 +1493,7 @@ WebAssembly Module Records have the following methods:
     1. Let |resolvedModule| be |resolution|.\\[[Module]].
     1. Let |resolvedName| be |resolution|.\[[BindingName]].
     1. If |resolvedModule| is a WebAssembly Module Record,
-        1. If |resolvedModule|.\[[Instance]] is ~empty~ then,
-            1. Throw a {LinkError} exception.
+        1. If |resolvedModule|.\[[Instance]] is ~empty~, throw a {LinkError} exception.
         1. Assert: |resolvedModule|.\[[Instance]] is a WebAssembly {{Instance}} object.
         1. Assert: |resolvedModule|.\[[ModuleSource]] is a WebAssembly {{Module}} object.
         1. Let |module| be |resolvedModule|.\[[ModuleSource]].\[[Module]].
