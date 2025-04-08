@@ -79,8 +79,9 @@ urlPrefix: https://tc39.github.io/ecma262/; spec: ECMASCRIPT
         text: CreateArrayFromList; url: sec-createarrayfromlist
         text: Cyclic Module Record; url: cyclic-module-record
         text: GetMethod; url: sec-getmethod
-        text: ToBigInt64; url: #sec-tobigint64
-        text: Module Namespace exotic object; url: #sec-module-namespace-exotic-objects
+        text: ToBigInt64; url: sec-tobigint64
+        text: Module Namespace exotic object; url: sec-module-namespace-exotic-objects
+        text: ResolvedBinding Record; url: resolvedbinding-record
     type: abstract-op
         text: CreateDataPropertyOrThrow; url: sec-createdatapropertyorthrow
         text: CreateMethodProperty; url: sec-createmethodproperty
@@ -1488,21 +1489,24 @@ WebAssembly Module Records have the following methods:
 1. [=list/iterate|For each=] (|importedModuleName|, |name|, |importtype|) in [=module_imports=](|module|),
     1. Let |importedModule| be [$GetImportedModule$](|record|, |importedModuleName|).
     1. Let |resolution| be |importedModule|.ResolveExport(|name|).
-    1. If |resolution|.\[[Module]] is a WebAssembly Module Record,
-        1. Let |resolutionInstance| be |resolution|.\[[Module]].\[[Instance]].
-        1. If |resolutionInstance| is ~empty~ then,
+    1. Assert: |resolution| is a [=ResolvedBinding Record=], as validated during environment initialization.
+    1. Let |resolvedModule| be |resolution|.\\[[Module]].
+    1. Let |resolvedName| be |resolution|.\[[BindingName]].
+    1. If |resolvedModule| is a WebAssembly Module Record,
+        1. If |resolvedModule|.\[[Instance]] is ~empty~ then,
             1. Throw a {LinkError} exception.
-        1. Let |resolutionModule| be |resolution|.\[[Module]].\[[ModuleSource]].\[[Module]].
-        1. Let |resolutionName| be |resolution|.\[[BindingName]].
-        1. Let |externval| be [=instance_export=](|resolutionInstance|, |resolutionName|).
+        1. Assert: |resolvedModule|.\[[Instance]] is a WebAssembly {{Instance}} object.
+        1. Assert: |resolvedModule|.\[[ModuleSource]] is a WebAssembly {{Module}} object.
+        1. Let |module| be |resolvedModule|.\[[ModuleSource]].\[[Module]].
+        1. Let |externval| be [=instance_export=](|resolvedModule|.\[[Instance]], |resolvedName|).
         1. Assert: |externval| is not [=error=].
-        1. Assert: [=module_exports=](|resolutionModule|) contains an element (|resolutionName|, <var ignore>type</var>).
-        1. Let |externtype| be the value of |type| for the element (|resolutionName|, |type|) in [=module_exports=](|resolutionModule|).
+        1. Assert: [=module_exports=](|module|) contains an element (|resolvedName|, <var ignore>type</var>).
+        1. Let |externtype| be the value of |type| for the element (|resolvedName|, |type|) in [=module_exports=](|module|).
         1. If |importtype| is not an [=extern subtype=] of |externtype|, throw a {{LinkError}} exception.
         1. [=list/Append=] |externval| to |imports|.
     1. Otherwise,
-        1. Let |env| be |resolution|.\[[Module]].\[[Environment]].
-        1. Let |v| be [=?=] |env|.GetBindingValue(|resolution|.\[[BindingName]], true).
+        1. Let |env| be |resolvedModule|.\[[Environment]].
+        1. Let |v| be [=?=] |env|.GetBindingValue(|resolvedName|, true).
         1. If |importtype| is of the form [=func=] |functype|,
             1. If [$IsCallable$](|v|) is false, throw a {{LinkError}} exception.
             1. If |v| has a \[[FunctionAddress]] internal slot, and therefore is an [=Exported Function=],
