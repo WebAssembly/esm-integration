@@ -79,7 +79,9 @@ urlPrefix: https://tc39.github.io/ecma262/; spec: ECMASCRIPT
         text: CreateArrayFromList; url: sec-createarrayfromlist
         text: Cyclic Module Record; url: cyclic-module-record
         text: GetMethod; url: sec-getmethod
-        text: ToBigInt64; url: #sec-tobigint64
+        text: ToBigInt64; url: sec-tobigint64
+        text: Module Namespace exotic object; url: sec-module-namespace-exotic-objects
+        text: ResolvedBinding Record; url: resolvedbinding-record
     type: abstract-op
         text: CreateDataPropertyOrThrow; url: sec-createdatapropertyorthrow
         text: CreateMethodProperty; url: sec-createmethodproperty
@@ -156,6 +158,7 @@ urlPrefix: https://webassembly.github.io/spec/core/; spec: WebAssembly; type: df
     text: memory address; url: exec/runtime.html#syntax-memaddr
     text: global address; url: exec/runtime.html#syntax-globaladdr
     text: extern address; url: exec/runtime.html#syntax-externaddr
+    text: extern subtype; url: valid/types.html#match-externtype
     text: page size; url: exec/runtime.html#page-size
     url: syntax/types.html#syntax-numtype
         text: i32
@@ -317,6 +320,8 @@ namespace WebAssembly {
 
     Promise&lt;Instance> instantiate(
         Module moduleObject, optional object importObject);
+
+    Instance namespaceInstance(ModuleNamespace moduleNamespace);
 };
 </pre>
 
@@ -328,6 +333,7 @@ Note:
   WebAssembly.compile(|bytes|) asynchronously validates and complies bytes of WebAssembly into a Module.
   WebAssembly.instantiate(|bytes|, |importObject|) asynchronously compiles and instantiates a WebAssembly module from bytes of source.
   The WebAssembly.instantiate(|moduleObject|, |importObject|) asynchronously instantiates a compiled module.
+  WebAssembly.namespaceInstance(|namespace|) obtains the WebAssembly Instance from the Module Namespace Exotic Object for a WebAssembly Module Record.
 -->
 
 <div algorithm>
@@ -534,6 +540,14 @@ The verification of WebAssembly type requirements is deferred to the
 </div>
 
 Note: A follow-on streaming API is documented in the <a href="https://webassembly.github.io/spec/web-api/index.html">WebAssembly Web API</a>.
+
+<div algorithm>
+    The <dfn method for="WebAssembly">namespaceInstance(|namespace|)</dfn> method, when invoked, performs the following steps:
+    1. Assert: |namespace| is a [=Module Namespace exotic object=].
+    1. If |namespace|.\[[Module]] is not a [=WebAssembly Module Record=], [=throw=] a {{TypeError}} exception.
+    1. Let |module| be |namespace|.\[[Module]].
+    1. Return |module|.\[[Instance]].
+</div>
 
 <h3 id="modules">Modules</h3>
 
@@ -1391,6 +1405,8 @@ To <dfn export>parse a WebAssembly module</dfn> given a <a>byte sequence</a> |by
 1. For each (|moduleName|, <var ignore>name</var>, <var ignore>type</var>) in [=module_imports=](|module|.\[[Module]]),
     1. [=set/Append=] |moduleName| to |requestedModules|.
 1. Let |moduleRecord| be {
+      <!-- WebAssembly Module Records -->
+      \[[Instance]]: ~empty~,
       <!-- Abstract Module Records -->
       \[[Realm]]: |realm|,
       \[[Environment]]: ~empty~,
@@ -1470,25 +1486,82 @@ WebAssembly Module Records have the following methods:
 <h3 id="module-execution">ExecuteModule ( [ |promiseCapability| ] ) Concrete Method</h3>
 1. Assert: |promiseCapability| was not provided.
 1. Let |record| be this WebAssembly Module Record.
-1. Let |module| be |record|.\[[ModuleSource]].
-1. Let |imports| be a new, empty [=map=].
-1. For each (|importedModuleName|, |name|, <var ignore>type</var>) in [=module_imports=](|module|.\[[Module]]),
-    1. If |imports|[|importedModuleName|] does not exist, set |imports|[|importedModuleName|] to a new, empty [=map=].
+1. Let |module| be |record|.\[[ModuleSource]].\[[Module]].
+1. Let |imports| be « ».
+1. [=list/iterate|For each=] (|importedModuleName|, |name|, |importtype|) in [=module_imports=](|module|),
     1. Let |importedModule| be [$GetImportedModule$](|record|, |importedModuleName|).
-    1. Let |value| be ? |importedModule|.\[[Environment]].GetBindingValue(|name|, true).
-    1. Set |imports|[|importedModuleName|][|name|] to |value|.
-1. Let |importObject| be ! [$OrdinaryObjectCreate$](null).
-1. For each |key| → |value| of |imports|,
-    1. Let |moduleImportsObject| be ! [$OrdinaryObjectCreate$](null).
-    1. For each |importedName| → |importedValue| of |value|,
-        1. Perform ! [$CreateDataPropertyOrThrow$](|moduleImportsObject|, |importedName|, |importedValue|).
-    1. Perform ! [$CreateDataPropertyOrThrow$](|importObject|, |key|, |moduleImportsObject|).
-1. [=Read the imports=] of |module| with imports |importObject|, and let |imports| be the result.
+    1. Let |resolution| be |importedModule|.ResolveExport(|name|).
+    1. Assert: |resolution| is a [=ResolvedBinding Record=], as validated during environment initialization.
+    1. Let |resolvedModule| be |resolution|.\\[[Module]].
+    1. Let |resolvedName| be |resolution|.\[[BindingName]].
+    1. If |resolvedModule| is a WebAssembly Module Record,
+        1. If |resolvedModule|.\[[Instance]] is ~empty~, throw a {LinkError} exception.
+        1. Assert: |resolvedModule|.\[[Instance]] is a WebAssembly {{Instance}} object.
+        1. Assert: |resolvedModule|.\[[ModuleSource]] is a WebAssembly {{Module}} object.
+        1. Let |module| be |resolvedModule|.\[[ModuleSource]].\[[Module]].
+        1. Let |externval| be [=instance_export=](|resolvedModule|.\[[Instance]], |resolvedName|).
+        1. Assert: |externval| is not [=error=].
+        1. Assert: [=module_exports=](|module|) contains an element (|resolvedName|, <var ignore>type</var>).
+        1. Let |externtype| be the value of |type| for the element (|resolvedName|, |type|) in [=module_exports=](|module|).
+        1. If |importtype| is not an [=extern subtype=] of |externtype|, throw a {{LinkError}} exception.
+        1. [=list/Append=] |externval| to |imports|.
+    1. Otherwise,
+        1. Let |env| be |resolvedModule|.\[[Environment]].
+        1. Let |v| be [=?=] |env|.GetBindingValue(|resolvedName|, true).
+        1. If |importtype| is of the form [=func=] |functype|,
+            1. If [$IsCallable$](|v|) is false, throw a {{LinkError}} exception.
+            1. If |v| has a \[[FunctionAddress]] internal slot, and therefore is an [=Exported Function=],
+                1. Let |funcaddr| be the value of |v|'s \[[FunctionAddress]] internal slot.
+            1. Otherwise,
+                1. [=Create a host function=] from |v| and |functype|, and let |funcaddr| be the result.
+                1. Let <var ignore>index</var> be the number of external functions in |imports|, defining the [=index of the host function=] |funcaddr|.
+            1. Let |externfunc| be the [=external value=] [=external value|func=] |funcaddr|.
+            1. [=list/Append=] |externfunc| to |imports|.
+        1. If |importtype| is of the form [=global=] |mut| |valtype|,
+            1. Let |store| be the [=surrounding agent=]'s [=associated store=].
+            1. If |v| [=implements=] {{Global}},
+                1. Let |globaladdr| be |v|.\[[Global]].
+                1. Let |targetmut| <var ignore>valuetype</var> be [=global_type=](|store|, |globaladdr|).
+                    1. If |mut| is [=const=] and |targetmut| is [=var=], throw a {{LinkError}} exception.
+            1. Otherwise,
+                1. If |valtype| is [=v128=], throw a {{LinkError}} exception.
+                1. If |mut| is [=var=], throw a {{LinkError}} exception.
+                1. Let |value| be [=?=] [=ToWebAssemblyValue=](|v|, |valtype|).
+                1. Let (|store|, |globaladdr|) be [=global_alloc=](|store|, |mut| |valtype|, |value|).
+                1. Set the [=surrounding agent=]'s [=associated store=] to |store|.
+            1. Let |externglobal| be [=external value|global=] |globaladdr|.
+            1. [=list/Append=] |externglobal| to |imports|.
+        1. If |importtype| is of the form [=mem=] <var ignore>memtype</var>,
+            1. If |v| does not [=implement=] {{Memory}}, throw a {{LinkError}} exception.
+            1. Let |externmem| be the [=external value=] [=external value|mem=] |v|.\[[Memory]].
+            1. [=list/Append=] |externmem| to |imports|.
+        1. If |importtype| is of the form [=table=] <var ignore>tabletype</var>,
+            1. If |v| does not [=implement=] {{Table}}, throw a {{LinkError}} exception.
+            1. Let |tableaddr| be |v|.\[[Table]].
+            1. Let |externtable| be the [=external value=] [=external value|table=] |tableaddr|.
+            1. [=list/Append=] |externtable| to |imports|.
 1. [=Instantiate the core of a WebAssembly module=] |module| with |imports|, and let |instance| be the result.
-1. For each |name| in the [=export name list=] of |record|,
-    1. Perform ! |record|.\[[Environment]].InitializeBinding(|name|, ! Get(|instance|.\[[Exports]], |name|)).
+1. Set |record|.\[[Instance]] to |instance|.
+1. [=list/iterate|For each=] (|name|, |externtype|) of [=module_exports=](|module|),
+    1. If |externtype| is of the form [=global=] |mut| |globaltype|,
+        1. Assert: |externval| is of the form [=external value|global=] |globaladdr|.
+        1. Let [=external value|global=] |globaladdr| be |externval|.
+        1. Let |global_value| be [=global_read=](|store|, |globaladdr|).
+        1. If |globaltype| is not [=v128=],
+            1. Note: The condition above leaves unsupported JS values as uninitialized in TDZ and therefore as a reference error on
+                access. When integrating with shared globals, they may be excluded here similarly to v128 above.
+            1. Perform [=!=] |record|.\[[Environment]].InitializeBinding(|name|, [=ToJSValue=](|global_value|)).
+            1. If |mut| is [=var=], then associate all future mutations of |globaladdr| with the ECMA-262 binding record for |name| in
+                |record|.\[[Environment]], such that |record|.\[[Environment]].GetBindingValue(|resolution|.\[[BindingName]], true)
+                always returns [=ToJSValue=]([=global_read=](|store|, |globaladdr|)) for the current [=surrounding agent=]'s
+                [=associated store=] |store|.
+    1. Otherwise,
+        1. Perform ! |record|.\[[Environment]].InitializeBinding(|name|, ! Get(|instance|.\[[Exports]], |name|)).
 
-    Note: exported bindings are left uninitialized, i.e., in TDZ.
+Note: The linking semantics here for Wasm to Wasm modules are identical to the WebAssembly JS API semantics as if passing the
+the exports object as the imports object in instantiation. When linking Wasm module imports to JS module exports, the JS API semantics
+are exactly followed as well. It is only in the case of importing Wasm from JS that WebAssembly.Global unwrapping is observable on the
+WebAssembly Module Record Environment Record.
 
 </div>
 
@@ -1500,6 +1573,8 @@ WebAssembly Module Records have the following methods:
         1. For each (|moduleName|, <var ignore>name</var>, <var ignore>type</var>) in [=module_imports=](|specifier|.\[[Module]]),
             1. [=set/Append=] |moduleName| to |requestedModules|.
         1. Let |moduleRecord| be {
+              <!-- WebAssembly Module Records -->
+              \[[Instance]]: ~empty~,
               <!-- Abstract Module Records -->
               \[[Realm]]: |realm|,
               \[[Environment]]: ~empty~,
