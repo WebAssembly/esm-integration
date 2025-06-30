@@ -1409,6 +1409,9 @@ To <dfn export>parse a WebAssembly module</dfn> given a <a>byte sequence</a> |by
     1. Note: The following step only applies when integrating with the JS String Builtins proposal.
     1. If [=Find a builtin=] with (|moduleName|, |name|, |type|) and builtins |module|.\[[BuiltinSets]] is not null, then [=iteration/continue=].
     1. [=set/Append=] |moduleName| to |requestedModules|.
+1. For each (|name|, <var ignore>type</var>) in [=module_exports=](|module|.\[[Module]])
+    1. If |name| starts with the prefix "wasm:" or "wasm-js:",
+        1. Throw a {{LinkError}} exception.
 1. Let |moduleRecord| be {
       <!-- WebAssembly Module Records -->
       \[[Instance]]: ~empty~,
@@ -1444,8 +1447,7 @@ The <dfn>export name list</dfn> of a WebAssembly Module Record |record| is defin
 1. Let |module| be |record|'s \[[ModuleSource]] internal slot.
 1. Let |exports| be an empty [=list=].
 1. For each (|name|, <var ignore>type</var>) in [=module_exports=](|module|.\[[Module]])
-    1. If |name| does not start with the prefix "wasm:" or "wasm-js:",
-        1. [=list/Append=] |name| to the end of |exports|.
+    1. [=list/Append=] |name| to the end of |exports|.
 1. Return |exports|.
 
 </div>
