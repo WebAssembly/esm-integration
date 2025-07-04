@@ -4,9 +4,9 @@
   <meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport">
   <title>WebAssembly JavaScript Interface: ESM Integration</title>
   <meta content="ED" name="w3c-status">
-  <meta content="Bikeshed version b25686b9f, updated Fri Mar 14 14:15:20 2025 -0700" name="generator">
+  <meta content="Bikeshed version 618007319, updated Thu Jun 26 17:23:55 2025 -0700" name="generator">
   <link href="https://www.w3.org/TR/wasm-js-api-2/" rel="canonical">
-  <meta content="03354b6e85c731ace0b515456448d01badd8943d" name="revision">
+  <meta content="e6f42fc919267bb49a82e4ac6b4807f2f49730fb" name="revision">
   <meta content="dark light" name="color-scheme">
 <style>
 emu-const {
@@ -741,9 +741,13 @@ var[data-var-color="6"] { --var-vg: #FFBCF2; }
   <link href="https://www.w3.org/StyleSheets/TR/2021/dark.css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css">
  <body class="h-entry">
   <div class="head">
-   <p data-fill-with="logo"><a class="logo" href="https://www.w3.org/"> <img alt="W3C" height="48" src="https://www.w3.org/StyleSheets/TR/2021/logos/W3C" width="72"> </a> </p>
+   <p data-fill-with="logo"><a class="logo" href="https://www.w3.org/">
+    <img alt="W3C" height="48" src="https://www.w3.org/StyleSheets/TR/2021/logos/W3C" width="72">
+</a>
+</p>
    <h1 class="p-name no-ref" id="title">WebAssembly JavaScript Interface: ESM Integration</h1>
-   <p id="w3c-state"><a href="https://www.w3.org/standards/types/#ED">Editor’s Draft</a>, <time class="dt-updated" datetime="2025-04-10">10 April 2025</time></p>
+   <p id="w3c-state"><a href="https://www.w3.org/standards/types/#ED">Editor’s Draft</a>,
+    <time class="dt-updated" datetime="2025-07-04">4 July 2025</time></p>
    <details open>
     <summary>More details about this document</summary>
     <div data-fill-with="spec-metadata">
@@ -765,32 +769,55 @@ var[data-var-color="6"] { --var-vg: #FFBCF2; }
     </div>
    </details>
    <div data-fill-with="warning"></div>
-   <p class="copyright" data-fill-with="copyright"><a href="https://www.w3.org/policies/#copyright">Copyright</a> © 2025 <a href="https://www.w3.org/">World Wide Web Consortium</a>. <abbr title="World Wide Web Consortium">W3C</abbr><sup>®</sup> <a href="https://www.w3.org/policies/#Legal_Disclaimer">liability</a>, <a href="https://www.w3.org/policies/#W3C_Trademarks">trademark</a> and <a href="https://www.w3.org/copyright/software-license/" rel="license" title="W3C Software and Document License">permissive document license</a> rules apply. </p>
+   <p class="copyright" data-fill-with="copyright"><a href="https://www.w3.org/policies/#copyright">Copyright</a> © 2025 <a href="https://www.w3.org/">World Wide Web Consortium</a>. <abbr title="World Wide Web Consortium">W3C</abbr><sup>®</sup> <a href="https://www.w3.org/policies/#Legal_Disclaimer">liability</a>, <a href="https://www.w3.org/policies/#W3C_Trademarks">trademark</a> and <a href="https://www.w3.org/copyright/software-license/" rel="license" title="W3C Software and Document License">permissive document license</a> rules apply.
+</p>
    <hr title="Separator for header">
   </div>
   <div class="p-summary" data-fill-with="abstract">
    <h2 class="no-num no-toc no-ref heading settled" id="abstract"><span class="content">Abstract</span></h2>
    <p>This document provides an explicit JavaScript API for interacting with WebAssembly.</p>
-    This is part of a collection of related documents:
+   
+
+
+
+This is part of a collection of related documents:
 the <a href="https://www.w3.org/TR/wasm-core/">Core WebAssembly Specification</a>,
 the <a href="https://www.w3.org/TR/wasm-js-api/">WebAssembly JS Interface</a>,
-and the <a href="https://www.w3.org/TR/wasm-web-api/">WebAssembly Web API</a>. 
+and the <a href="https://www.w3.org/TR/wasm-web-api/">WebAssembly Web API</a>.
+
   </div>
   <h2 class="no-num no-toc no-ref heading settled" id="sotd"><span class="content">Status of this document</span></h2>
   <div data-fill-with="status">
-   <p> This is a public copy of the editors’ draft.
+   <p>
+	This is a public copy of the editors’ draft.
 	It is provided for discussion only and may change at any moment.
 	Its publication here does not imply endorsement of its contents by W3C.
-	Don’t cite this document other than as work in progress. </p>
-   <p> <a href="https://github.com/WebAssembly/spec/issues">GitHub Issues</a> are preferred for discussion of this specification.
-  All issues and comments are <a href="https://github.com/WebAssembly/spec/issues?utf8=%E2%9C%93&amp;q=is%3Aissue++">archived</a>. </p>
-   <p> This document was produced by the <a href="https://www.w3.org/groups/wg/wasm">WebAssembly Working Group</a>. </p>
-   <p> This document was produced by a group operating under
+	Don’t cite this document other than as work in progress.
+</p>
+   <p>
+  <a href="https://github.com/WebAssembly/spec/issues">GitHub Issues</a>
+  are preferred for discussion of this specification.
+  All issues and comments are
+  <a href="https://github.com/WebAssembly/spec/issues?utf8=%E2%9C%93&amp;q=is%3Aissue++">archived</a>.
+</p>
+   <p>
+  This document was produced by the
+  <a href="https://www.w3.org/groups/wg/wasm">WebAssembly Working Group</a>.
+</p>
+   <p>
+	This document was produced by a group operating under
 	the <a href="https://www.w3.org/Consortium/Patent-Policy-20170801/">W3C Patent Policy</a>.
-	W3C maintains a <a href="https://www.w3.org/2004/01/pp-impl/101196/status" rel="disclosure">public list of any patent disclosures</a> made in connection with the deliverables of the group;
+	W3C maintains a <a href="https://www.w3.org/2004/01/pp-impl/101196/status" rel="disclosure">public list of any patent disclosures</a>
+	made in connection with the deliverables of the group;
 	that page also includes instructions for disclosing a patent.
-	An individual who has actual knowledge of a patent which the individual believes contains <a href="https://www.w3.org/Consortium/Patent-Policy-20170801/#def-essential">Essential Claim(s)</a> must disclose the information in accordance with <a href="https://www.w3.org/Consortium/Patent-Policy-20170801/#sec-Disclosure">section 6 of the W3C Patent Policy</a>. </p>
-   <p> This document is governed by the <a href="https://www.w3.org/policies/process/20231103/" id="w3c_process_revision">03 November 2023 W3C Process Document</a>. </p>
+	An individual who has actual knowledge of a patent that the individual believes contains <a href="https://www.w3.org/Consortium/Patent-Policy-20170801/#def-essential">Essential Claim(s)</a>
+	must disclose the information in accordance with <a href="https://www.w3.org/Consortium/Patent-Policy-20170801/#sec-Disclosure">section 6 of the W3C Patent Policy</a>.
+
+</p>
+   <p>
+	This document is governed by the <a href="https://www.w3.org/policies/process/20231103/" id="w3c_process_revision">03 November 2023 W3C Process Document</a>.
+
+</p>
    <p></p>
   </div>
   <div data-fill-with="at-risk"></div>
@@ -936,11 +963,13 @@ This mapping is used to ensure that, for a given <a data-link-type="dfn" href="h
     <a class="idl-code" data-link-type="interface" href="https://webidl.spec.whatwg.org/#idl-promise" id="ref-for-idl-promise②"><c- b>Promise</c-></a>&lt;<a data-link-type="idl-name" href="#instance" id="ref-for-instance①"><c- n>Instance</c-></a>> <a class="idl-code" data-link-type="method" href="#dom-webassembly-instantiate-moduleobject-importobject" id="ref-for-dom-webassembly-instantiate-moduleobject-importobject"><c- g>instantiate</c-></a>(
         <a data-link-type="idl-name" href="#module" id="ref-for-module②"><c- n>Module</c-></a> <dfn class="dfn-paneled idl-code" data-dfn-for="WebAssembly/instantiate(moduleObject, importObject), WebAssembly/instantiate(moduleObject)" data-dfn-type="argument" data-export id="dom-webassembly-instantiate-moduleobject-importobject-moduleobject"><code><c- g>moduleObject</c-></code></dfn>, <c- b>optional</c-> <a class="idl-code" data-link-type="interface" href="https://webidl.spec.whatwg.org/#idl-object" id="ref-for-idl-object①"><c- b>object</c-></a> <dfn class="dfn-paneled idl-code" data-dfn-for="WebAssembly/instantiate(moduleObject, importObject), WebAssembly/instantiate(moduleObject)" data-dfn-type="argument" data-export id="dom-webassembly-instantiate-moduleobject-importobject-importobject"><code><c- g>importObject</c-></code></dfn>);
 
-    <a data-link-type="idl-name" href="#instance" id="ref-for-instance②"><c- n>Instance</c-></a> <dfn class="dfn-paneled idl-code" data-dfn-for="WebAssembly" data-dfn-type="method" data-export data-lt="namespaceInstance(moduleNamespace)" id="dom-webassembly-namespaceinstance"><code><c- g>namespaceInstance</c-></code></dfn>(<a data-link-type="idl-name"><c- n>ModuleNamespace</c-></a> <dfn class="dfn-paneled idl-code" data-dfn-for="WebAssembly/namespaceInstance(moduleNamespace)" data-dfn-type="argument" data-export id="dom-webassembly-namespaceinstance-modulenamespace-modulenamespace"><code><c- g>moduleNamespace</c-></code></dfn>);
+    <a data-link-type="idl-name" href="#instance" id="ref-for-instance②"><c- n>Instance</c-></a> <dfn class="dfn-paneled idl-code" data-dfn-for="WebAssembly" data-dfn-type="method" data-export data-lt="namespaceInstance(moduleNamespace)" id="dom-webassembly-namespaceinstance"><code><c- g>namespaceInstance</c-></code></dfn>(<u class="link-error" data-lt="ModuleNamespace" title="LINK ERROR: No &apos;idl-name&apos; refs found for &apos;ModuleNamespace&apos;."><c- n>ModuleNamespace</c-></u> <dfn class="dfn-paneled idl-code" data-dfn-for="WebAssembly/namespaceInstance(moduleNamespace)" data-dfn-type="argument" data-export id="dom-webassembly-namespaceinstance-modulenamespace-modulenamespace"><code><c- g>moduleNamespace</c-></code></dfn>);
 };
 </pre>
    <div class="algorithm" data-algorithm="compile a WebAssembly module">
-     To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="compile-a-webassembly-module">compile a WebAssembly module</dfn> from source bytes <var>bytes</var>, perform the following steps: 
+    
+  To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="compile-a-webassembly-module">compile a WebAssembly module</dfn> from source bytes <var>bytes</var>, perform the following steps:
+
     <ol>
      <li data-md>
       <p>Let <var>module</var> be <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/appendix/embedding.html#embed-module-decode" id="ref-for-embed-module-decode">module_decode</a>(<var>bytes</var>). If <var>module</var> is <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/appendix/embedding.html#embed-error" id="ref-for-embed-error">error</a>, return <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/appendix/embedding.html#embed-error" id="ref-for-embed-error①">error</a>.</p>
@@ -951,7 +980,9 @@ This mapping is used to ensure that, for a given <a data-link-type="dfn" href="h
     </ol>
    </div>
    <div class="algorithm" data-algorithm="validate(bytes)" data-algorithm-for="WebAssembly">
-     The <dfn class="dfn-paneled idl-code" data-dfn-for="WebAssembly" data-dfn-type="method" data-export id="dom-webassembly-validate"><code>validate(<var>bytes</var>)</code></dfn> method, when invoked, performs the following steps: 
+    
+  The <dfn class="dfn-paneled idl-code" data-dfn-for="WebAssembly" data-dfn-type="method" data-export id="dom-webassembly-validate"><code>validate(<var>bytes</var>)</code></dfn> method, when invoked, performs the following steps:
+
     <ol>
      <li data-md>
       <p>Let <var>stableBytes</var> be a <a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#dfn-get-buffer-source-copy" id="ref-for-dfn-get-buffer-source-copy">copy of the bytes held by the buffer</a> <var>bytes</var>.</p>
@@ -973,7 +1004,10 @@ This mapping is used to ensure that, for a given <a data-link-type="dfn" href="h
      <p>[[ModuleRecord]] : the <a data-link-type="dfn" href="#webassembly-module-record" id="ref-for-webassembly-module-record">WebAssembly Module Record</a> if this WebAssembly module is associated with one.</p>
    </ul>
    <div class="algorithm" data-algorithm="construct a WebAssembly module object">
-     To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="construct-a-webassembly-module-object">construct a WebAssembly module object</dfn> from a module <var>module</var> and source bytes <var>bytes</var>, perform the following steps: 
+    
+  To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="construct-a-webassembly-module-object">construct a WebAssembly module object</dfn> from a module <var>module</var> and source bytes <var>bytes</var>, perform the following steps:
+
+
     <ol>
      <li data-md>
       <p>Let <var>moduleObject</var> be a new <code class="idl"><a data-link-type="idl" href="#module" id="ref-for-module⑤">Module</a></code> object.</p>
@@ -988,7 +1022,10 @@ This mapping is used to ensure that, for a given <a data-link-type="dfn" href="h
     </ol>
    </div>
    <div class="algorithm" data-algorithm="asynchronously compile a WebAssembly module">
-     To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="asynchronously-compile-a-webassembly-module">asynchronously compile a WebAssembly module</dfn> from source bytes <var>bytes</var>, using optional <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#task-source" id="ref-for-task-source">task source</a> <var>taskSource</var>, perform the following steps: 
+    
+  To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="asynchronously-compile-a-webassembly-module">asynchronously compile a WebAssembly module</dfn> from source bytes <var>bytes</var>, using optional <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#task-source" id="ref-for-task-source">task source</a> <var>taskSource</var>, perform the following steps:
+
+
     <ol>
      <li data-md>
       <p>Let <var>promise</var> be <a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#a-new-promise" id="ref-for-a-new-promise">a new promise</a>.</p>
@@ -1017,7 +1054,9 @@ This mapping is used to ensure that, for a given <a data-link-type="dfn" href="h
     </ol>
    </div>
    <div class="algorithm" data-algorithm="compile(bytes)" data-algorithm-for="WebAssembly">
-     The <dfn class="dfn-paneled idl-code" data-dfn-for="WebAssembly" data-dfn-type="method" data-export id="dom-webassembly-compile"><code>compile(<var>bytes</var>)</code></dfn> method, when invoked, performs the following steps: 
+    
+    The <dfn class="dfn-paneled idl-code" data-dfn-for="WebAssembly" data-dfn-type="method" data-export id="dom-webassembly-compile"><code>compile(<var>bytes</var>)</code></dfn> method, when invoked, performs the following steps:
+
     <ol>
      <li data-md>
       <p>Let <var>stableBytes</var> be a <a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#dfn-get-buffer-source-copy" id="ref-for-dfn-get-buffer-source-copy①">copy of the bytes held by the buffer</a> <var>bytes</var>.</p>
@@ -1026,7 +1065,9 @@ This mapping is used to ensure that, for a given <a data-link-type="dfn" href="h
     </ol>
    </div>
    <div class="algorithm" data-algorithm="read-the-imports">
-     To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="read-the-imports">read the imports</dfn> from a WebAssembly module <var>module</var> from imports object <var>importObject</var>, perform the following steps: 
+    
+  To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="read-the-imports">read the imports</dfn> from a WebAssembly module <var>module</var> from imports object <var>importObject</var>, perform the following steps:
+
     <ol>
      <li data-md>
       <p>If <var>module</var>.<a data-link-type="dfn" data-refhint-key="32e497d6" href="https://webassembly.github.io/spec/core/syntax/modules.html#syntax-module" id="ref-for-syntax-module①">imports</a> <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-is-empty" id="ref-for-list-is-empty">is not empty</a>, and <var>importObject</var> is undefined, throw a <code class="idl"><a data-link-type="idl" href="https://tc39.github.io/ecma262/#sec-native-error-types-used-in-this-standard-typeerror" id="ref-for-sec-native-error-types-used-in-this-standard-typeerror">TypeError</a></code> exception.</p>
@@ -1146,7 +1187,9 @@ The verification of WebAssembly type requirements is deferred to the
 "<a data-link-type="dfn" href="#instantiate-the-core-of-a-webassembly-module" id="ref-for-instantiate-the-core-of-a-webassembly-module">instantiate the core of a WebAssembly module</a>" algorithm.</p>
    </div>
    <div class="algorithm" data-algorithm="create an exports object">
-     To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="create-an-exports-object">create an exports object</dfn> from a WebAssembly module <var>module</var> and instance <var>instance</var>, perform the following steps: 
+    
+  To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="create-an-exports-object">create an exports object</dfn> from a WebAssembly module <var>module</var> and instance <var>instance</var>, perform the following steps:
+
     <ol>
      <li data-md>
       <p>Let <var>exportsObject</var> be <a data-link-type="dfn" data-refhint-key="f4fa6c3b" href="https://tc39.github.io/ecma262/#sec-returnifabrupt-shorthands" id="ref-for-sec-returnifabrupt-shorthands②">!</a> <a data-link-type="abstract-op" href="https://tc39.github.io/ecma262/#sec-ordinaryobjectcreate" id="ref-for-sec-ordinaryobjectcreate">OrdinaryObjectCreate</a>(null).</p>
@@ -1218,7 +1261,10 @@ The verification of WebAssembly type requirements is deferred to the
     </ol>
    </div>
    <div class="algorithm" data-algorithm="initialize an instance object">
-     To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="initialize-an-instance-object">initialize an instance object</dfn> <var>instanceObject</var> from a WebAssembly module <var>module</var> and instance <var>instance</var>, perform the following steps: 
+    
+  To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="initialize-an-instance-object">initialize an instance object</dfn> <var>instanceObject</var> from a WebAssembly module <var>module</var> and instance <var>instance</var>, perform the following steps:
+
+
     <ol>
      <li data-md>
       <p><a data-link-type="dfn" href="#create-an-exports-object" id="ref-for-create-an-exports-object">Create an exports object</a> from <var>module</var> and <var>instance</var> and let <var>exportsObject</var> be the result.</p>
@@ -1229,7 +1275,9 @@ The verification of WebAssembly type requirements is deferred to the
     </ol>
    </div>
    <div class="algorithm" data-algorithm="instantiate the core of a WebAssembly module">
-     To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="instantiate-the-core-of-a-webassembly-module">instantiate the core of a WebAssembly module</dfn> from a module <var>module</var> and imports <var>imports</var>, perform the following steps: 
+    
+  To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="instantiate-the-core-of-a-webassembly-module">instantiate the core of a WebAssembly module</dfn> from a module <var>module</var> and imports <var>imports</var>, perform the following steps:
+
     <ol>
      <li data-md>
       <p>Let <var>store</var> be the <a data-link-type="dfn" href="https://tc39.es/ecma262/multipage/executable-code-and-execution-contexts.html#surrounding-agent" id="ref-for-surrounding-agent②">surrounding agent</a>’s <a data-link-type="dfn" href="#associated-store" id="ref-for-associated-store②">associated store</a>.</p>
@@ -1254,7 +1302,9 @@ The verification of WebAssembly type requirements is deferred to the
     </ol>
    </div>
    <div class="algorithm" data-algorithm="asynchronously instantiate a WebAssembly module">
-     To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="asynchronously-instantiate-a-webassembly-module">asynchronously instantiate a WebAssembly module</dfn> from a <code class="idl"><a data-link-type="idl" href="#module" id="ref-for-module⑥">Module</a></code> <var>moduleObject</var> and imports <var>importObject</var>, perform the following steps: 
+    
+  To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="asynchronously-instantiate-a-webassembly-module">asynchronously instantiate a WebAssembly module</dfn> from a <code class="idl"><a data-link-type="idl" href="#module" id="ref-for-module⑥">Module</a></code> <var>moduleObject</var> and imports <var>importObject</var>, perform the following steps:
+
     <ol>
      <li data-md>
       <p>Let <var>promise</var> be <a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#a-new-promise" id="ref-for-a-new-promise①">a new promise</a>.</p>
@@ -1287,7 +1337,10 @@ If this throws an exception, catch it, <a data-link-type="dfn" href="https://web
     </ol>
    </div>
    <div class="algorithm" data-algorithm="instantiate a promise of a module">
-     To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="instantiate-a-promise-of-a-module">instantiate a promise of a module</dfn> <var>promiseOfModule</var> with imports <var>importObject</var>, perform the following steps: 
+    
+  To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="instantiate-a-promise-of-a-module">instantiate a promise of a module</dfn> <var>promiseOfModule</var> with imports <var>importObject</var>, perform the following steps:
+
+
     <ol>
      <li data-md>
       <p>Let <var>promise</var> be <a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#a-new-promise" id="ref-for-a-new-promise②">a new promise</a>.</p>
@@ -1322,7 +1375,9 @@ If this throws an exception, catch it, <a data-link-type="dfn" href="https://web
     </ol>
    </div>
    <div class="algorithm" data-algorithm="instantiate(bytes, importObject)" data-algorithm-for="WebAssembly">
-     The <dfn class="dfn-paneled idl-code" data-dfn-for="WebAssembly" data-dfn-type="method" data-export data-lt="instantiate(bytes, importObject)|instantiate(bytes)" id="dom-webassembly-instantiate"><code>instantiate(<var>bytes</var>, <var>importObject</var>)</code></dfn> method, when invoked, performs the following steps: 
+    
+  The <dfn class="dfn-paneled idl-code" data-dfn-for="WebAssembly" data-dfn-type="method" data-export data-lt="instantiate(bytes, importObject)|instantiate(bytes)" id="dom-webassembly-instantiate"><code>instantiate(<var>bytes</var>, <var>importObject</var>)</code></dfn> method, when invoked, performs the following steps:
+
     <ol>
      <li data-md>
       <p>Let <var>stableBytes</var> be a <a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#dfn-get-buffer-source-copy" id="ref-for-dfn-get-buffer-source-copy②">copy of the bytes held by the buffer</a> <var>bytes</var>.</p>
@@ -1333,7 +1388,9 @@ If this throws an exception, catch it, <a data-link-type="dfn" href="https://web
     </ol>
    </div>
    <div class="algorithm" data-algorithm="instantiate(moduleObject, importObject)" data-algorithm-for="WebAssembly">
-     The <dfn class="dfn-paneled idl-code" data-dfn-for="WebAssembly" data-dfn-type="method" data-export data-lt="instantiate(moduleObject, importObject)|instantiate(moduleObject)" id="dom-webassembly-instantiate-moduleobject-importobject"><code>instantiate(<var>moduleObject</var>, <var>importObject</var>)</code></dfn> method, when invoked, performs the following steps: 
+    
+  The <dfn class="dfn-paneled idl-code" data-dfn-for="WebAssembly" data-dfn-type="method" data-export data-lt="instantiate(moduleObject, importObject)|instantiate(moduleObject)" id="dom-webassembly-instantiate-moduleobject-importobject"><code>instantiate(<var>moduleObject</var>, <var>importObject</var>)</code></dfn> method, when invoked, performs the following steps:
+
     <ol>
      <li data-md>
       <p><a data-link-type="dfn" href="#asynchronously-instantiate-a-webassembly-module" id="ref-for-asynchronously-instantiate-a-webassembly-module①">Asynchronously instantiate the WebAssembly module</a> <var>moduleObject</var> importing <var>importObject</var>, and return the result.</p>
@@ -1341,7 +1398,9 @@ If this throws an exception, catch it, <a data-link-type="dfn" href="https://web
    </div>
    <p class="note" role="note"><span class="marker">Note:</span> A follow-on streaming API is documented in the <a href="https://webassembly.github.io/spec/web-api/index.html">WebAssembly Web API</a>.</p>
    <div class="algorithm" data-algorithm="namespaceInstance(namespace)" data-algorithm-for="WebAssembly">
-     The <dfn class="dfn-paneled idl-code" data-dfn-for="WebAssembly" data-dfn-type="method" data-export id="dom-webassembly-namespaceinstance-namespace"><code>namespaceInstance(<var>namespace</var>)</code></dfn> method, when invoked, performs the following steps: 
+    
+    The <dfn class="dfn-paneled idl-code" data-dfn-for="WebAssembly" data-dfn-type="method" data-export id="dom-webassembly-namespaceinstance-namespace"><code>namespaceInstance(<var>namespace</var>)</code></dfn> method, when invoked, performs the following steps:
+
     <ol>
      <li data-md>
       <p class="assertion">Assert: <var>namespace</var> is a <a data-link-type="dfn" href="https://tc39.github.io/ecma262/#sec-module-namespace-exotic-objects" id="ref-for-sec-module-namespace-exotic-objects">Module Namespace exotic object</a>.</p>
@@ -1384,7 +1443,9 @@ If this throws an exception, catch it, <a data-link-type="dfn" href="https://web
    <p>Per ECMA-262 requirements for Source Phase Imports (<a data-link-type="biblio" href="#biblio-sourcephaseimports" title="Source Phase Imports">[SOURCEPHASEIMPORTS]</a>) integration, the interface prototype object for <code class="idl"><a data-link-type="idl" href="#module" id="ref-for-module①⓪">Module</a></code> must have as its [[Prototype]] set to <a data-link-type="dfn" href="https://tc39.github.io/proposal-source-phase-imports/#sec-properties-of-the-%abstractmodulesource%-prototype-object" id="ref-for-sec-properties-of-the-%abstractmodulesource%-prototype-object">%AbstractModuleSource%.prototype</a>, as if created by <a data-link-type="abstract-op" href="https://tc39.github.io/ecma262/#sec-ordinaryobjectcreate" id="ref-for-sec-ordinaryobjectcreate①">OrdinaryObjectCreate</a>(<a data-link-type="dfn" href="https://tc39.github.io/proposal-source-phase-imports/#sec-properties-of-the-%abstractmodulesource%-prototype-object" id="ref-for-sec-properties-of-the-%abstractmodulesource%-prototype-object①">%AbstractModuleSource%.prototype</a>).
 In addition, the interface object for <code class="idl"><a data-link-type="idl" href="#module" id="ref-for-module①①">Module</a></code> must have as its [[Prototype]] set to <a data-link-type="dfn" href="https://tc39.github.io/proposal-source-phase-imports/#sec-%abstractmodulesource%-constructor" id="ref-for-sec-%abstractmodulesource%-constructor">%AbstractModuleSource%</a>, as if created by <a data-link-type="abstract-op" href="https://tc39.github.io/ecma262/#sec-ordinaryobjectcreate" id="ref-for-sec-ordinaryobjectcreate②">OrdinaryObjectCreate</a>(<a data-link-type="dfn" href="https://tc39.github.io/proposal-source-phase-imports/#sec-%abstractmodulesource%-constructor" id="ref-for-sec-%abstractmodulesource%-constructor①">%AbstractModuleSource%</a>).</p>
    <div class="algorithm" data-algorithm="string value of the extern type">
-     The <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="string-value-of-the-extern-type">string value of the extern type</dfn> <var>type</var> is 
+    
+  The <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="string-value-of-the-extern-type">string value of the extern type</dfn> <var>type</var> is
+
     <ul>
      <li data-md>
       <p>"function" if <var>type</var> is of the form <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/syntax/types.html#external-types" id="ref-for-external-types⑧">func</a> <var>functype</var></p>
@@ -1397,7 +1458,9 @@ In addition, the interface object for <code class="idl"><a data-link-type="idl" 
     </ul>
    </div>
    <div class="algorithm" data-algorithm="exports(moduleObject)" data-algorithm-for="Module">
-     The <dfn class="dfn-paneled idl-code" data-dfn-for="Module" data-dfn-type="method" data-export id="dom-module-exports"><code>exports(<var>moduleObject</var>)</code></dfn> method, when invoked, performs the following steps: 
+    
+    The <dfn class="dfn-paneled idl-code" data-dfn-for="Module" data-dfn-type="method" data-export id="dom-module-exports"><code>exports(<var>moduleObject</var>)</code></dfn> method, when invoked, performs the following steps:
+
     <ol>
      <li data-md>
       <p>Let <var>module</var> be <var>moduleObject</var>.[[Module]].</p>
@@ -1418,7 +1481,9 @@ In addition, the interface object for <code class="idl"><a data-link-type="idl" 
     </ol>
    </div>
    <div class="algorithm" data-algorithm="imports(moduleObject)" data-algorithm-for="Module">
-     The <dfn class="dfn-paneled idl-code" data-dfn-for="Module" data-dfn-type="method" data-export id="dom-module-imports"><code>imports(<var>moduleObject</var>)</code></dfn> method, when invoked, performs the following steps: 
+    
+    The <dfn class="dfn-paneled idl-code" data-dfn-for="Module" data-dfn-type="method" data-export id="dom-module-imports"><code>imports(<var>moduleObject</var>)</code></dfn> method, when invoked, performs the following steps:
+
     <ol>
      <li data-md>
       <p>Let <var>module</var> be <var>moduleObject</var>.[[Module]].</p>
@@ -1439,7 +1504,9 @@ In addition, the interface object for <code class="idl"><a data-link-type="idl" 
     </ol>
    </div>
    <div class="algorithm" data-algorithm="customSections(moduleObject, sectionName)" data-algorithm-for="Module">
-     The <dfn class="dfn-paneled idl-code" data-dfn-for="Module" data-dfn-type="method" data-export id="dom-module-customsections"><code>customSections(<var>moduleObject</var>, <var>sectionName</var>)</code></dfn> method, when invoked, performs the following steps: 
+    
+    The <dfn class="dfn-paneled idl-code" data-dfn-for="Module" data-dfn-type="method" data-export id="dom-module-customsections"><code>customSections(<var>moduleObject</var>, <var>sectionName</var>)</code></dfn> method, when invoked, performs the following steps:
+
     <ol>
      <li data-md>
       <p>Let <var>bytes</var> be <var>moduleObject</var>.[[Bytes]].</p>
@@ -1464,7 +1531,10 @@ In addition, the interface object for <code class="idl"><a data-link-type="idl" 
     </ol>
    </div>
    <div class="algorithm" data-algorithm="Module(bytes)" data-algorithm-for="Module">
-     The <dfn class="dfn-paneled idl-code" data-dfn-for="Module" data-dfn-type="constructor" data-export data-lt="Module(bytes)|constructor(bytes)" id="dom-module-module"><code>Module(<var>bytes</var>)</code></dfn> constructor, when invoked, performs the following steps: 
+    
+    The <dfn class="dfn-paneled idl-code" data-dfn-for="Module" data-dfn-type="constructor" data-export data-lt="Module(bytes)|constructor(bytes)" id="dom-module-module"><code>Module(<var>bytes</var>)</code></dfn> constructor, when invoked, performs the following steps:
+
+
     <ol>
      <li data-md>
       <p>Let <var>stableBytes</var> be a <a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#dfn-get-buffer-source-copy" id="ref-for-dfn-get-buffer-source-copy③">copy of the bytes held by the buffer</a> <var>bytes</var>.</p>
@@ -1487,7 +1557,9 @@ In addition, the interface object for <code class="idl"><a data-link-type="idl" 
 };
 </pre>
    <div class="algorithm" data-algorithm="Instance(module, importObject)" data-algorithm-for="Instance">
-     The <dfn class="dfn-paneled idl-code" data-dfn-for="Instance" data-dfn-type="constructor" data-export data-lt="Instance(module, importObject)|constructor(module, importObject)|Instance(module)|constructor(module)" id="dom-instance-instance"><code>Instance(<var>module</var>, <var>importObject</var>)</code></dfn> constructor, when invoked, runs the following steps: 
+    
+  The <dfn class="dfn-paneled idl-code" data-dfn-for="Instance" data-dfn-type="constructor" data-export data-lt="Instance(module, importObject)|constructor(module, importObject)|Instance(module)|constructor(module)" id="dom-instance-instance"><code>Instance(<var>module</var>, <var>importObject</var>)</code></dfn> constructor, when invoked, runs the following steps:
+
     <ol>
      <li data-md>
       <p>Let <var>module</var> be <var>module</var>.[[Module]].</p>
@@ -1500,7 +1572,9 @@ In addition, the interface object for <code class="idl"><a data-link-type="idl" 
     </ol>
     <p class="note" role="note"><span class="marker">Note:</span> The use of this synchronous API is discouraged, as some implementations sometimes do long-running compilation work when instantiating.</p>
    </div>
-   <div class="algorithm" data-algorithm="exports" data-algorithm-for="Instance"> The getter of the <dfn class="dfn-paneled idl-code" data-dfn-for="Instance" data-dfn-type="attribute" data-export id="dom-instance-exports"><code>exports</code></dfn> attribute of <code class="idl"><a data-link-type="idl" href="#instance" id="ref-for-instance④">Instance</a></code> returns <strong>this</strong>.[[Exports]]. </div>
+   <div class="algorithm" data-algorithm="exports" data-algorithm-for="Instance">
+    The getter of the <dfn class="dfn-paneled idl-code" data-dfn-for="Instance" data-dfn-type="attribute" data-export id="dom-instance-exports"><code>exports</code></dfn> attribute of <code class="idl"><a data-link-type="idl" href="#instance" id="ref-for-instance④">Instance</a></code> returns <strong>this</strong>.[[Exports]].
+</div>
    <h3 class="heading settled" data-level="5.3" id="memories"><span class="secno">5.3. </span><span class="content">Memories</span><a class="self-link" href="#memories"></a></h3>
 <pre class="idl highlight def"><c- b>dictionary</c-> <dfn class="dfn-paneled idl-code" data-dfn-type="dictionary" data-export id="dictdef-memorydescriptor"><code><c- g>MemoryDescriptor</c-></code></dfn> {
   <c- b>required</c-> [<a class="idl-code" data-link-type="extended-attribute" href="https://webidl.spec.whatwg.org/#EnforceRange" id="ref-for-EnforceRange"><c- g>EnforceRange</c-></a>] <a class="idl-code" data-link-type="interface" href="https://webidl.spec.whatwg.org/#idl-unsigned-long" id="ref-for-idl-unsigned-long"><c- b>unsigned</c-> <c- b>long</c-></a> <dfn class="dfn-paneled idl-code" data-dfn-for="MemoryDescriptor" data-dfn-type="dict-member" data-export data-type="unsigned long" id="dom-memorydescriptor-initial"><code><c- g>initial</c-></code></dfn>;
@@ -1516,7 +1590,9 @@ In addition, the interface object for <code class="idl"><a data-link-type="idl" 
   <c- b>readonly</c-> <c- b>attribute</c-> <a class="idl-code" data-link-type="interface" href="https://tc39.github.io/ecma262/#sec-arraybuffer-objects" id="ref-for-sec-arraybuffer-objects④"><c- b>ArrayBuffer</c-></a> <a class="idl-code" data-link-type="attribute" data-readonly data-type="ArrayBuffer" href="#dom-memory-buffer" id="ref-for-dom-memory-buffer"><c- g>buffer</c-></a>;
 };
 </pre>
-   <p>A <code class="idl"><a data-link-type="idl" href="#memory" id="ref-for-memory③">Memory</a></code> object represents a single <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/exec/runtime.html#memory-instances" id="ref-for-memory-instances①">memory instance</a> which can be simultaneously referenced by multiple <code class="idl"><a data-link-type="idl" href="#instance" id="ref-for-instance⑤">Instance</a></code> objects. Each <code class="idl"><a data-link-type="idl" href="#memory" id="ref-for-memory④">Memory</a></code> object has the following internal slots:</p>
+   <p>A <code class="idl"><a data-link-type="idl" href="#memory" id="ref-for-memory③">Memory</a></code> object represents a single <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/exec/runtime.html#memory-instances" id="ref-for-memory-instances①">memory instance</a>
+which can be simultaneously referenced by multiple <code class="idl"><a data-link-type="idl" href="#instance" id="ref-for-instance⑤">Instance</a></code> objects. Each
+<code class="idl"><a data-link-type="idl" href="#memory" id="ref-for-memory④">Memory</a></code> object has the following internal slots:</p>
    <ul>
     <li data-md>
      <p>[[Memory]] : a <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/exec/runtime.html#syntax-memaddr" id="ref-for-syntax-memaddr①">memory address</a></p>
@@ -1524,7 +1600,10 @@ In addition, the interface object for <code class="idl"><a data-link-type="idl" 
      <p>[[BufferObject]] : an <code class="idl"><a data-link-type="idl" href="https://tc39.github.io/ecma262/#sec-arraybuffer-objects" id="ref-for-sec-arraybuffer-objects⑤">ArrayBuffer</a></code> whose <a data-link-type="dfn" href="https://tc39.es/ecma262/multipage/ecmascript-data-types-and-values.html#sec-data-blocks" id="ref-for-sec-data-blocks①">Data Block</a> is <a data-link-type="dfn" href="#identified-with" id="ref-for-identified-with">identified with</a> the above memory address</p>
    </ul>
    <div class="algorithm" data-algorithm="create a fixed length memory buffer">
-     To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="create-a-fixed-length-memory-buffer">create a fixed length memory buffer</dfn> from a <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/exec/runtime.html#syntax-memaddr" id="ref-for-syntax-memaddr②">memory address</a> <var>memaddr</var>, perform the following steps: 
+    
+    To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="create-a-fixed-length-memory-buffer">create a fixed length memory buffer</dfn> from a <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/exec/runtime.html#syntax-memaddr" id="ref-for-syntax-memaddr②">memory address</a> <var>memaddr</var>, perform the following steps:
+
+
     <ol>
      <li data-md>
       <p>Let <var>block</var> be a <a data-link-type="dfn" href="https://tc39.es/ecma262/multipage/ecmascript-data-types-and-values.html#sec-data-blocks" id="ref-for-sec-data-blocks②">Data Block</a> which is <a data-link-type="dfn" href="#identified-with" id="ref-for-identified-with①">identified with</a> the underlying memory of <var>memaddr</var>.</p>
@@ -1541,7 +1620,10 @@ In addition, the interface object for <code class="idl"><a data-link-type="idl" 
     </ol>
    </div>
    <div class="algorithm" data-algorithm="create a resizable memory buffer">
-     To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="create-a-resizable-memory-buffer">create a resizable memory buffer</dfn> from a <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/exec/runtime.html#syntax-memaddr" id="ref-for-syntax-memaddr③">memory address</a> <var>memaddr</var> and a <var>maxsize</var>, perform the following steps: 
+    
+    To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="create-a-resizable-memory-buffer">create a resizable memory buffer</dfn> from a <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/exec/runtime.html#syntax-memaddr" id="ref-for-syntax-memaddr③">memory address</a> <var>memaddr</var> and a <var>maxsize</var>, perform the following steps:
+
+
     <ol>
      <li data-md>
       <p>Let <var>block</var> be a <a data-link-type="dfn" href="https://tc39.es/ecma262/multipage/ecmascript-data-types-and-values.html#sec-data-blocks" id="ref-for-sec-data-blocks③">Data Block</a> which is <a data-link-type="dfn" href="#identified-with" id="ref-for-identified-with②">identified with</a> the underlying memory of <var>memaddr</var>.</p>
@@ -1568,7 +1650,9 @@ In addition, the interface object for <code class="idl"><a data-link-type="idl" 
     </ol>
    </div>
    <div class="algorithm" data-algorithm="initialize a memory object">
-     To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="initialize-a-memory-object">initialize a memory object</dfn> <var>memory</var> from a <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/exec/runtime.html#syntax-memaddr" id="ref-for-syntax-memaddr④">memory address</a> <var>memaddr</var>, perform the following steps: 
+    
+    To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="initialize-a-memory-object">initialize a memory object</dfn> <var>memory</var> from a <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/exec/runtime.html#syntax-memaddr" id="ref-for-syntax-memaddr④">memory address</a> <var>memaddr</var>, perform the following steps:
+
     <ol>
      <li data-md>
       <p>Let <var>map</var> be the <a data-link-type="dfn" href="https://tc39.es/ecma262/multipage/executable-code-and-execution-contexts.html#surrounding-agent" id="ref-for-surrounding-agent④">surrounding agent</a>’s associated <a data-link-type="dfn" href="#memory-object-cache" id="ref-for-memory-object-cache">Memory object cache</a>.</p>
@@ -1585,7 +1669,10 @@ In addition, the interface object for <code class="idl"><a data-link-type="idl" 
     </ol>
    </div>
    <div class="algorithm" data-algorithm="create a memory object">
-     To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="create-a-memory-object">create a memory object</dfn> from a <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/exec/runtime.html#syntax-memaddr" id="ref-for-syntax-memaddr⑤">memory address</a> <var>memaddr</var>, perform the following steps: 
+    
+    To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="create-a-memory-object">create a memory object</dfn> from a <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/exec/runtime.html#syntax-memaddr" id="ref-for-syntax-memaddr⑤">memory address</a> <var>memaddr</var>, perform the following steps:
+
+
     <ol>
      <li data-md>
       <p>Let <var>map</var> be the <a data-link-type="dfn" href="https://tc39.es/ecma262/multipage/executable-code-and-execution-contexts.html#surrounding-agent" id="ref-for-surrounding-agent⑤">surrounding agent</a>’s associated <a data-link-type="dfn" href="#memory-object-cache" id="ref-for-memory-object-cache①">Memory object cache</a>.</p>
@@ -1604,7 +1691,9 @@ In addition, the interface object for <code class="idl"><a data-link-type="idl" 
     </ol>
    </div>
    <div class="algorithm" data-algorithm="Memory(descriptor)" data-algorithm-for="Memory">
-     The <dfn class="dfn-paneled idl-code" data-dfn-for="Memory" data-dfn-type="constructor" data-export data-lt="Memory(descriptor)|constructor(descriptor)" id="dom-memory-memory"><code>Memory(<var>descriptor</var>)</code></dfn> constructor, when invoked, performs the following steps: 
+    
+    The <dfn class="dfn-paneled idl-code" data-dfn-for="Memory" data-dfn-type="constructor" data-export data-lt="Memory(descriptor)|constructor(descriptor)" id="dom-memory-memory"><code>Memory(<var>descriptor</var>)</code></dfn> constructor, when invoked, performs the following steps:
+
     <ol>
      <li data-md>
       <p>Let <var>initial</var> be <var>descriptor</var>["initial"].</p>
@@ -1625,7 +1714,10 @@ In addition, the interface object for <code class="idl"><a data-link-type="idl" 
     </ol>
    </div>
    <div class="algorithm" data-algorithm="refresh the Memory buffer">
-     To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="refresh-the-memory-buffer">refresh the Memory buffer</dfn> of <var>memaddr</var>, perform the following steps: 
+    
+    To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="refresh-the-memory-buffer">refresh the Memory buffer</dfn> of <var>memaddr</var>, perform the following steps:
+
+
     <ol>
      <li data-md>
       <p>Let <var>map</var> be the <a data-link-type="dfn" href="https://tc39.es/ecma262/multipage/executable-code-and-execution-contexts.html#surrounding-agent" id="ref-for-surrounding-agent⑧">surrounding agent</a>’s associated <a data-link-type="dfn" href="#memory-object-cache" id="ref-for-memory-object-cache②">Memory object cache</a>.</p>
@@ -1658,7 +1750,10 @@ In addition, the interface object for <code class="idl"><a data-link-type="idl" 
     </ol>
    </div>
    <div class="algorithm" data-algorithm="grow the memory buffer">
-     To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="grow-the-memory-buffer">grow the memory buffer</dfn> associated with a <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/exec/runtime.html#syntax-memaddr" id="ref-for-syntax-memaddr⑥">memory address</a> <var>memaddr</var> by <var>delta</var>, perform the following steps: 
+    
+    To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="grow-the-memory-buffer">grow the memory buffer</dfn> associated with a <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/exec/runtime.html#syntax-memaddr" id="ref-for-syntax-memaddr⑥">memory address</a> <var>memaddr</var> by <var>delta</var>, perform the following steps:
+
+
     <ol>
      <li data-md>
       <p>Let <var>store</var> be the <a data-link-type="dfn" href="https://tc39.es/ecma262/multipage/executable-code-and-execution-contexts.html#surrounding-agent" id="ref-for-surrounding-agent⑨">surrounding agent</a>’s <a data-link-type="dfn" href="#associated-store" id="ref-for-associated-store⑥">associated store</a>.</p>
@@ -1677,7 +1772,9 @@ In addition, the interface object for <code class="idl"><a data-link-type="idl" 
     </ol>
    </div>
    <div class="algorithm" data-algorithm="dom-Memory-grow">
-     The <dfn class="dfn-paneled idl-code" data-dfn-for="Memory" data-dfn-type="method" data-export id="dom-memory-grow"><code>grow(<var>delta</var>)</code></dfn> method, when invoked, performs the following steps: 
+    
+    The <dfn class="dfn-paneled idl-code" data-dfn-for="Memory" data-dfn-type="method" data-export id="dom-memory-grow"><code>grow(<var>delta</var>)</code></dfn> method, when invoked, performs the following steps:
+
     <ol>
      <li data-md>
       <p>Let <var>memaddr</var> be <strong>this</strong>.[[Memory]].</p>
@@ -1703,7 +1800,9 @@ In addition, the interface object for <code class="idl"><a data-link-type="idl" 
     </ol>
    </div>
    <div class="algorithm" data-algorithm="dom-Memory-toFixedLengthBuffer">
-     The <dfn class="dfn-paneled idl-code" data-dfn-for="Memory" data-dfn-type="method" data-export id="dom-memory-tofixedlengthbuffer"><code>toFixedLengthBuffer()</code></dfn> method, when invoked, performs the following steps: 
+    
+    The <dfn class="dfn-paneled idl-code" data-dfn-for="Memory" data-dfn-type="method" data-export id="dom-memory-tofixedlengthbuffer"><code>toFixedLengthBuffer()</code></dfn> method, when invoked, performs the following steps:
+
     <ol>
      <li data-md>
       <p>Let <var>buffer</var> be <strong>this</strong>.[[BufferObject]].</p>
@@ -1722,7 +1821,9 @@ In addition, the interface object for <code class="idl"><a data-link-type="idl" 
     </ol>
    </div>
    <div class="algorithm" data-algorithm="dom-Memory-toResizableBuffer">
-     The <dfn class="dfn-paneled idl-code" data-dfn-for="Memory" data-dfn-type="method" data-export id="dom-memory-toresizablebuffer"><code>toResizableBuffer()</code></dfn> method, when invoked, performs the following steps: 
+    
+    The <dfn class="dfn-paneled idl-code" data-dfn-for="Memory" data-dfn-type="method" data-export id="dom-memory-toresizablebuffer"><code>toResizableBuffer()</code></dfn> method, when invoked, performs the following steps:
+
     <ol>
      <li data-md>
       <p>Let <var>buffer</var> be <strong>this</strong>.[[BufferObject]].</p>
@@ -1796,7 +1897,9 @@ In addition, the interface object for <code class="idl"><a data-link-type="idl" 
       <p>Otherwise, return <emu-const>unhandled</emu-const>.</p>
     </ol>
    </div>
-   <div class="algorithm" data-algorithm="buffer" data-algorithm-for="Memory"> The getter of the <dfn class="dfn-paneled idl-code" data-dfn-for="Memory" data-dfn-type="attribute" data-export id="dom-memory-buffer"><code>buffer</code></dfn> attribute of <code class="idl"><a data-link-type="idl" href="#memory" id="ref-for-memory⑦">Memory</a></code> returns <strong>this</strong>.[[BufferObject]]. </div>
+   <div class="algorithm" data-algorithm="buffer" data-algorithm-for="Memory">
+    The getter of the <dfn class="dfn-paneled idl-code" data-dfn-for="Memory" data-dfn-type="attribute" data-export id="dom-memory-buffer"><code>buffer</code></dfn> attribute of <code class="idl"><a data-link-type="idl" href="#memory" id="ref-for-memory⑦">Memory</a></code> returns <strong>this</strong>.[[BufferObject]].
+</div>
    <h3 class="heading settled" data-level="5.4" id="tables"><span class="secno">5.4. </span><span class="content">Tables</span><a class="self-link" href="#tables"></a></h3>
 <pre class="idl highlight def"><c- b>enum</c-> <dfn class="dfn-paneled idl-code" data-dfn-type="enum" data-export id="enumdef-tablekind"><code><c- g>TableKind</c-></code></dfn> {
   <dfn class="dfn-paneled idl-code" data-dfn-for="TableKind" data-dfn-type="enum-value" data-export id="dom-tablekind-externref"><code><c- s>"externref"</c-></code></dfn>,
@@ -1824,7 +1927,9 @@ In addition, the interface object for <code class="idl"><a data-link-type="idl" 
 multiple <code class="idl"><a data-link-type="idl" href="#instance" id="ref-for-instance⑥">Instance</a></code> objects.
 Each <code class="idl"><a data-link-type="idl" href="#table" id="ref-for-table③">Table</a></code> object has a [[Table]] internal slot, which is a <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/exec/runtime.html#syntax-tableaddr" id="ref-for-syntax-tableaddr①">table address</a>.</p>
    <div class="algorithm" data-algorithm="initialize a table object">
-     To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="initialize-a-table-object">initialize a table object</dfn> <var>table</var> from a <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/exec/runtime.html#syntax-tableaddr" id="ref-for-syntax-tableaddr②">table address</a> <var>tableaddr</var>, perform the following steps: 
+    
+    To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="initialize-a-table-object">initialize a table object</dfn> <var>table</var> from a <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/exec/runtime.html#syntax-tableaddr" id="ref-for-syntax-tableaddr②">table address</a> <var>tableaddr</var>, perform the following steps:
+
     <ol>
      <li data-md>
       <p>Let <var>map</var> be the <a data-link-type="dfn" href="https://tc39.es/ecma262/multipage/executable-code-and-execution-contexts.html#surrounding-agent" id="ref-for-surrounding-agent①③">surrounding agent</a>’s associated <a data-link-type="dfn" href="#table-object-cache" id="ref-for-table-object-cache">Table object cache</a>.</p>
@@ -1837,7 +1942,9 @@ Each <code class="idl"><a data-link-type="idl" href="#table" id="ref-for-table�
     </ol>
    </div>
    <div class="algorithm" data-algorithm="create a table object">
-     To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="create-a-table-object">create a table object</dfn> from a <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/exec/runtime.html#syntax-tableaddr" id="ref-for-syntax-tableaddr③">table address</a> <var>tableaddr</var>, perform the following steps: 
+    
+    To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="create-a-table-object">create a table object</dfn> from a <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/exec/runtime.html#syntax-tableaddr" id="ref-for-syntax-tableaddr③">table address</a> <var>tableaddr</var>, perform the following steps:
+
     <ol>
      <li data-md>
       <p>Let <var>map</var> be the <a data-link-type="dfn" href="https://tc39.es/ecma262/multipage/executable-code-and-execution-contexts.html#surrounding-agent" id="ref-for-surrounding-agent①④">surrounding agent</a>’s associated <a data-link-type="dfn" href="#table-object-cache" id="ref-for-table-object-cache①">Table object cache</a>.</p>
@@ -1856,7 +1963,9 @@ Each <code class="idl"><a data-link-type="idl" href="#table" id="ref-for-table�
     </ol>
    </div>
    <div class="algorithm" data-algorithm="Table(descriptor, value)" data-algorithm-for="Table">
-     The <dfn class="dfn-paneled idl-code" data-dfn-for="Table" data-dfn-type="constructor" data-export data-lt="Table(descriptor, value)|constructor(descriptor, value)|Table(descriptor)|constructor(descriptor)" id="dom-table-table"><code>Table(<var>descriptor</var>, <var>value</var>)</code></dfn> constructor, when invoked, performs the following steps: 
+    
+    The <dfn class="dfn-paneled idl-code" data-dfn-for="Table" data-dfn-type="constructor" data-export data-lt="Table(descriptor, value)|constructor(descriptor, value)|Table(descriptor)|constructor(descriptor)" id="dom-table-table"><code>Table(<var>descriptor</var>, <var>value</var>)</code></dfn> constructor, when invoked, performs the following steps:
+
     <ol>
      <li data-md>
       <p>Let <var>elementType</var> be <a data-link-type="dfn" href="#tovaluetype" id="ref-for-tovaluetype">ToValueType</a>(<var>descriptor</var>["element"]).</p>
@@ -1898,7 +2007,9 @@ Each <code class="idl"><a data-link-type="idl" href="#table" id="ref-for-table�
     </ol>
    </div>
    <div class="algorithm" data-algorithm="dom-Table-grow">
-     The <dfn class="dfn-paneled idl-code" data-dfn-for="Table" data-dfn-type="method" data-export data-lt="grow(delta, value)|grow(delta)" id="dom-table-grow"><code>grow(<var>delta</var>, <var>value</var>)</code></dfn> method, when invoked, performs the following steps: 
+    
+    The <dfn class="dfn-paneled idl-code" data-dfn-for="Table" data-dfn-type="method" data-export data-lt="grow(delta, value)|grow(delta)" id="dom-table-grow"><code>grow(<var>delta</var>, <var>value</var>)</code></dfn> method, when invoked, performs the following steps:
+
     <ol>
      <li data-md>
       <p>Let <var>tableaddr</var> be <strong>this</strong>.[[Table]].</p>
@@ -1932,7 +2043,9 @@ Each <code class="idl"><a data-link-type="idl" href="#table" id="ref-for-table�
     </ol>
    </div>
    <div class="algorithm" data-algorithm="length" data-algorithm-for="Table">
-     The getter of the <dfn class="dfn-paneled idl-code" data-dfn-for="Table" data-dfn-type="attribute" data-export id="dom-table-length"><code>length</code></dfn> attribute of <code class="idl"><a data-link-type="idl" href="#table" id="ref-for-table⑤">Table</a></code>, when invoked, performs the following steps: 
+    
+    The getter of the <dfn class="dfn-paneled idl-code" data-dfn-for="Table" data-dfn-type="attribute" data-export id="dom-table-length"><code>length</code></dfn> attribute of <code class="idl"><a data-link-type="idl" href="#table" id="ref-for-table⑤">Table</a></code>, when invoked, performs the following steps:
+
     <ol>
      <li data-md>
       <p>Let <var>tableaddr</var> be <strong>this</strong>.[[Table]].</p>
@@ -1943,7 +2056,9 @@ Each <code class="idl"><a data-link-type="idl" href="#table" id="ref-for-table�
     </ol>
    </div>
    <div class="algorithm" data-algorithm="get(index)" data-algorithm-for="Table">
-     The <dfn class="dfn-paneled idl-code" data-dfn-for="Table" data-dfn-type="method" data-export id="dom-table-get"><code>get(<var>index</var>)</code></dfn> method, when invoked, performs the following steps: 
+    
+    The <dfn class="dfn-paneled idl-code" data-dfn-for="Table" data-dfn-type="method" data-export id="dom-table-get"><code>get(<var>index</var>)</code></dfn> method, when invoked, performs the following steps:
+
     <ol>
      <li data-md>
       <p>Let <var>tableaddr</var> be <strong>this</strong>.[[Table]].</p>
@@ -1958,7 +2073,9 @@ Each <code class="idl"><a data-link-type="idl" href="#table" id="ref-for-table�
     </ol>
    </div>
    <div class="algorithm" data-algorithm="set(index, value)" data-algorithm-for="Table">
-     The <dfn class="dfn-paneled idl-code" data-dfn-for="Table" data-dfn-type="method" data-export data-lt="set(index, value)|set(index)" id="dom-table-set"><code>set(<var>index</var>, <var>value</var>)</code></dfn> method, when invoked, performs the following steps: 
+    
+    The <dfn class="dfn-paneled idl-code" data-dfn-for="Table" data-dfn-type="method" data-export data-lt="set(index, value)|set(index)" id="dom-table-set"><code>set(<var>index</var>, <var>value</var>)</code></dfn> method, when invoked, performs the following steps:
+
     <ol>
      <li data-md>
       <p>Let <var>tableaddr</var> be <strong>this</strong>.[[Table]].</p>
@@ -2010,13 +2127,17 @@ Each <code class="idl"><a data-link-type="idl" href="#table" id="ref-for-table�
   <c- b>attribute</c-> <a class="idl-code" data-link-type="interface" href="https://webidl.spec.whatwg.org/#idl-any" id="ref-for-idl-any⑥"><c- b>any</c-></a> <a class="idl-code" data-link-type="attribute" data-type="any" href="#dom-global-value" id="ref-for-dom-global-value"><c- g>value</c-></a>;
 };
 </pre>
-   <p>A <code class="idl"><a data-link-type="idl" href="#global" id="ref-for-global②">Global</a></code> object represents a single <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/exec/runtime.html#global-instances" id="ref-for-global-instances">global instance</a> which can be simultaneously referenced by multiple <code class="idl"><a data-link-type="idl" href="#instance" id="ref-for-instance⑦">Instance</a></code> objects. Each <code class="idl"><a data-link-type="idl" href="#global" id="ref-for-global③">Global</a></code> object has one internal slot:</p>
+   <p>A <code class="idl"><a data-link-type="idl" href="#global" id="ref-for-global②">Global</a></code> object represents a single <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/exec/runtime.html#global-instances" id="ref-for-global-instances">global instance</a>
+which can be simultaneously referenced by multiple <code class="idl"><a data-link-type="idl" href="#instance" id="ref-for-instance⑦">Instance</a></code> objects. Each
+<code class="idl"><a data-link-type="idl" href="#global" id="ref-for-global③">Global</a></code> object has one internal slot:</p>
    <ul>
     <li data-md>
      <p>[[Global]] : a <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/exec/runtime.html#syntax-globaladdr" id="ref-for-syntax-globaladdr①">global address</a></p>
    </ul>
    <div class="algorithm" data-algorithm="initialize a global object">
-     To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="initialize-a-global-object">initialize a global object</dfn> <var>global</var> from a <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/exec/runtime.html#syntax-globaladdr" id="ref-for-syntax-globaladdr②">global address</a> <var>globaladdr</var>, perform the following steps: 
+    
+    To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="initialize-a-global-object">initialize a global object</dfn> <var>global</var> from a <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/exec/runtime.html#syntax-globaladdr" id="ref-for-syntax-globaladdr②">global address</a> <var>globaladdr</var>, perform the following steps:
+
     <ol>
      <li data-md>
       <p>Let <var>map</var> be the <a data-link-type="dfn" href="https://tc39.es/ecma262/multipage/executable-code-and-execution-contexts.html#surrounding-agent" id="ref-for-surrounding-agent②③">surrounding agent</a>’s associated <a data-link-type="dfn" href="#global-object-cache" id="ref-for-global-object-cache">Global object cache</a>.</p>
@@ -2029,7 +2150,9 @@ Each <code class="idl"><a data-link-type="idl" href="#table" id="ref-for-table�
     </ol>
    </div>
    <div class="algorithm" data-algorithm="create a global object">
-     To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="create-a-global-object">create a global object</dfn> from a <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/exec/runtime.html#syntax-globaladdr" id="ref-for-syntax-globaladdr③">global address</a> <var>globaladdr</var>, perform the following steps: 
+    
+    To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="create-a-global-object">create a global object</dfn> from a <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/exec/runtime.html#syntax-globaladdr" id="ref-for-syntax-globaladdr③">global address</a> <var>globaladdr</var>, perform the following steps:
+
     <ol>
      <li data-md>
       <p>Let <var>map</var> be the <a data-link-type="dfn" href="https://tc39.es/ecma262/multipage/executable-code-and-execution-contexts.html#surrounding-agent" id="ref-for-surrounding-agent②④">surrounding agent</a>’s associated <a data-link-type="dfn" href="#global-object-cache" id="ref-for-global-object-cache①">Global object cache</a>.</p>
@@ -2048,7 +2171,9 @@ Each <code class="idl"><a data-link-type="idl" href="#table" id="ref-for-table�
     </ol>
    </div>
    <div class="algorithm" data-algorithm="ToValueType">
-     The algorithm <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="tovaluetype">ToValueType</dfn>(<var>s</var>) performs the following steps: 
+    
+    The algorithm <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="tovaluetype">ToValueType</dfn>(<var>s</var>) performs the following steps:
+
     <ol>
      <li data-md>
       <p>If <var>s</var> equals "i32", return <a data-link-type="dfn" data-refhint-key="1eccdce5" href="https://webassembly.github.io/spec/core/syntax/types.html#syntax-numtype" id="ref-for-syntax-numtype②">i32</a>.</p>
@@ -2069,7 +2194,9 @@ Each <code class="idl"><a data-link-type="idl" href="#table" id="ref-for-table�
     </ol>
    </div>
    <div class="algorithm" data-algorithm="DefaultValue">
-     The algorithm <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="defaultvalue">DefaultValue</dfn>(<var>valuetype</var>) performs the following steps: 
+    
+    The algorithm <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="defaultvalue">DefaultValue</dfn>(<var>valuetype</var>) performs the following steps:
+
     <ol>
      <li data-md>
       <p>If <var>valuetype</var> equals <a data-link-type="dfn" data-refhint-key="1eccdce5" href="https://webassembly.github.io/spec/core/syntax/types.html#syntax-numtype" id="ref-for-syntax-numtype⑥">i32</a>, return <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/exec/runtime.html#values" id="ref-for-values①">i32.const</a> 0.</p>
@@ -2088,7 +2215,9 @@ Each <code class="idl"><a data-link-type="idl" href="#table" id="ref-for-table�
     </ol>
    </div>
    <div class="algorithm" data-algorithm="Global(descriptor, v)" data-algorithm-for="Global">
-     The <dfn class="dfn-paneled idl-code" data-dfn-for="Global" data-dfn-type="constructor" data-export data-lt="Global(descriptor, v)|constructor(descriptor, v)|Global(descriptor)|constructor(descriptor)" id="dom-global-global"><code>Global(<var>descriptor</var>, <var>v</var>)</code></dfn> constructor, when invoked, performs the following steps: 
+    
+    The <dfn class="dfn-paneled idl-code" data-dfn-for="Global" data-dfn-type="constructor" data-export data-lt="Global(descriptor, v)|constructor(descriptor, v)|Global(descriptor)|constructor(descriptor)" id="dom-global-global"><code>Global(<var>descriptor</var>, <var>v</var>)</code></dfn> constructor, when invoked, performs the following steps:
+
     <ol>
      <li data-md>
       <p>Let <var>mutable</var> be <var>descriptor</var>["mutable"].</p>
@@ -2125,7 +2254,9 @@ Each <code class="idl"><a data-link-type="idl" href="#table" id="ref-for-table�
     </ol>
    </div>
    <div class="algorithm" data-algorithm="GetGlobalValue">
-     The algorithm <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="getglobalvalue">GetGlobalValue</dfn>(<code class="idl"><a data-link-type="idl" href="#global" id="ref-for-global⑤">Global</a></code> <var>global</var>) performs the following steps: 
+    
+    The algorithm <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="getglobalvalue">GetGlobalValue</dfn>(<code class="idl"><a data-link-type="idl" href="#global" id="ref-for-global⑤">Global</a></code> <var>global</var>) performs the following steps:
+
     <ol>
      <li data-md>
       <p>Let <var>store</var> be the current agent’s <a data-link-type="dfn" href="#associated-store" id="ref-for-associated-store①⑨">associated store</a>.</p>
@@ -2142,7 +2273,9 @@ Each <code class="idl"><a data-link-type="idl" href="#table" id="ref-for-table�
     </ol>
    </div>
    <div class="algorithm" data-algorithm="value" data-algorithm-for="Global">
-     The getter of the <dfn class="dfn-paneled idl-code" data-dfn-for="Global" data-dfn-type="attribute" data-export id="dom-global-value"><code>value</code></dfn> attribute of <code class="idl"><a data-link-type="idl" href="#global" id="ref-for-global⑥">Global</a></code>, when invoked, performs the following steps: 
+    
+    The getter of the <dfn class="dfn-paneled idl-code" data-dfn-for="Global" data-dfn-type="attribute" data-export id="dom-global-value"><code>value</code></dfn> attribute of <code class="idl"><a data-link-type="idl" href="#global" id="ref-for-global⑥">Global</a></code>, when invoked, performs the following steps:
+
     <ol>
      <li data-md>
       <p>Return <a data-link-type="dfn" href="#getglobalvalue" id="ref-for-getglobalvalue">GetGlobalValue</a>(<strong>this</strong>).</p>
@@ -2170,7 +2303,9 @@ Each <code class="idl"><a data-link-type="idl" href="#table" id="ref-for-table�
     </ol>
    </div>
    <div class="algorithm" data-algorithm="valueOf()" data-algorithm-for="Global">
-     The <dfn class="dfn-paneled idl-code" data-dfn-for="Global" data-dfn-type="method" data-export id="dom-global-valueof"><code>valueOf()</code></dfn> method, when invoked, performs the following steps: 
+    
+    The <dfn class="dfn-paneled idl-code" data-dfn-for="Global" data-dfn-type="method" data-export id="dom-global-valueof"><code>valueOf()</code></dfn> method, when invoked, performs the following steps:
+
     <ol>
      <li data-md>
       <p>Return <a data-link-type="dfn" href="#getglobalvalue" id="ref-for-getglobalvalue①">GetGlobalValue</a>(<strong>this</strong>).</p>
@@ -2181,7 +2316,10 @@ Each <code class="idl"><a data-link-type="idl" href="#table" id="ref-for-table�
 Exported Functions are <a data-link-type="dfn" href="https://tc39.github.io/ecma262/#sec-built-in-function-objects" id="ref-for-sec-built-in-function-objects">Built-in Function Objects</a> which are not constructors, and which have a [[FunctionAddress]] internal slot.
 This slot holds a <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/exec/runtime.html#syntax-funcaddr" id="ref-for-syntax-funcaddr①">function address</a> relative to the <a data-link-type="dfn" href="https://tc39.es/ecma262/multipage/executable-code-and-execution-contexts.html#surrounding-agent" id="ref-for-surrounding-agent②⑤">surrounding agent</a>’s <a data-link-type="dfn" href="#associated-store" id="ref-for-associated-store②②">associated store</a>.</p>
    <div class="algorithm" data-algorithm="name of the WebAssembly function">
-     The <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="name-of-the-webassembly-function">name of the WebAssembly function</dfn> <var>funcaddr</var> is found by performing the following steps: 
+    
+  The <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="name-of-the-webassembly-function">name of the WebAssembly function</dfn> <var>funcaddr</var> is found by performing the following steps:
+
+
     <ol>
      <li data-md>
       <p>Let <var>store</var> be the <a data-link-type="dfn" href="https://tc39.es/ecma262/multipage/executable-code-and-execution-contexts.html#surrounding-agent" id="ref-for-surrounding-agent②⑥">surrounding agent</a>’s <a data-link-type="dfn" href="#associated-store" id="ref-for-associated-store②③">associated store</a>.</p>
@@ -2210,7 +2348,10 @@ This slot holds a <a data-link-type="dfn" href="https://webassembly.github.io/sp
     </ol>
    </div>
    <div class="algorithm" data-algorithm="a new Exported Function">
-     To create <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="a-new-exported-function">a new Exported Function</dfn> from a WebAssembly <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/exec/runtime.html#syntax-funcaddr" id="ref-for-syntax-funcaddr②">function address</a> <var>funcaddr</var>, perform the following steps: 
+    
+  To create <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="a-new-exported-function">a new Exported Function</dfn> from a WebAssembly <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/exec/runtime.html#syntax-funcaddr" id="ref-for-syntax-funcaddr②">function address</a> <var>funcaddr</var>, perform the following steps:
+
+
     <ol>
      <li data-md>
       <p>Let <var>map</var> be the <a data-link-type="dfn" href="https://tc39.es/ecma262/multipage/executable-code-and-execution-contexts.html#surrounding-agent" id="ref-for-surrounding-agent②⑦">surrounding agent</a>’s associated <a data-link-type="dfn" href="#exported-function-cache" id="ref-for-exported-function-cache">Exported Function cache</a>.</p>
@@ -2245,7 +2386,10 @@ This slot holds a <a data-link-type="dfn" href="https://webassembly.github.io/sp
     </ol>
    </div>
    <div class="algorithm" data-algorithm="call an Exported Function">
-     To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="call-an-exported-function">call an Exported Function</dfn> with <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/exec/runtime.html#syntax-funcaddr" id="ref-for-syntax-funcaddr③">function address</a> <var>funcaddr</var> and a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list" id="ref-for-list①">list</a> of JavaScript arguments <var>argValues</var>, perform the following steps: 
+    
+  To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="call-an-exported-function">call an Exported Function</dfn> with <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/exec/runtime.html#syntax-funcaddr" id="ref-for-syntax-funcaddr③">function address</a> <var>funcaddr</var> and a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list" id="ref-for-list①">list</a> of JavaScript arguments <var>argValues</var>, perform the following steps:
+
+
     <ol>
      <li data-md>
       <p>Let <var>store</var> be the <a data-link-type="dfn" href="https://tc39.es/ecma262/multipage/executable-code-and-execution-contexts.html#surrounding-agent" id="ref-for-surrounding-agent②⑨">surrounding agent</a>’s <a data-link-type="dfn" href="#associated-store" id="ref-for-associated-store②⑤">associated store</a>.</p>
@@ -2303,7 +2447,10 @@ This slot holds a <a data-link-type="dfn" href="https://webassembly.github.io/sp
    <p class="note" role="note"><span class="marker">Note:</span> <a data-link-type="dfn" href="#call-an-exported-function" id="ref-for-call-an-exported-function①">Calling an Exported Function</a> executes in the [[Realm]] of the callee Exported Function, as per the definition of <a data-link-type="dfn" href="https://tc39.github.io/ecma262/#sec-built-in-function-objects" id="ref-for-sec-built-in-function-objects①">built-in function objects</a>.</p>
    <p class="note" role="note"><span class="marker">Note:</span> Exported Functions do not have a [[Construct]] method and thus it is not possible to call one with the <code>new</code> operator.</p>
    <div class="algorithm" data-algorithm="run a host function">
-     To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="run-a-host-function">run a host function</dfn> from the JavaScript object <var>func</var>, type <var>functype</var>, and <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list" id="ref-for-list②">list</a> of <a data-link-type="dfn" data-refhint-key="8390efce" href="https://webassembly.github.io/spec/core/exec/runtime.html#values" id="ref-for-values⑥">WebAssembly values</a> <var>arguments</var>, perform the following steps: 
+    
+  To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="run-a-host-function">run a host function</dfn> from the JavaScript object <var>func</var>, type <var>functype</var>, and <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list" id="ref-for-list②">list</a> of <a data-link-type="dfn" data-refhint-key="8390efce" href="https://webassembly.github.io/spec/core/exec/runtime.html#values" id="ref-for-values⑥">WebAssembly values</a> <var>arguments</var>, perform the following steps:
+
+
     <ol>
      <li data-md>
       <p>Let [<var>parameters</var>] → [<var>results</var>] be <var>functype</var>.</p>
@@ -2350,7 +2497,10 @@ This slot holds a <a data-link-type="dfn" href="https://webassembly.github.io/sp
     </ol>
    </div>
    <div class="algorithm" data-algorithm="create a host function">
-     To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="create-a-host-function">create a host function</dfn> from the JavaScript object <var>func</var> and type <var>functype</var>, perform the following steps: 
+    
+  To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="create-a-host-function">create a host function</dfn> from the JavaScript object <var>func</var> and type <var>functype</var>, perform the following steps:
+
+
     <ol>
      <li data-md>
       <p class="assertion">Assert: <a data-link-type="abstract-op" href="https://tc39.es/ecma262/multipage/abstract-operations.html#sec-iscallable" id="ref-for-sec-iscallable②">IsCallable</a>(<var>func</var>).</p>
@@ -2391,7 +2541,10 @@ This slot holds a <a data-link-type="dfn" href="https://webassembly.github.io/sp
     </ol>
    </div>
    <div class="algorithm" data-algorithm="ToJSValue">
-     The algorithm <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="tojsvalue">ToJSValue</dfn>(<var>w</var>) coerces a <a data-link-type="dfn" data-refhint-key="8390efce" href="https://webassembly.github.io/spec/core/exec/runtime.html#values" id="ref-for-values⑦">WebAssembly value</a> to a JavaScript value by performing the following steps: 
+    
+The algorithm <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="tojsvalue">ToJSValue</dfn>(<var>w</var>) coerces a <a data-link-type="dfn" data-refhint-key="8390efce" href="https://webassembly.github.io/spec/core/exec/runtime.html#values" id="ref-for-values⑦">WebAssembly value</a> to a JavaScript value by performing the following steps:
+
+
     <ol>
      <li data-md>
       <p class="assertion">Assert: <var>w</var> is not of  the form <a data-link-type="dfn" data-refhint-key="5e745a1a" href="https://webassembly.github.io/spec/core/exec/runtime.html#values" id="ref-for-values⑧">v128.const</a> <var>v128</var>.</p>
@@ -2446,7 +2599,10 @@ This slot holds a <a data-link-type="dfn" href="https://webassembly.github.io/sp
     </ol>
    </div>
    <div class="algorithm" data-algorithm="ToWebAssemblyValue">
-     The algorithm <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="towebassemblyvalue">ToWebAssemblyValue</dfn>(<var>v</var>, <var>type</var>) coerces a JavaScript value to a <a data-link-type="dfn" data-refhint-key="8390efce" href="https://webassembly.github.io/spec/core/exec/runtime.html#values" id="ref-for-values①⑥">WebAssembly value</a> by performing the following steps: 
+    
+The algorithm <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="towebassemblyvalue">ToWebAssemblyValue</dfn>(<var>v</var>, <var>type</var>) coerces a JavaScript value to a <a data-link-type="dfn" data-refhint-key="8390efce" href="https://webassembly.github.io/spec/core/exec/runtime.html#values" id="ref-for-values①⑥">WebAssembly value</a> by performing the following steps:
+
+
     <ol>
      <li data-md>
       <p class="assertion">Assert: <var>type</var> is not <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/syntax/types.html#vector-types" id="ref-for-vector-types⑦">v128</a>.</p>
@@ -2561,7 +2717,10 @@ This slot holds a <a data-link-type="dfn" href="https://webassembly.github.io/sp
    <h3 class="heading settled" data-level="5.7" id="error-objects"><span class="secno">5.7. </span><span class="content">Error Objects</span><a class="self-link" href="#error-objects"></a></h3>
    <p>WebAssembly defines the following Error classes: <dfn class="dfn-paneled idl-code" data-dfn-type="exception" data-export id="exceptiondef-compileerror"><code>CompileError</code></dfn>, <dfn class="dfn-paneled idl-code" data-dfn-type="exception" data-export id="exceptiondef-linkerror"><code>LinkError</code></dfn>, and <dfn class="dfn-paneled idl-code" data-dfn-type="exception" data-export id="exceptiondef-runtimeerror"><code>RuntimeError</code></dfn>.</p>
    <div class="algorithm" data-algorithm="create the WebAssembly namespace object">
-     When the <a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#dfn-namespace-object" id="ref-for-dfn-namespace-object">namespace object</a> for the <code class="idl"><a data-link-type="idl" href="#namespacedef-webassembly" id="ref-for-namespacedef-webassembly⑤">WebAssembly</a></code> namespace is <a data-link-type="dfn" href="https://heycam.github.io/webidl/#create-a-namespace-object" id="ref-for-create-a-namespace-object">created</a>, the following steps must be run: 
+    
+When the <a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#dfn-namespace-object" id="ref-for-dfn-namespace-object">namespace object</a> for the <code class="idl"><a data-link-type="idl" href="#namespacedef-webassembly" id="ref-for-namespacedef-webassembly⑤">WebAssembly</a></code> namespace is <a data-link-type="dfn" href="https://heycam.github.io/webidl/#create-a-namespace-object" id="ref-for-create-a-namespace-object">created</a>, the following steps must be run:
+
+
     <ol>
      <li data-md>
       <p>Let <var>namespaceObject</var> be the <a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#dfn-namespace-object" id="ref-for-dfn-namespace-object①">namespace object</a>.</p>
@@ -2571,7 +2730,7 @@ This slot holds a <a data-link-type="dfn" href="https://webassembly.github.io/sp
        <li data-md>
         <p>Let <var>constructor</var> be a new object, implementing the <a data-link-type="dfn" href="https://tc39.github.io/ecma262/#sec-nativeerror-object-structure" id="ref-for-sec-nativeerror-object-structure">NativeError Object Structure</a>, with <var>NativeError</var> set to <var>error</var>.</p>
        <li data-md>
-        <p><a data-link-type="dfn" data-refhint-key="f4fa6c3b" href="https://tc39.github.io/ecma262/#sec-returnifabrupt-shorthands" id="ref-for-sec-returnifabrupt-shorthands②③">!</a> <a data-link-type="abstract-op" href="https://tc39.es/ecma262/multipage/ordinary-and-exotic-objects-behaviours.html#sec-definemethodproperty" id="ref-for-sec-definemethodproperty">DefineMethodProperty</a>(<var>namespaceObject</var>, <var>error</var>, <var>constructor</var>, false).</p>
+        <p><a data-link-type="dfn" data-refhint-key="f4fa6c3b" href="https://tc39.github.io/ecma262/#sec-returnifabrupt-shorthands" id="ref-for-sec-returnifabrupt-shorthands②③">!</a> <a data-link-type="abstract-op" href="https://tc39.es/ecma262/multipage/ordinary-and-exotic-objects-behaviours.html#sec-definemethodproperty" id="ref-for-sec-definemethodproperty">DefineMethodProperty</a>(<var>namespaceObject</var>, <var>error</var>,  <var>constructor</var>, false).</p>
       </ol>
     </ol>
    </div>
@@ -2601,7 +2760,9 @@ same class of exception is thrown as for out of memory conditions in JavaScript.
 The particular exception here is implementation-defined in both cases.</p>
    <p class="note" role="note"><span class="marker">Note:</span> ECMAScript doesn’t specify any sort of behavior on out-of-memory conditions; implementations have been observed to throw OOMError and to crash. Either is valid here.</p>
    <div class="issue" id="issue-7eafcf54">
-    <a class="self-link" href="#issue-7eafcf54"></a> A failed allocation of a large table or memory may either result in 
+    <a class="self-link" href="#issue-7eafcf54"></a>
+    A failed allocation of a large table or memory may either result in
+
     <ul>
      <li data-md>
       <p>a <code class="idl"><a data-link-type="idl" href="https://tc39.github.io/ecma262/#sec-native-error-types-used-in-this-standard-rangeerror" id="ref-for-sec-native-error-types-used-in-this-standard-rangeerror①③">RangeError</a></code>, as specified in the <code class="idl"><a data-link-type="idl" href="#memory" id="ref-for-memory⑧">Memory</a></code> <code class="idl"><a data-link-type="idl" href="#dom-memory-grow" id="ref-for-dom-memory-grow①">grow()</a></code> and <code class="idl"><a data-link-type="idl" href="#table" id="ref-for-table⑥">Table</a></code> <code class="idl"><a data-link-type="idl" href="#dom-table-grow" id="ref-for-dom-table-grow①">grow()</a></code> operations</p>
@@ -2610,7 +2771,9 @@ The particular exception here is implementation-defined in both cases.</p>
      <li data-md>
       <p>UA-specific OOM behavior as described in this section.</p>
     </ul>
-     In a future revision, we may reconsider more reliable and recoverable errors for allocations of large amounts of memory. 
+        In a future revision, we may reconsider more reliable and recoverable errors for allocations of large amounts of memory.
+
+
     <p>See <a href="https://github.com/WebAssembly/spec/issues/879">Issue 879</a> for further discussion.</p>
    </div>
    <h2 class="heading settled" data-level="7" id="limits"><span class="secno">7. </span><span class="content">Implementation-defined Limits</span><a class="self-link" href="#limits"></a></h2>
@@ -2649,7 +2812,10 @@ In practice, an implementation may run out of resources for valid modules below 
    <p class="note" role="note"><span class="marker">Note:</span> While this specification is not yet merged into the main Wasm specification, since it defines both a Source Phase Imports integration and an evaluation/instance phase integration, implementations may choose to implement only the Source Phase Imports as its own smaller proposal without implementing the full evaluation/instance phase import support. In this case, the <code>ResolveExport</code> abstract operation should be implemented as returning null, and the <code>InitializeEnvironment</code> and <code>ExecuteModule</code> abstract operations implemented as unconditionally throwing a <code>SyntaxError</code> exception. This note will be removed when this proposal is upstreamed.</p>
    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-export id="webassembly-module-record">WebAssembly Module Record</dfn>s are a subclass of <a data-link-type="dfn" href="https://tc39.github.io/ecma262/#cyclic-module-record" id="ref-for-cyclic-module-record">Cyclic Module Record</a> which contain WebAssembly code.</p>
    <div class="algorithm" data-algorithm="parse a WebAssembly module">
-     To <dfn class="dfn-paneled" data-dfn-type="dfn" data-export id="parse-a-webassembly-module">parse a WebAssembly module</dfn> given a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#byte-sequence" id="ref-for-byte-sequence">byte sequence</a> <var>bytes</var>, a Realm <var>realm</var> and object <var>hostDefined</var>, perform the following steps. 
+    
+To <dfn class="dfn-paneled" data-dfn-type="dfn" data-export id="parse-a-webassembly-module">parse a WebAssembly module</dfn> given a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#byte-sequence" id="ref-for-byte-sequence">byte sequence</a> <var>bytes</var>, a Realm <var>realm</var> and object <var>hostDefined</var>, perform the following steps.
+
+
     <ol>
      <li data-md>
       <p>Let <var>stableBytes</var> be a <a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#dfn-get-buffer-source-copy" id="ref-for-dfn-get-buffer-source-copy④">copy of the bytes held by the buffer</a> <var>bytes</var>.</p>
@@ -2658,6 +2824,8 @@ In practice, an implementation may run out of resources for valid modules below 
      <li data-md>
       <p>If <var>module</var> is <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/appendix/embedding.html#embed-error" id="ref-for-embed-error①⑤">error</a>, throw a <code class="idl"><a data-link-type="idl" href="#exceptiondef-compileerror" id="ref-for-exceptiondef-compileerror④">CompileError</a></code> exception.</p>
      <li data-md>
+      <p class="note" role="note"><span class="marker">Note:</span> When integrating with the JS String Builtins proposal, <var>builtinSetNames</var> should be passed in the following step as « "js-string" » and <var>importedStringModule</var> as null.</p>
+     <li data-md>
       <p><a data-link-type="dfn" href="#construct-a-webassembly-module-object" id="ref-for-construct-a-webassembly-module-object①">Construct a WebAssembly module object</a> from <var>module</var> and <var>bytes</var>, and let <var>module</var> be the result.</p>
      <li data-md>
       <p>Let <var>requestedModules</var> be a set.</p>
@@ -2665,7 +2833,33 @@ In practice, an implementation may run out of resources for valid modules below 
       <p>For each (<var>moduleName</var>, <var>name</var>, <var>type</var>) in <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/appendix/embedding.html#embed-module-imports" id="ref-for-embed-module-imports②">module_imports</a>(<var>module</var>.[[Module]]),</p>
       <ol>
        <li data-md>
+        <p>If <var>moduleName</var> starts with the prefix "wasm-js:",</p>
+        <ol>
+         <li data-md>
+          <p>Throw a <code class="idl"><a data-link-type="idl" href="#exceptiondef-linkerror" id="ref-for-exceptiondef-linkerror⑨">LinkError</a></code> exception.</p>
+        </ol>
+       <li data-md>
+        <p>If <var>name</var> starts with the prefix "wasm:" or "wasm-js:",</p>
+        <ol>
+         <li data-md>
+          <p>Throw a <code class="idl"><a data-link-type="idl" href="#exceptiondef-linkerror" id="ref-for-exceptiondef-linkerror①⓪">LinkError</a></code> exception.</p>
+        </ol>
+       <li data-md>
+        <p class="note" role="note"><span class="marker">Note:</span> The following step only applies when integrating with the JS String Builtins proposal.</p>
+       <li data-md>
+        <p>If <u class="link-error" data-lt="Find a builtin" title="LINK ERROR: No &apos;dfn&apos; refs found for &apos;find a builtin&apos;.">Find a builtin</u> with (<var>moduleName</var>, <var>name</var>, <var>type</var>) and builtins <var>module</var>.[[BuiltinSets]] is not null, then <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue" id="ref-for-iteration-continue">continue</a>.</p>
+       <li data-md>
         <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#set-append" id="ref-for-set-append">Append</a> <var>moduleName</var> to <var>requestedModules</var>.</p>
+      </ol>
+     <li data-md>
+      <p>For each (<var>name</var>, <var>type</var>) in <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/appendix/embedding.html#embed-module-exports" id="ref-for-embed-module-exports②">module_exports</a>(<var>module</var>.[[Module]])</p>
+      <ol>
+       <li data-md>
+        <p>If <var>name</var> starts with the prefix "wasm:" or "wasm-js:",</p>
+        <ol>
+         <li data-md>
+          <p>Throw a <code class="idl"><a data-link-type="idl" href="#exceptiondef-linkerror" id="ref-for-exceptiondef-linkerror①①">LinkError</a></code> exception.</p>
+        </ol>
       </ol>
      <li data-md>
       <p>Let <var>moduleRecord</var> be {
@@ -2696,14 +2890,17 @@ In practice, an implementation may run out of resources for valid modules below 
     <p class="note" role="note"><span class="marker">Note:</span> From HTML, it’s not observable when <a data-link-type="dfn" href="#parse-a-webassembly-module" id="ref-for-parse-a-webassembly-module">parse a WebAssembly module</a> begins, so any work perfomed in compilation may be performed off-thread.</p>
    </div>
    <div class="algorithm" data-algorithm="export name list">
-     The <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="export-name-list">export name list</dfn> of a WebAssembly Module Record <var>record</var> is defined by the following algorithm: 
+    
+The <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="export-name-list">export name list</dfn> of a WebAssembly Module Record <var>record</var> is defined by the following algorithm:
+
+
     <ol>
      <li data-md>
       <p>Let <var>module</var> be <var>record</var>’s [[ModuleSource]] internal slot.</p>
      <li data-md>
       <p>Let <var>exports</var> be an empty <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list" id="ref-for-list④">list</a>.</p>
      <li data-md>
-      <p>For each (<var>name</var>, <var>type</var>) in <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/appendix/embedding.html#embed-module-exports" id="ref-for-embed-module-exports②">module_exports</a>(<var>module</var>.[[Module]])</p>
+      <p>For each (<var>name</var>, <var>type</var>) in <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/appendix/embedding.html#embed-module-exports" id="ref-for-embed-module-exports③">module_exports</a>(<var>module</var>.[[Module]])</p>
       <ol>
        <li data-md>
         <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-append" id="ref-for-list-append①①">Append</a> <var>name</var> to the end of <var>exports</var>.</p>
@@ -2772,6 +2969,10 @@ In practice, an implementation may run out of resources for valid modules below 
       <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-iterate" id="ref-for-list-iterate⑨">For each</a> (<var>importedModuleName</var>, <var>name</var>, <var>importtype</var>) in <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/appendix/embedding.html#embed-module-imports" id="ref-for-embed-module-imports③">module_imports</a>(<var>module</var>),</p>
       <ol>
        <li data-md>
+        <p class="note" role="note"><span class="marker">Note:</span> The following step only applies when integrating with the JS String Builtins proposal.</p>
+       <li data-md>
+        <p>If <u class="link-error" data-lt="Find a builtin" title="LINK ERROR: No &apos;dfn&apos; refs found for &apos;find a builtin&apos;.">Find a builtin</u> with (<var>importedModuleName</var>, <var>name</var>) and builtins <var>module</var>.[[BuiltinSets]] is not null, then <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue" id="ref-for-iteration-continue①">continue</a>.</p>
+       <li data-md>
         <p>Let <var>importedModule</var> be <a data-link-type="abstract-op" href="https://tc39.github.io/ecma262/#sec-GetImportedModule" id="ref-for-sec-GetImportedModule">GetImportedModule</a>(<var>record</var>, <var>importedModuleName</var>).</p>
        <li data-md>
         <p>Let <var>resolution</var> be <var>importedModule</var>.ResolveExport(<var>name</var>).</p>
@@ -2797,11 +2998,11 @@ In practice, an implementation may run out of resources for valid modules below 
          <li data-md>
           <p class="assertion">Assert: <var>externval</var> is not <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/appendix/embedding.html#embed-error" id="ref-for-embed-error①⑥">error</a>.</p>
          <li data-md>
-          <p class="assertion">Assert: <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/appendix/embedding.html#embed-module-exports" id="ref-for-embed-module-exports③">module_exports</a>(<var>module</var>) contains an element (<var>resolvedName</var>, <var>type</var>).</p>
+          <p class="assertion">Assert: <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/appendix/embedding.html#embed-module-exports" id="ref-for-embed-module-exports④">module_exports</a>(<var>module</var>) contains an element (<var>resolvedName</var>, <var>type</var>).</p>
          <li data-md>
-          <p>Let <var>externtype</var> be the value of <var>type</var> for the element (<var>resolvedName</var>, <var>type</var>) in <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/appendix/embedding.html#embed-module-exports" id="ref-for-embed-module-exports④">module_exports</a>(<var>module</var>).</p>
+          <p>Let <var>externtype</var> be the value of <var>type</var> for the element (<var>resolvedName</var>, <var>type</var>) in <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/appendix/embedding.html#embed-module-exports" id="ref-for-embed-module-exports⑤">module_exports</a>(<var>module</var>).</p>
          <li data-md>
-          <p>If <var>importtype</var> is not an <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/valid/types.html#match-externtype" id="ref-for-match-externtype">extern subtype</a> of <var>externtype</var>, throw a <code class="idl"><a data-link-type="idl" href="#exceptiondef-linkerror" id="ref-for-exceptiondef-linkerror⑨">LinkError</a></code> exception.</p>
+          <p>If <var>importtype</var> is not an <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/valid/types.html#match-externtype" id="ref-for-match-externtype">extern subtype</a> of <var>externtype</var>, throw a <code class="idl"><a data-link-type="idl" href="#exceptiondef-linkerror" id="ref-for-exceptiondef-linkerror①②">LinkError</a></code> exception.</p>
          <li data-md>
           <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-append" id="ref-for-list-append①②">Append</a> <var>externval</var> to <var>imports</var>.</p>
         </ol>
@@ -2816,7 +3017,7 @@ In practice, an implementation may run out of resources for valid modules below 
           <p>If <var>importtype</var> is of the form <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/syntax/types.html#external-types" id="ref-for-external-types①②">func</a> <var>functype</var>,</p>
           <ol>
            <li data-md>
-            <p>If <a data-link-type="abstract-op" href="https://tc39.es/ecma262/multipage/abstract-operations.html#sec-iscallable" id="ref-for-sec-iscallable③">IsCallable</a>(<var>v</var>) is false, throw a <code class="idl"><a data-link-type="idl" href="#exceptiondef-linkerror" id="ref-for-exceptiondef-linkerror①⓪">LinkError</a></code> exception.</p>
+            <p>If <a data-link-type="abstract-op" href="https://tc39.es/ecma262/multipage/abstract-operations.html#sec-iscallable" id="ref-for-sec-iscallable③">IsCallable</a>(<var>v</var>) is false, throw a <code class="idl"><a data-link-type="idl" href="#exceptiondef-linkerror" id="ref-for-exceptiondef-linkerror①③">LinkError</a></code> exception.</p>
            <li data-md>
             <p>If <var>v</var> has a [[FunctionAddress]] internal slot, and therefore is an <a data-link-type="dfn" href="#exported-function" id="ref-for-exported-function③">Exported Function</a>,</p>
             <ol>
@@ -2850,16 +3051,16 @@ In practice, an implementation may run out of resources for valid modules below 
               <p>Let <var>targetmut</var> <var>valuetype</var> be <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/appendix/embedding.html#embed-global-type" id="ref-for-embed-global-type②">global_type</a>(<var>store</var>, <var>globaladdr</var>).</p>
               <ol>
                <li data-md>
-                <p>If <var>mut</var> is <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/syntax/types.html#syntax-mut" id="ref-for-syntax-mut④">const</a> and <var>targetmut</var> is <a data-link-type="dfn" data-refhint-key="e638887d" href="https://webassembly.github.io/spec/core/syntax/types.html#syntax-mut" id="ref-for-syntax-mut⑤">var</a>, throw a <code class="idl"><a data-link-type="idl" href="#exceptiondef-linkerror" id="ref-for-exceptiondef-linkerror①①">LinkError</a></code> exception.</p>
+                <p>If <var>mut</var> is <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/syntax/types.html#syntax-mut" id="ref-for-syntax-mut④">const</a> and <var>targetmut</var> is <a data-link-type="dfn" data-refhint-key="e638887d" href="https://webassembly.github.io/spec/core/syntax/types.html#syntax-mut" id="ref-for-syntax-mut⑤">var</a>, throw a <code class="idl"><a data-link-type="idl" href="#exceptiondef-linkerror" id="ref-for-exceptiondef-linkerror①④">LinkError</a></code> exception.</p>
               </ol>
             </ol>
            <li data-md>
             <p>Otherwise,</p>
             <ol>
              <li data-md>
-              <p>If <var>valtype</var> is <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/syntax/types.html#vector-types" id="ref-for-vector-types⑧">v128</a>, throw a <code class="idl"><a data-link-type="idl" href="#exceptiondef-linkerror" id="ref-for-exceptiondef-linkerror①②">LinkError</a></code> exception.</p>
+              <p>If <var>valtype</var> is <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/syntax/types.html#vector-types" id="ref-for-vector-types⑧">v128</a>, throw a <code class="idl"><a data-link-type="idl" href="#exceptiondef-linkerror" id="ref-for-exceptiondef-linkerror①⑤">LinkError</a></code> exception.</p>
              <li data-md>
-              <p>If <var>mut</var> is <a data-link-type="dfn" data-refhint-key="e638887d" href="https://webassembly.github.io/spec/core/syntax/types.html#syntax-mut" id="ref-for-syntax-mut⑥">var</a>, throw a <code class="idl"><a data-link-type="idl" href="#exceptiondef-linkerror" id="ref-for-exceptiondef-linkerror①③">LinkError</a></code> exception.</p>
+              <p>If <var>mut</var> is <a data-link-type="dfn" data-refhint-key="e638887d" href="https://webassembly.github.io/spec/core/syntax/types.html#syntax-mut" id="ref-for-syntax-mut⑥">var</a>, throw a <code class="idl"><a data-link-type="idl" href="#exceptiondef-linkerror" id="ref-for-exceptiondef-linkerror①⑥">LinkError</a></code> exception.</p>
              <li data-md>
               <p>Let <var>value</var> be <a data-link-type="dfn" href="https://tc39.github.io/ecma262/#sec-returnifabrupt-shorthands" id="ref-for-sec-returnifabrupt-shorthands②⑤">?</a> <a data-link-type="dfn" href="#towebassemblyvalue" id="ref-for-towebassemblyvalue①⓪">ToWebAssemblyValue</a>(<var>v</var>, <var>valtype</var>).</p>
              <li data-md>
@@ -2876,7 +3077,7 @@ In practice, an implementation may run out of resources for valid modules below 
           <p>If <var>importtype</var> is of the form <a data-link-type="dfn" data-refhint-key="80a23595" href="https://webassembly.github.io/spec/core/syntax/types.html#external-types" id="ref-for-external-types①④">mem</a> <var>memtype</var>,</p>
           <ol>
            <li data-md>
-            <p>If <var>v</var> does not <a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#implements" id="ref-for-implements④">implement</a> <code class="idl"><a data-link-type="idl" href="#memory" id="ref-for-memory⑨">Memory</a></code>, throw a <code class="idl"><a data-link-type="idl" href="#exceptiondef-linkerror" id="ref-for-exceptiondef-linkerror①④">LinkError</a></code> exception.</p>
+            <p>If <var>v</var> does not <a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#implements" id="ref-for-implements④">implement</a> <code class="idl"><a data-link-type="idl" href="#memory" id="ref-for-memory⑨">Memory</a></code>, throw a <code class="idl"><a data-link-type="idl" href="#exceptiondef-linkerror" id="ref-for-exceptiondef-linkerror①⑦">LinkError</a></code> exception.</p>
            <li data-md>
             <p>Let <var>externmem</var> be the <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/exec/runtime.html#syntax-externval" id="ref-for-syntax-externval①⑧">external value</a> <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/exec/runtime.html#syntax-externval" id="ref-for-syntax-externval①⑨">mem</a> <var>v</var>.[[Memory]].</p>
            <li data-md>
@@ -2886,7 +3087,7 @@ In practice, an implementation may run out of resources for valid modules below 
           <p>If <var>importtype</var> is of the form <a data-link-type="dfn" data-refhint-key="d7f31bd6" href="https://webassembly.github.io/spec/core/syntax/types.html#external-types" id="ref-for-external-types①⑤">table</a> <var>tabletype</var>,</p>
           <ol>
            <li data-md>
-            <p>If <var>v</var> does not <a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#implements" id="ref-for-implements⑤">implement</a> <code class="idl"><a data-link-type="idl" href="#table" id="ref-for-table⑦">Table</a></code>, throw a <code class="idl"><a data-link-type="idl" href="#exceptiondef-linkerror" id="ref-for-exceptiondef-linkerror①⑤">LinkError</a></code> exception.</p>
+            <p>If <var>v</var> does not <a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#implements" id="ref-for-implements⑤">implement</a> <code class="idl"><a data-link-type="idl" href="#table" id="ref-for-table⑦">Table</a></code>, throw a <code class="idl"><a data-link-type="idl" href="#exceptiondef-linkerror" id="ref-for-exceptiondef-linkerror①⑧">LinkError</a></code> exception.</p>
            <li data-md>
             <p>Let <var>tableaddr</var> be <var>v</var>.[[Table]].</p>
            <li data-md>
@@ -2901,7 +3102,7 @@ In practice, an implementation may run out of resources for valid modules below 
      <li data-md>
       <p>Set <var>record</var>.[[Instance]] to <var>instance</var>.</p>
      <li data-md>
-      <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-iterate" id="ref-for-list-iterate①⓪">For each</a> (<var>name</var>, <var>externtype</var>) of <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/appendix/embedding.html#embed-module-exports" id="ref-for-embed-module-exports⑤">module_exports</a>(<var>module</var>),</p>
+      <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-iterate" id="ref-for-list-iterate①⓪">For each</a> (<var>name</var>, <var>externtype</var>) of <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/appendix/embedding.html#embed-module-exports" id="ref-for-embed-module-exports⑥">module_exports</a>(<var>module</var>),</p>
       <ol>
        <li data-md>
         <p>If <var>externtype</var> is of the form <a data-link-type="dfn" data-refhint-key="4581e593" href="https://webassembly.github.io/spec/core/syntax/types.html#external-types" id="ref-for-external-types①⑥">global</a> <var>mut</var> <var>globaltype</var>,</p>
@@ -2921,8 +3122,10 @@ access. When integrating with shared globals, they may be excluded here similarl
            <li data-md>
             <p>Perform <a data-link-type="dfn" data-refhint-key="f4fa6c3b" href="https://tc39.github.io/ecma262/#sec-returnifabrupt-shorthands" id="ref-for-sec-returnifabrupt-shorthands②⑥">!</a> <var>record</var>.[[Environment]].InitializeBinding(<var>name</var>, <a data-link-type="dfn" href="#tojsvalue" id="ref-for-tojsvalue⑤">ToJSValue</a>(<var>global_value</var>)).</p>
            <li data-md>
-            <p>If <var>mut</var> is <a data-link-type="dfn" data-refhint-key="e638887d" href="https://webassembly.github.io/spec/core/syntax/types.html#syntax-mut" id="ref-for-syntax-mut⑦">var</a>, then associate all future mutations of <var>globaladdr</var> with the ECMA-262 binding record for <var>name</var> in <var>record</var>.[[Environment]], such that <var>record</var>.[[Environment]].GetBindingValue(<var>resolution</var>.[[BindingName]], true)
-always returns <a data-link-type="dfn" href="#tojsvalue" id="ref-for-tojsvalue⑥">ToJSValue</a>(<a data-link-type="dfn" href="https://webassembly.github.io/spec/core/appendix/embedding.html#embed-global-read" id="ref-for-embed-global-read②">global_read</a>(<var>store</var>, <var>globaladdr</var>)) for the current <a data-link-type="dfn" href="https://tc39.es/ecma262/multipage/executable-code-and-execution-contexts.html#surrounding-agent" id="ref-for-surrounding-agent③⑦">surrounding agent</a>’s <a data-link-type="dfn" href="#associated-store" id="ref-for-associated-store③①">associated store</a> <var>store</var>.</p>
+            <p>If <var>mut</var> is <a data-link-type="dfn" data-refhint-key="e638887d" href="https://webassembly.github.io/spec/core/syntax/types.html#syntax-mut" id="ref-for-syntax-mut⑦">var</a>, then associate all future mutations of <var>globaladdr</var> with the ECMA-262 binding record for <var>name</var> in
+<var>record</var>.[[Environment]], such that <var>record</var>.[[Environment]].GetBindingValue(<var>resolution</var>.[[BindingName]], true)
+always returns <a data-link-type="dfn" href="#tojsvalue" id="ref-for-tojsvalue⑥">ToJSValue</a>(<a data-link-type="dfn" href="https://webassembly.github.io/spec/core/appendix/embedding.html#embed-global-read" id="ref-for-embed-global-read②">global_read</a>(<var>store</var>, <var>globaladdr</var>)) for the current <a data-link-type="dfn" href="https://tc39.es/ecma262/multipage/executable-code-and-execution-contexts.html#surrounding-agent" id="ref-for-surrounding-agent③⑦">surrounding agent</a>’s
+<a data-link-type="dfn" href="#associated-store" id="ref-for-associated-store③①">associated store</a> <var>store</var>.</p>
           </ol>
         </ol>
        <li data-md>
@@ -2995,12 +3198,22 @@ WebAssembly Module Record Environment Record.</p>
 The following sections provide an overview of what has changed.</p>
    <h3 class="heading settled" data-level="10.1" id="release-20"><span class="secno">10.1. </span><span class="content">Release 2.0</span><a class="self-link" href="#release-20"></a></h3>
    <h4 class="no-toc heading settled" id="changes-multivalue">Multiple Values<a class="self-link" href="#changes-multivalue"></a></h4>
-    Multiple values can be returned from WebAssembly functions into JavaScript as an <a data-link-type="dfn" href="https://tc39.github.io/ecma262/#sec-array-exotic-objects" id="ref-for-sec-array-exotic-objects">Array</a> object. 
+   
+Multiple values can be returned from WebAssembly functions into JavaScript as an <a data-link-type="dfn" href="https://tc39.github.io/ecma262/#sec-array-exotic-objects" id="ref-for-sec-array-exotic-objects">Array</a> object.
+
+
    <h4 class="no-toc heading settled" id="changes-bigint">BigInt Integration<a class="self-link" href="#changes-bigint"></a></h4>
-    WebAssembly <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/syntax/types.html#syntax-numtype" id="ref-for-syntax-numtype①④">i64</a> values can be passed to and from JavaScript (via imported or exported globals, table get or set operations, function return values or arguments) as <a data-link-type="dfn" data-refhint-key="55e2e3f1" href="https://tc39.github.io/ecma262/#sec-ecmascript-language-types-bigint-type" id="ref-for-sec-ecmascript-language-types-bigint-type②">BigInt</a> objects. 
+   
+WebAssembly <a data-link-type="dfn" href="https://webassembly.github.io/spec/core/syntax/types.html#syntax-numtype" id="ref-for-syntax-numtype①④">i64</a> values can be passed to and from JavaScript (via imported or exported globals, table get or set operations, function return values or arguments) as <a data-link-type="dfn" data-refhint-key="55e2e3f1" href="https://tc39.github.io/ecma262/#sec-ecmascript-language-types-bigint-type" id="ref-for-sec-ecmascript-language-types-bigint-type②">BigInt</a> objects.
+
+
    <h4 class="no-toc heading settled" id="changes-reftypes">Reference types<a class="self-link" href="#changes-reftypes"></a></h4>
-    JavaScript values can be passed to and from WebAssembly (via imported or exported globals, table set or get operations, and function arguments or return values) as <a data-link-type="dfn" data-refhint-key="92193adb" href="https://webassembly.github.io/spec/core/syntax/types.html#syntax-reftype" id="ref-for-syntax-reftype①⓪">externref</a> values.
-Multiple tables can be exported and imported to and from JavaScript. 
+   
+JavaScript values can be passed to and from WebAssembly (via imported or exported globals, table set or get operations, and function arguments or return values) as <a data-link-type="dfn" data-refhint-key="92193adb" href="https://webassembly.github.io/spec/core/syntax/types.html#syntax-reftype" id="ref-for-syntax-reftype①⓪">externref</a> values.
+Multiple tables can be exported and imported to and from JavaScript.
+
+
+
   </main>
   <div data-fill-with="conformance">
    <h2 class="no-ref no-num heading settled" id="w3c-conformance"><span class="content">Conformance</span><a class="self-link" href="#w3c-conformance"></a></h2>
@@ -3012,21 +3225,31 @@ Multiple tables can be exported and imported to and from JavaScript.
     in the normative parts of this document
     are to be interpreted as described in RFC 2119.
     However, for readability,
-    these words do not appear in all uppercase letters in this specification. </p>
+    these words do not appear in all uppercase letters in this specification.
+
+    </p>
    <p>All of the text of this specification is normative
-    except sections explicitly marked as non-normative, examples, and notes. <a data-link-type="biblio" href="#biblio-rfc2119" title="Key words for use in RFCs to Indicate Requirement Levels">[RFC2119]</a> </p>
+    except sections explicitly marked as non-normative, examples, and notes. <a data-link-type="biblio" href="#biblio-rfc2119" title="Key words for use in RFCs to Indicate Requirement Levels">[RFC2119]</a>
+
+    </p>
    <p>Examples in this specification are introduced with the words “for example”
     or are set apart from the normative text
     with <code>class="example"</code>,
-    like this: </p>
+    like this:
+
+    </p>
    <div class="example" id="w3c-example">
-    <a class="self-link" href="#w3c-example"></a> 
-    <p>This is an example of an informative example. </p>
+    <a class="self-link" href="#w3c-example"></a>
+        
+    <p>This is an example of an informative example.
+    </p>
    </div>
    <p>Informative notes begin with the word “Note”
     and are set apart from the normative text
     with <code>class="note"</code>,
-    like this: </p>
+    like this:
+
+    </p>
    <p class="note" role="note">Note, this is an informative note.</p>
    <section>
     <h3 class="no-ref no-num heading settled" id="w3c-conformant-algorithms"><span class="content">Conformant Algorithms</span><a class="self-link" href="#w3c-conformant-algorithms"></a></h3>
@@ -3035,14 +3258,17 @@ Multiple tables can be exported and imported to and from JavaScript.
     or "return false and abort these steps")
     are to be interpreted with the meaning of the key word
     ("must", "should", "may", etc)
-    used in introducing the algorithm. </p>
+    used in introducing the algorithm.
+
+    </p>
     <p>Conformance requirements phrased as algorithms or specific steps
     can be implemented in any manner,
     so long as the end result is equivalent.
     In particular, the algorithms defined in this specification
     are intended to be easy to understand
     and are not intended to be performant.
-    Implementers are encouraged to optimize. </p>
+    Implementers are encouraged to optimize.
+</p>
    </section>
   </div>
   <script src="https://www.w3.org/scripts/TR/2021/fixup.js"></script>
@@ -3293,6 +3519,7 @@ Multiple tables can be exported and imported to and from JavaScript.
      <li><span class="dfn-paneled" id="53275e46">append <small>(for list)</small></span>
      <li><span class="dfn-paneled" id="a3b18719">append <small>(for set)</small></span>
      <li><span class="dfn-paneled" id="3de9e659">byte sequence</span>
+     <li><span class="dfn-paneled" id="f937b7b6">continue</span>
      <li><span class="dfn-paneled" id="1243a891">exist</span>
      <li><span class="dfn-paneled" id="6b815fdd">is empty</span>
      <li><span class="dfn-paneled" id="f02cd417">iterate <small>(for list)</small></span>
@@ -3481,7 +3708,7 @@ Multiple tables can be exported and imported to and from JavaScript.
     <a class="idl-code" data-link-type="interface" href="https://webidl.spec.whatwg.org/#idl-promise"><c- b>Promise</c-></a>&lt;<a data-link-type="idl-name" href="#instance"><c- n>Instance</c-></a>> <a class="idl-code" data-link-type="method" href="#dom-webassembly-instantiate-moduleobject-importobject"><c- g>instantiate</c-></a>(
         <a data-link-type="idl-name" href="#module"><c- n>Module</c-></a> <a href="#dom-webassembly-instantiate-moduleobject-importobject-moduleobject"><code><c- g>moduleObject</c-></code></a>, <c- b>optional</c-> <a class="idl-code" data-link-type="interface" href="https://webidl.spec.whatwg.org/#idl-object"><c- b>object</c-></a> <a href="#dom-webassembly-instantiate-moduleobject-importobject-importobject"><code><c- g>importObject</c-></code></a>);
 
-    <a data-link-type="idl-name" href="#instance"><c- n>Instance</c-></a> <a href="#dom-webassembly-namespaceinstance"><code><c- g>namespaceInstance</c-></code></a>(<a data-link-type="idl-name"><c- n>ModuleNamespace</c-></a> <a href="#dom-webassembly-namespaceinstance-modulenamespace-modulenamespace"><code><c- g>moduleNamespace</c-></code></a>);
+    <a data-link-type="idl-name" href="#instance"><c- n>Instance</c-></a> <a href="#dom-webassembly-namespaceinstance"><code><c- g>namespaceInstance</c-></code></a>(<u class="link-error" data-lt="ModuleNamespace" title="LINK ERROR: No &apos;idl-name&apos; refs found for &apos;ModuleNamespace&apos;."><c- n>ModuleNamespace</c-></u> <a href="#dom-webassembly-namespaceinstance-modulenamespace-modulenamespace"><code><c- g>moduleNamespace</c-></code></a>);
 };
 
 <c- b>enum</c-> <a href="#enumdef-importexportkind"><code><c- g>ImportExportKind</c-></code></a> {
@@ -3579,7 +3806,9 @@ Multiple tables can be exported and imported to and from JavaScript.
   <h2 class="no-num no-ref heading settled" id="issues-index"><span class="content">Issues Index</span><a class="self-link" href="#issues-index"></a></h2>
   <div style="counter-reset:issue">
    <div class="issue">
-     A failed allocation of a large table or memory may either result in 
+    
+    A failed allocation of a large table or memory may either result in
+
     <ul>
      <li data-md>
       <p>a <code class="idl"><a data-link-type="idl" href="https://tc39.github.io/ecma262/#sec-native-error-types-used-in-this-standard-rangeerror">RangeError</a></code>, as specified in the <code class="idl"><a data-link-type="idl" href="#memory">Memory</a></code> <code class="idl"><a data-link-type="idl" href="#dom-memory-grow">grow()</a></code> and <code class="idl"><a data-link-type="idl" href="#table">Table</a></code> <code class="idl"><a data-link-type="idl" href="#dom-table-grow">grow()</a></code> operations</p>
@@ -3588,9 +3817,12 @@ Multiple tables can be exported and imported to and from JavaScript.
      <li data-md>
       <p>UA-specific OOM behavior as described in this section.</p>
     </ul>
-     In a future revision, we may reconsider more reliable and recoverable errors for allocations of large amounts of memory. 
+        In a future revision, we may reconsider more reliable and recoverable errors for allocations of large amounts of memory.
+
+
     <p>See <a href="https://github.com/WebAssembly/spec/issues/879">Issue 879</a> for further discussion.</p>
-     <a class="issue-return" href="#issue-7eafcf54" title="Jump to section">↵</a>
+    
+ <a class="issue-return" href="#issue-7eafcf54" title="Jump to section">↵</a>
    </div>
   </div>
 <script>/* Boilerplate: script-dom-helper */
@@ -3862,7 +4094,7 @@ let dfnPanelData = {
 "71ea3880": {"dfnID":"71ea3880","dfnText":"var","external":true,"refSections":[{"refs":[{"id":"ref-for-syntax-mut"}],"title":"5. The WebAssembly Namespace"},{"refs":[{"id":"ref-for-syntax-mut\u2460"},{"id":"ref-for-syntax-mut\u2461"},{"id":"ref-for-syntax-mut\u2462"}],"title":"5.5. Globals"},{"refs":[{"id":"ref-for-syntax-mut\u2463"},{"id":"ref-for-syntax-mut\u2464"},{"id":"ref-for-syntax-mut\u2465"},{"id":"ref-for-syntax-mut\u2466"}],"title":"9.5. ExecuteModule ( [ promiseCapability ] ) Concrete Method"}],"url":"https://webassembly.github.io/spec/core/syntax/types.html#syntax-mut"},
 "746f6bc3": {"dfnID":"746f6bc3","dfnText":"memory instance","external":true,"refSections":[{"refs":[{"id":"ref-for-memory-instances"}],"title":"4.1. Interaction of the WebAssembly Store with JavaScript"},{"refs":[{"id":"ref-for-memory-instances\u2460"}],"title":"5.3. Memories"}],"url":"https://webassembly.github.io/spec/core/exec/runtime.html#memory-instances"},
 "750115f9": {"dfnID":"750115f9","dfnText":"DefineMethodProperty","external":true,"refSections":[{"refs":[{"id":"ref-for-sec-definemethodproperty"}],"title":"5.7. Error Objects"}],"url":"https://tc39.es/ecma262/multipage/ordinary-and-exotic-objects-behaviours.html#sec-definemethodproperty"},
-"76674d02": {"dfnID":"76674d02","dfnText":"module_exports","external":true,"refSections":[{"refs":[{"id":"ref-for-embed-module-exports"}],"title":"5. The WebAssembly Namespace"},{"refs":[{"id":"ref-for-embed-module-exports\u2460"}],"title":"5.1. Modules"},{"refs":[{"id":"ref-for-embed-module-exports\u2461"}],"title":"9. Integration with ECMAScript modules"},{"refs":[{"id":"ref-for-embed-module-exports\u2462"},{"id":"ref-for-embed-module-exports\u2463"},{"id":"ref-for-embed-module-exports\u2464"}],"title":"9.5. ExecuteModule ( [ promiseCapability ] ) Concrete Method"}],"url":"https://webassembly.github.io/spec/core/appendix/embedding.html#embed-module-exports"},
+"76674d02": {"dfnID":"76674d02","dfnText":"module_exports","external":true,"refSections":[{"refs":[{"id":"ref-for-embed-module-exports"}],"title":"5. The WebAssembly Namespace"},{"refs":[{"id":"ref-for-embed-module-exports\u2460"}],"title":"5.1. Modules"},{"refs":[{"id":"ref-for-embed-module-exports\u2461"},{"id":"ref-for-embed-module-exports\u2462"}],"title":"9. Integration with ECMAScript modules"},{"refs":[{"id":"ref-for-embed-module-exports\u2463"},{"id":"ref-for-embed-module-exports\u2464"},{"id":"ref-for-embed-module-exports\u2465"}],"title":"9.5. ExecuteModule ( [ promiseCapability ] ) Concrete Method"}],"url":"https://webassembly.github.io/spec/core/appendix/embedding.html#embed-module-exports"},
 "77489c34": {"dfnID":"77489c34","dfnText":"global address","external":true,"refSections":[{"refs":[{"id":"ref-for-syntax-globaladdr"}],"title":"4.2. WebAssembly JS Object Caches"},{"refs":[{"id":"ref-for-syntax-globaladdr\u2460"},{"id":"ref-for-syntax-globaladdr\u2461"},{"id":"ref-for-syntax-globaladdr\u2462"}],"title":"5.5. Globals"}],"url":"https://webassembly.github.io/spec/core/exec/runtime.html#syntax-globaladdr"},
 "78def970": {"dfnID":"78def970","dfnText":"%AbstractModuleSource%.prototype","external":true,"refSections":[{"refs":[{"id":"ref-for-sec-properties-of-the-%abstractmodulesource%-prototype-object"},{"id":"ref-for-sec-properties-of-the-%abstractmodulesource%-prototype-object\u2460"}],"title":"5.1. Modules"}],"url":"https://tc39.github.io/proposal-source-phase-imports/#sec-properties-of-the-%abstractmodulesource%-prototype-object"},
 "7c586764": {"dfnID":"7c586764","dfnText":"sequence","external":true,"refSections":[{"refs":[{"id":"ref-for-grammar-notation"}],"title":"3. Notation"}],"url":"https://webassembly.github.io/spec/core/syntax/conventions.html#grammar-notation"},
@@ -4062,7 +4294,7 @@ let dfnPanelData = {
 "enumdef-tablekind": {"dfnID":"enumdef-tablekind","dfnText":"TableKind","external":false,"refSections":[{"refs":[{"id":"ref-for-enumdef-tablekind"}],"title":"5.4. Tables"}],"url":"#enumdef-tablekind"},
 "enumdef-valuetype": {"dfnID":"enumdef-valuetype","dfnText":"ValueType","external":false,"refSections":[{"refs":[{"id":"ref-for-enumdef-valuetype"}],"title":"5.5. Globals"}],"url":"#enumdef-valuetype"},
 "exceptiondef-compileerror": {"dfnID":"exceptiondef-compileerror","dfnText":"CompileError","external":false,"refSections":[{"refs":[{"id":"ref-for-exceptiondef-compileerror"}],"title":"5. The WebAssembly Namespace"},{"refs":[{"id":"ref-for-exceptiondef-compileerror\u2460"}],"title":"5.1. Modules"},{"refs":[{"id":"ref-for-exceptiondef-compileerror\u2461"}],"title":"5.7. Error Objects"},{"refs":[{"id":"ref-for-exceptiondef-compileerror\u2462"}],"title":"7. Implementation-defined Limits"},{"refs":[{"id":"ref-for-exceptiondef-compileerror\u2463"}],"title":"9. Integration with ECMAScript modules"}],"url":"#exceptiondef-compileerror"},
-"exceptiondef-linkerror": {"dfnID":"exceptiondef-linkerror","dfnText":"LinkError","external":false,"refSections":[{"refs":[{"id":"ref-for-exceptiondef-linkerror"},{"id":"ref-for-exceptiondef-linkerror\u2460"},{"id":"ref-for-exceptiondef-linkerror\u2461"},{"id":"ref-for-exceptiondef-linkerror\u2462"},{"id":"ref-for-exceptiondef-linkerror\u2463"},{"id":"ref-for-exceptiondef-linkerror\u2464"},{"id":"ref-for-exceptiondef-linkerror\u2465"},{"id":"ref-for-exceptiondef-linkerror\u2466"}],"title":"5. The WebAssembly Namespace"},{"refs":[{"id":"ref-for-exceptiondef-linkerror\u2467"}],"title":"5.7. Error Objects"},{"refs":[{"id":"ref-for-exceptiondef-linkerror\u2468"},{"id":"ref-for-exceptiondef-linkerror\u2460\u24ea"},{"id":"ref-for-exceptiondef-linkerror\u2460\u2460"},{"id":"ref-for-exceptiondef-linkerror\u2460\u2461"},{"id":"ref-for-exceptiondef-linkerror\u2460\u2462"},{"id":"ref-for-exceptiondef-linkerror\u2460\u2463"},{"id":"ref-for-exceptiondef-linkerror\u2460\u2464"}],"title":"9.5. ExecuteModule ( [ promiseCapability ] ) Concrete Method"}],"url":"#exceptiondef-linkerror"},
+"exceptiondef-linkerror": {"dfnID":"exceptiondef-linkerror","dfnText":"LinkError","external":false,"refSections":[{"refs":[{"id":"ref-for-exceptiondef-linkerror"},{"id":"ref-for-exceptiondef-linkerror\u2460"},{"id":"ref-for-exceptiondef-linkerror\u2461"},{"id":"ref-for-exceptiondef-linkerror\u2462"},{"id":"ref-for-exceptiondef-linkerror\u2463"},{"id":"ref-for-exceptiondef-linkerror\u2464"},{"id":"ref-for-exceptiondef-linkerror\u2465"},{"id":"ref-for-exceptiondef-linkerror\u2466"}],"title":"5. The WebAssembly Namespace"},{"refs":[{"id":"ref-for-exceptiondef-linkerror\u2467"}],"title":"5.7. Error Objects"},{"refs":[{"id":"ref-for-exceptiondef-linkerror\u2468"},{"id":"ref-for-exceptiondef-linkerror\u2460\u24ea"},{"id":"ref-for-exceptiondef-linkerror\u2460\u2460"}],"title":"9. Integration with ECMAScript modules"},{"refs":[{"id":"ref-for-exceptiondef-linkerror\u2460\u2461"},{"id":"ref-for-exceptiondef-linkerror\u2460\u2462"},{"id":"ref-for-exceptiondef-linkerror\u2460\u2463"},{"id":"ref-for-exceptiondef-linkerror\u2460\u2464"},{"id":"ref-for-exceptiondef-linkerror\u2460\u2465"},{"id":"ref-for-exceptiondef-linkerror\u2460\u2466"},{"id":"ref-for-exceptiondef-linkerror\u2460\u2467"}],"title":"9.5. ExecuteModule ( [ promiseCapability ] ) Concrete Method"}],"url":"#exceptiondef-linkerror"},
 "exceptiondef-runtimeerror": {"dfnID":"exceptiondef-runtimeerror","dfnText":"RuntimeError","external":false,"refSections":[{"refs":[{"id":"ref-for-exceptiondef-runtimeerror"}],"title":"5. The WebAssembly Namespace"},{"refs":[{"id":"ref-for-exceptiondef-runtimeerror\u2460"}],"title":"5.6. Exported Functions"},{"refs":[{"id":"ref-for-exceptiondef-runtimeerror\u2461"}],"title":"5.7. Error Objects"},{"refs":[{"id":"ref-for-exceptiondef-runtimeerror\u2462"}],"title":"7. Implementation-defined Limits"}],"url":"#exceptiondef-runtimeerror"},
 "export-name-list": {"dfnID":"export-name-list","dfnText":"export name list","external":false,"refSections":[{"refs":[{"id":"ref-for-export-name-list"}],"title":"9.1. GetExportedNames ( exportStarSet ) Concrete Method"},{"refs":[{"id":"ref-for-export-name-list\u2460"}],"title":"9.2. ResolveExport ( exportName, resolveSet ) Concrete Method"},{"refs":[{"id":"ref-for-export-name-list\u2461"}],"title":"9.4. InitializeEnvironment ( ) Concrete Method"}],"url":"#export-name-list"},
 "exported-function": {"dfnID":"exported-function","dfnText":"Exported Function","external":false,"refSections":[{"refs":[{"id":"ref-for-exported-function"}],"title":"4.2. WebAssembly JS Object Caches"},{"refs":[{"id":"ref-for-exported-function\u2460"}],"title":"5. The WebAssembly Namespace"},{"refs":[{"id":"ref-for-exported-function\u2461"}],"title":"5.6. Exported Functions"},{"refs":[{"id":"ref-for-exported-function\u2462"}],"title":"9.5. ExecuteModule ( [ promiseCapability ] ) Concrete Method"}],"url":"#exported-function"},
@@ -4078,6 +4310,7 @@ let dfnPanelData = {
 "f56c24ad": {"dfnID":"f56c24ad","dfnText":"imports","external":true,"refSections":[{"refs":[{"id":"ref-for-syntax-module"},{"id":"ref-for-syntax-module\u2460"}],"title":"5. The WebAssembly Namespace"}],"url":"https://webassembly.github.io/spec/core/syntax/modules.html#syntax-module"},
 "f79e9d2a": {"dfnID":"f79e9d2a","dfnText":"extern subtype","external":true,"refSections":[{"refs":[{"id":"ref-for-match-externtype"}],"title":"9.5. ExecuteModule ( [ promiseCapability ] ) Concrete Method"}],"url":"https://webassembly.github.io/spec/core/valid/types.html#match-externtype"},
 "f9155c11": {"dfnID":"f9155c11","dfnText":"Cyclic Module Record","external":true,"refSections":[{"refs":[{"id":"ref-for-cyclic-module-record"}],"title":"9. Integration with ECMAScript modules"}],"url":"https://tc39.github.io/ecma262/#cyclic-module-record"},
+"f937b7b6": {"dfnID":"f937b7b6","dfnText":"continue","external":true,"refSections":[{"refs":[{"id":"ref-for-iteration-continue"}],"title":"9. Integration with ECMAScript modules"},{"refs":[{"id":"ref-for-iteration-continue\u2460"}],"title":"9.5. ExecuteModule ( [ promiseCapability ] ) Concrete Method"}],"url":"https://infra.spec.whatwg.org/#iteration-continue"},
 "f98ab0c2": {"dfnID":"f98ab0c2","dfnText":"LegacyNamespace","external":true,"refSections":[{"refs":[{"id":"ref-for-LegacyNamespace"}],"title":"5.1. Modules"},{"refs":[{"id":"ref-for-LegacyNamespace\u2460"}],"title":"5.2. Instances"},{"refs":[{"id":"ref-for-LegacyNamespace\u2461"}],"title":"5.3. Memories"},{"refs":[{"id":"ref-for-LegacyNamespace\u2462"}],"title":"5.4. Tables"},{"refs":[{"id":"ref-for-LegacyNamespace\u2463"}],"title":"5.5. Globals"}],"url":"https://webidl.spec.whatwg.org/#LegacyNamespace"},
 "f9dbc1a8": {"dfnID":"f9dbc1a8","dfnText":"NativeError Object Structure","external":true,"refSections":[{"refs":[{"id":"ref-for-sec-nativeerror-object-structure"}],"title":"5.7. Error Objects"}],"url":"https://tc39.github.io/ecma262/#sec-nativeerror-object-structure"},
 "fa5c4242": {"dfnID":"fa5c4242","dfnText":"agent cluster","external":true,"refSections":[{"refs":[{"id":"ref-for-sec-agent-clusters"}],"title":"4.1. Interaction of the WebAssembly Store with JavaScript"}],"url":"https://tc39.es/ecma262/multipage/executable-code-and-execution-contexts.html#sec-agent-clusters"},
@@ -4632,6 +4865,7 @@ let refsData = {
 "https://html.spec.whatwg.org/multipage/webappapis.html#queue-a-task": {"displayText":"queue a task","export":true,"for_":[],"level":"1","normative":true,"shortname":"html","spec":"html","status":"current","text":"queue a task","type":"dfn","url":"https://html.spec.whatwg.org/multipage/webappapis.html#queue-a-task"},
 "https://html.spec.whatwg.org/multipage/webappapis.html#task-source": {"displayText":"task source","export":true,"for_":[],"level":"1","normative":true,"shortname":"html","spec":"html","status":"current","text":"task source","type":"dfn","url":"https://html.spec.whatwg.org/multipage/webappapis.html#task-source"},
 "https://infra.spec.whatwg.org/#byte-sequence": {"displayText":"byte sequence","export":true,"for_":[],"level":"1","normative":true,"shortname":"infra","spec":"infra","status":"current","text":"byte sequence","type":"dfn","url":"https://infra.spec.whatwg.org/#byte-sequence"},
+"https://infra.spec.whatwg.org/#iteration-continue": {"displayText":"continue","export":true,"for_":["iteration"],"level":"1","normative":true,"shortname":"infra","spec":"infra","status":"current","text":"continue","type":"dfn","url":"https://infra.spec.whatwg.org/#iteration-continue"},
 "https://infra.spec.whatwg.org/#list": {"displayText":"list","export":true,"for_":[],"level":"1","normative":true,"shortname":"infra","spec":"infra","status":"current","text":"list","type":"dfn","url":"https://infra.spec.whatwg.org/#list"},
 "https://infra.spec.whatwg.org/#list-append": {"displayText":"append","export":true,"for_":["list"],"level":"1","normative":true,"shortname":"infra","spec":"infra","status":"current","text":"append","type":"dfn","url":"https://infra.spec.whatwg.org/#list-append"},
 "https://infra.spec.whatwg.org/#list-is-empty": {"displayText":"is empty","export":true,"for_":["list","stack","queue","set"],"level":"1","normative":true,"shortname":"infra","spec":"infra","status":"current","text":"is empty","type":"dfn","url":"https://infra.spec.whatwg.org/#list-is-empty"},
