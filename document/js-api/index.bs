@@ -1400,10 +1400,20 @@ To <dfn export>parse a WebAssembly module</dfn> given a <a>byte sequence</a> |by
 1. Let |stableBytes| be a [=get a copy of the buffer source|copy of the bytes held by the buffer=] |bytes|.
 1. [=Compile a WebAssembly module|Compile the WebAssembly module=] |stableBytes| and store the result as |module|.
 1. If |module| is [=error=], throw a {{CompileError}} exception.
+1. Note: When integrating with the JS String Builtins proposal, |builtinSetNames| should be passed in the following step as « "js-string" » and |importedStringModule| as null.
 1. [=Construct a WebAssembly module object=] from |module| and |bytes|, and let |module| be the result.
 1. Let |requestedModules| be a set.
-1. For each (|moduleName|, <var ignore>name</var>, <var ignore>type</var>) in [=module_imports=](|module|.\[[Module]]),
+1. For each (|moduleName|, |name|, |type|) in [=module_imports=](|module|.\[[Module]]),
+    1. If |moduleName| starts with the prefix "wasm-js:",
+        1. Throw a {{LinkError}} exception.
+    1. If |name| starts with the prefix "wasm:" or "wasm-js:",
+        1. Throw a {{LinkError}} exception.
+    1. Note: The following step only applies when integrating with the JS String Builtins proposal.
+    1. If [=Find a builtin=] with (|moduleName|, |name|, |type|) and builtins |module|.\[[BuiltinSets]] is not null, then [=iteration/continue=].
     1. [=set/Append=] |moduleName| to |requestedModules|.
+1. For each (|name|, <var ignore>type</var>) in [=module_exports=](|module|.\[[Module]])
+    1. If |name| starts with the prefix "wasm:" or "wasm-js:",
+        1. Throw a {{LinkError}} exception.
 1. Let |moduleRecord| be {
       <!-- WebAssembly Module Records -->
       \[[Instance]]: ~empty~,
@@ -1489,6 +1499,8 @@ WebAssembly Module Records have the following methods:
 1. Let |module| be |record|.\[[ModuleSource]].\[[Module]].
 1. Let |imports| be « ».
 1. [=list/iterate|For each=] (|importedModuleName|, |name|, |importtype|) in [=module_imports=](|module|),
+    1. Note: The following step only applies when integrating with the JS String Builtins proposal.
+    1. If [=Find a builtin=] with (|importedModuleName|, |name|) and builtins |module|.\[[BuiltinSets]] is not null, then [=iteration/continue=].
     1. Let |importedModule| be [$GetImportedModule$](|record|, |importedModuleName|).
     1. Let |resolution| be |importedModule|.ResolveExport(|name|).
     1. Assert: |resolution| is a [=ResolvedBinding Record=], as validated during environment initialization.
