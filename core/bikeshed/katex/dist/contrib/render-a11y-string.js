@@ -481,12 +481,6 @@ var handleObject = function handleObject(tree, a11yStrings, atomType) {
         break;
       }
 
-    case "pmb":
-      {
-        a11yStrings.push("bold");
-        break;
-      }
-
     case "phantom":
       {
         a11yStrings.push("empty space");
@@ -801,7 +795,7 @@ var handleObject = function handleObject(tree, a11yStrings, atomType) {
 
     case "mathchoice":
       {
-        // TODO: track which style we're using, e.g. display, text, etc.
+        // TODO: track which which style we're using, e.g. dispaly, text, etc.
         // default to text style if even that may not be the correct style
         buildA11yStrings(tree.text, a11yStrings, atomType);
         break;
