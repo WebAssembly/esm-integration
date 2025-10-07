@@ -110,6 +110,8 @@ urlPrefix: https://tc39.github.io/ecma262/; spec: ECMASCRIPT
         text: ToBigInt64; url: sec-tobigint64
         text: Module Namespace exotic object; url: sec-module-namespace-exotic-objects
         text: ResolvedBinding Record; url: resolvedbinding-record
+        text: ModuleRequest Record; url: modulerequest-record
+        text: ImportAttribute Record; url: importattribute-record
     type: abstract-op
         text: CreateDataPropertyOrThrow; url: sec-createdatapropertyorthrow
         text: CreateMethodProperty; url: sec-createmethodproperty
@@ -2316,11 +2318,12 @@ To <dfn export>parse a WebAssembly module</dfn> given a <a>byte sequence</a> |by
 1. For each (|moduleName|, |name|, |type|) in [=module_imports=](|module|.\[[Module]]),
     1. If |moduleName| starts with the prefix "wasm-js:",
         1. Throw a {{LinkError}} exception.
-    1. If |name| starts with the prefix "wasm:" or "wasm-js:",
+    1. If |name| starts with the prefix "wasm:" or "wasm-js:", and |name| is not equal to "wasm-js:phase/source" or "wasm-js:phase/source",
         1. Throw a {{LinkError}} exception.
     1. Note: The following step only applies when integrating with the JS String Builtins proposal.
     1. If [=Find a builtin=] with (|moduleName|, |name|, |type|) and builtins |module|.\[[BuiltinSets]] is not null, then [=iteration/continue=].
-    1. [=set/Append=] |moduleName| to |requestedModules|.
+    1. Let (|moduleRequest|, <var ignore>importName</var>) be the [=module request=] for |moduleName| and |name|.
+    1. [=set/Append=] |moduleRequest| to |requestedModules|.
 1. For each (|name|, <var ignore>type</var>) in [=module_exports=](|module|.\[[Module]])
     1. If |name| starts with the prefix "wasm:" or "wasm-js:",
         1. Throw a {{LinkError}} exception.
@@ -2361,6 +2364,18 @@ The <dfn>export name list</dfn> of a WebAssembly Module Record |record| is defin
 1. For each (|name|, <var ignore>type</var>) in [=module_exports=](|module|.\[[Module]])
     1. [=list/Append=] |name| to the end of |exports|.
 1. Return |exports|.
+
+</div>
+
+<div algorithm>
+The <dfn>module request</dfn> for a string |moduleName| and a string |name| is defined by the following algorithm:
+
+1. Let |attributes| be an empty [=set=].
+1. Let |phase| be ~evaluation~.
+1. If |name| is equal to "wasm-js:phase/source", set |phase| to ~source~.
+1. If |name| is equal to "wasm-js:phase/defer", set |phase| to ~defer~.
+1. Let |moduleRequest| be a new [=ModuleRequest Record=] { \[[Specifier]]: |name|, \[[Attributes]]: |attributes|, \[[Phase]]: _phase_ }.
+1. Return (|moduleRequest|, |name|).
 
 </div>
 
@@ -2411,57 +2426,69 @@ WebAssembly Module Records have the following methods:
 1. [=list/iterate|For each=] (|importedModuleName|, |name|, |importtype|) in [=module_imports=](|module|),
     1. Note: The following step only applies when integrating with the JS String Builtins proposal.
     1. If [=Find a builtin=] with (|importedModuleName|, |name|) and builtins |module|.\[[BuiltinSets]] is not null, then [=iteration/continue=].
-    1. Let |importedModule| be [$GetImportedModule$](|record|, |importedModuleName|).
-    1. Let |resolution| be |importedModule|.ResolveExport(|name|).
-    1. Assert: |resolution| is a [=ResolvedBinding Record=], as validated during environment initialization.
-    1. Let |resolvedModule| be |resolution|.\\[[Module]].
-    1. Let |resolvedName| be |resolution|.\[[BindingName]].
-    1. If |resolvedModule| is a WebAssembly Module Record,
-        1. If |resolvedModule|.\[[Instance]] is ~empty~, throw a {LinkError} exception.
-        1. Assert: |resolvedModule|.\[[Instance]] is a WebAssembly {{Instance}} object.
-        1. Assert: |resolvedModule|.\[[ModuleSource]] is a WebAssembly {{Module}} object.
-        1. Let |module| be |resolvedModule|.\[[ModuleSource]].\[[Module]].
-        1. Let |externval| be [=instance_export=](|resolvedModule|.\[[Instance]], |resolvedName|).
-        1. Assert: |externval| is not [=error=].
-        1. Assert: [=module_exports=](|module|) contains an element (|resolvedName|, <var ignore>type</var>).
-        1. Let |externtype| be the value of |type| for the element (|resolvedName|, |type|) in [=module_exports=](|module|).
-        1. If |importtype| is not an [=extern subtype=] of |externtype|, throw a {{LinkError}} exception.
-        1. [=list/Append=] |externval| to |imports|.
-    1. Otherwise,
-        1. Let |env| be |resolvedModule|.\[[Environment]].
-        1. Let |v| be [=?=] |env|.GetBindingValue(|resolvedName|, true).
-        1. If |importtype| is of the form [=func=] |functype|,
-            1. If [$IsCallable$](|v|) is false, throw a {{LinkError}} exception.
-            1. If |v| has a \[[FunctionAddress]] internal slot, and therefore is an [=Exported Function=],
-                1. Let |funcaddr| be the value of |v|'s \[[FunctionAddress]] internal slot.
-            1. Otherwise,
-                1. [=Create a host function=] from |v| and |functype|, and let |funcaddr| be the result.
-                1. Let <var ignore>index</var> be the number of external functions in |imports|, defining the [=index of the host function=] |funcaddr|.
-            1. Let |externfunc| be the [=external value=] [=external value|func=] |funcaddr|.
-            1. [=list/Append=] |externfunc| to |imports|.
-        1. If |importtype| is of the form [=global=] |mut| |valtype|,
-            1. Let |store| be the [=surrounding agent=]'s [=associated store=].
-            1. If |v| [=implements=] {{Global}},
-                1. Let |globaladdr| be |v|.\[[Global]].
-                1. Let |targetmut| <var ignore>valuetype</var> be [=global_type=](|store|, |globaladdr|).
-                    1. If |mut| is [=const=] and |targetmut| is [=var=], throw a {{LinkError}} exception.
-            1. Otherwise,
-                1. If |valtype| is [=v128=], throw a {{LinkError}} exception.
-                1. If |mut| is [=var=], throw a {{LinkError}} exception.
-                1. Let |value| be [=?=] [=ToWebAssemblyValue=](|v|, |valtype|).
-                1. Let (|store|, |globaladdr|) be [=global_alloc=](|store|, |mut| |valtype|, |value|).
-                1. Set the [=surrounding agent=]'s [=associated store=] to |store|.
-            1. Let |externglobal| be [=external value|global=] |globaladdr|.
-            1. [=list/Append=] |externglobal| to |imports|.
-        1. If |importtype| is of the form [=mem=] <var ignore>memtype</var>,
-            1. If |v| does not [=implement=] {{Memory}}, throw a {{LinkError}} exception.
-            1. Let |externmem| be the [=external value=] [=external value|mem=] |v|.\[[Memory]].
-            1. [=list/Append=] |externmem| to |imports|.
-        1. If |importtype| is of the form [=table=] <var ignore>tabletype</var>,
-            1. If |v| does not [=implement=] {{Table}}, throw a {{LinkError}} exception.
-            1. Let |tableaddr| be |v|.\[[Table]].
-            1. Let |externtable| be the [=external value=] [=external value|table=] |tableaddr|.
-            1. [=list/Append=] |externtable| to |imports|.
+    1. Let (|moduleRequest|, |importName|) be the [=module request=] for |moduleName| and |name|.
+    1. Let |importedModule| be [$GetImportedModule$](|record|, |moduleRequest|).
+    1. If |moduleRequest|.\[[Phase]] is ~defer~ or ~source~,
+        1. If |moduleRequest|.\[[Phase]] is ~defer~, let |phase| be GetModuleNamespace(|importedModule|, ~defer~).
+        1. Else, let |phase| be _importedModule_.[[ModuleSource]] throwing a *SyntextError* exception if ~empty~.
+        1. If |importtype| is not of the form [=global=] [=const=] |valtype|, throw a {{LinkError}} exception.
+        1. Let |store| be the [=surrounding agent=]'s [=associated store=].
+        1. Let |value| be [=?=] [=ToWebAssemblyValue=](|v|, |valtype|).
+        1. Let (|store|, |globaladdr|) be [=global_alloc=](|store|, |mut| |valtype|, |value|).
+        1. Set the [=surrounding agent=]'s [=associated store=] to |store|.
+        1. Let |externglobal| be [=external value|global=] |globaladdr|.
+        1. [=list/Append=] |externglobal| to |imports|.
+    1. Else,
+        1. Let |resolution| be |importedModule|.ResolveExport(|importName|).
+        1. Assert: |resolution| is a [=ResolvedBinding Record=], as validated during environment initialization.
+        1. Let |resolvedModule| be |resolution|.\\[[Module]].
+        1. Let |resolvedName| be |resolution|.\[[BindingName]].
+        1. If |resolvedModule| is a WebAssembly Module Record,
+            1. If |resolvedModule|.\[[Instance]] is ~empty~, throw a {LinkError} exception.
+            1. Assert: |resolvedModule|.\[[Instance]] is a WebAssembly {{Instance}} object.
+            1. Assert: |resolvedModule|.\[[ModuleSource]] is a WebAssembly {{Module}} object.
+            1. Let |module| be |resolvedModule|.\[[ModuleSource]].\[[Module]].
+            1. Let |externval| be [=instance_export=](|resolvedModule|.\[[Instance]], |resolvedName|).
+            1. Assert: |externval| is not [=error=].
+            1. Assert: [=module_exports=](|module|) contains an element (|resolvedName|, <var ignore>type</var>).
+            1. Let |externtype| be the value of |type| for the element (|resolvedName|, |type|) in [=module_exports=](|module|).
+            1. If |importtype| is not an [=extern subtype=] of |externtype|, throw a {{LinkError}} exception.
+            1. [=list/Append=] |externval| to |imports|.
+        1. Otherwise,
+            1. Let |env| be |resolvedModule|.\[[Environment]].
+            1. Let |v| be [=?=] |env|.GetBindingValue(|resolvedName|, true).
+            1. If |importtype| is of the form [=func=] |functype|,
+                1. If [$IsCallable$](|v|) is false, throw a {{LinkError}} exception.
+                1. If |v| has a \[[FunctionAddress]] internal slot, and therefore is an [=Exported Function=],
+                    1. Let |funcaddr| be the value of |v|'s \[[FunctionAddress]] internal slot.
+                1. Otherwise,
+                    1. [=Create a host function=] from |v| and |functype|, and let |funcaddr| be the result.
+                    1. Let <var ignore>index</var> be the number of external functions in |imports|, defining the [=index of the host function=] |funcaddr|.
+                1. Let |externfunc| be the [=external value=] [=external value|func=] |funcaddr|.
+                1. [=list/Append=] |externfunc| to |imports|.
+            1. If |importtype| is of the form [=global=] |mut| |valtype|,
+                1. Let |store| be the [=surrounding agent=]'s [=associated store=].
+                1. If |v| [=implements=] {{Global}},
+                    1. Let |globaladdr| be |v|.\[[Global]].
+                    1. Let |targetmut| <var ignore>valuetype</var> be [=global_type=](|store|, |globaladdr|).
+                        1. If |mut| is [=const=] and |targetmut| is [=var=], throw a {{LinkError}} exception.
+                1. Otherwise,
+                    1. If |valtype| is [=v128=], throw a {{LinkError}} exception.
+                    1. If |mut| is [=var=], throw a {{LinkError}} exception.
+                    1. Let |value| be [=?=] [=ToWebAssemblyValue=](|v|, |valtype|).
+                    1. Let (|store|, |globaladdr|) be [=global_alloc=](|store|, |mut| |valtype|, |value|).
+                    1. Set the [=surrounding agent=]'s [=associated store=] to |store|.
+                1. Let |externglobal| be [=external value|global=] |globaladdr|.
+                1. [=list/Append=] |externglobal| to |imports|.
+            1. If |importtype| is of the form [=mem=] <var ignore>memtype</var>,
+                1. If |v| does not [=implement=] {{Memory}}, throw a {{LinkError}} exception.
+                1. Let |externmem| be the [=external value=] [=external value|mem=] |v|.\[[Memory]].
+                1. [=list/Append=] |externmem| to |imports|.
+            1. If |importtype| is of the form [=table=] <var ignore>tabletype</var>,
+                1. If |v| does not [=implement=] {{Table}}, throw a {{LinkError}} exception.
+                1. Let |tableaddr| be |v|.\[[Table]].
+                1. Let |externtable| be the [=external value=] [=external value|table=] |tableaddr|.
+                1. [=list/Append=] |externtable| to |imports|.
 1. [=Instantiate the core of a WebAssembly module=] |module| with |imports|, and let |instance| be the result.
 1. Set |record|.\[[Instance]] to |instance|.
 1. [=list/iterate|For each=] (|name|, |externtype|) of [=module_exports=](|module|),
