@@ -2377,7 +2377,7 @@ The <dfn>module request</dfn> for a string |moduleName| and a string |name| is d
 1. Let |attributes| be an empty [=set=].
 1. Let |importName| be |name|.
 1. If |name| is a [=scalar value string=] and contains the string "?",
-    1. Let |index| be the index of "?" in |name|.
+    1. Let |index| be the first index of "?" in |name|.
     1. Set |importName| to the substring of |name| from 0 to |index|.
     1. Let |query| be the substring of |name| after |index|.
     1. Let |params| be the result of [=application/x-www-form-urlencoded string parsing|parsing=] |query|.
