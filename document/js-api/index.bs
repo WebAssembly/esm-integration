@@ -110,6 +110,8 @@ urlPrefix: https://tc39.github.io/ecma262/; spec: ECMASCRIPT
         text: ToBigInt64; url: sec-tobigint64
         text: Module Namespace exotic object; url: sec-module-namespace-exotic-objects
         text: ResolvedBinding Record; url: resolvedbinding-record
+        text: ModuleRequest Record; url: modulerequest-record
+        text: ImportAttribute Record; url: importattribute-record
     type: abstract-op
         text: CreateDataPropertyOrThrow; url: sec-createdatapropertyorthrow
         text: CreateMethodProperty; url: sec-createmethodproperty
@@ -286,11 +288,15 @@ urlPrefix: https://tc39.es/proposal-resizablearraybuffer/; spec: ResizableArrayB
         text: handled; url: sec-hostresizearraybuffer
         text: IsFixedLengthArrayBuffer; url: sec-isfixedarraybuffer
         text: HostResizeArrayBuffer; url: sec-hostresizearraybuffer
+urlPrefix: https://url.spec.whatwg.org/; spec: URL
+    type: dfn
+        text: application/x-www-form-urlencoded string parsing; url: concept-urlencoded-string-parser
 </pre>
 
 <pre class='link-defaults'>
 spec:infra; type:dfn; text:list
 spec:infra; type:dfn; text:byte sequence
+spec:infra; type:dfn; text:scalar value string
 spec:ecma-262; type:exception; for:ECMAScript; text:Error
 spec:ecmascript; type:exception; for:ECMAScript; text:TypeError
 spec:ecmascript; type:exception; for:ECMAScript; text:RangeError
@@ -2321,7 +2327,8 @@ To <dfn export>parse a WebAssembly module</dfn> given a <a>byte sequence</a> |by
         1. Throw a {{LinkError}} exception.
     1. Note: The following step only applies when integrating with the JS String Builtins proposal.
     1. If [=Find a builtin=] with (|moduleName|, |name|, |type|) and builtins |module|.\[[BuiltinSets]] is not null, then [=iteration/continue=].
-    1. [=set/Append=] |moduleName| to |requestedModules|.
+    1. Let (|moduleRequest|, <var ignore>importName</var>) be the [=module request=] for |moduleName| and |name|.
+    1. [=set/Append=] |moduleRequest| to |requestedModules|.
 1. For each (|name|, <var ignore>type</var>) in [=module_exports=](|module|.\[[Module]])
     1. If |name| starts with the prefix "wasm:" or "wasm-js:",
         1. Throw a {{LinkError}} exception.
@@ -2362,6 +2369,24 @@ The <dfn>export name list</dfn> of a WebAssembly Module Record |record| is defin
 1. For each (|name|, <var ignore>type</var>) in [=module_exports=](|module|.\[[Module]])
     1. [=list/Append=] |name| to the end of |exports|.
 1. Return |exports|.
+
+</div>
+
+<div algorithm>
+The <dfn>module request</dfn> for a string |moduleName| and a string |name| is defined by the following algorithm:
+
+1. Let |attributes| be an empty [=set=].
+1. Let |importName| be |name|.
+1. If |name| is a [=scalar value string=] and contains the string "?",
+    1. Let |index| be the first index of "?" in |name|.
+    1. Set |importName| to the substring of |name| from 0 to |index|.
+    1. Let |query| be the substring of |name| after |index|.
+    1. Let |params| be the result of [=application/x-www-form-urlencoded string parsing|parsing=] |query|.
+    1. For each (|key|, |value|) in |params|
+        1. Let |attribute| be the [=ImportAttribute Record=] { \[[Key]]: |key|, \[[Value]]: |value| }.
+        1. [=set/Append=] |attribute| to |attributes|.
+1. Let |moduleRequest| be a new [=ModuleRequest Record=] { \[[Specifier]]: |moduleName|, \[[Attributes]]: |attributes| }.
+1. Return (|moduleRequest|, |importName|).
 
 </div>
 
@@ -2411,8 +2436,9 @@ WebAssembly Module Records have the following methods:
 1. Let |imports| be « ».
 1. [=list/iterate|For each=] (|importedModuleName|, |name|, |importtype|) in [=module_imports=](|module|),
     1. If [=Find a builtin=] with (|importedModuleName|, |name|) and builtins |module|.\[[BuiltinSets]] is not null, then [=iteration/continue=].
-    1. Let |importedModule| be [$GetImportedModule$](|record|, |importedModuleName|).
-    1. Let |resolution| be |importedModule|.ResolveExport(|name|).
+    1. Let (|moduleRequest|, |importName|) be the [=module request=] for |moduleName| and |name|.
+    1. Let |importedModule| be [$GetImportedModule$](|record|, |moduleRequest|).
+    1. Let |resolution| be |importedModule|.ResolveExport(|importName|).
     1. Assert: |resolution| is a [=ResolvedBinding Record=], as validated during environment initialization.
     1. Let |resolvedModule| be |resolution|.\\[[Module]].
     1. Let |resolvedName| be |resolution|.\[[BindingName]].
