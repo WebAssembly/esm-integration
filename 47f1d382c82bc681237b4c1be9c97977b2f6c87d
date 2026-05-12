@@ -1,0 +1,23 @@
+document/js-api/index.bs
+  e6e216ab9c2cacc9 2210,2214
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "47f1d382c82bc681237b4c1be9c97977b2f6c87d",
+  "prompts": {
+    "e6e216ab9c2cacc9": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_1e1ad3c95ffefrLyigWx0ajSk6",
+        "model": "cloudflare-workers-ai/@cf/zai-org/glm-5.1"
+      },
+      "human_author": "Guy Bedford",
+      "messages": [],
+      "total_additions": 2,
+      "total_deletions": 2,
+      "accepted_lines": 2,
+      "overriden_lines": 0
+    }
+  }
+}
