@@ -1874,7 +1874,7 @@ All builtin functions are grouped into sets. Every builtin set has a <dfn for="b
 
 To <dfn>get the builtins for a builtin set</dfn> with |builtinSetName|, perform the following steps:
 
-1. Return a list of (|name|, |funcType|, |steps|) for the set with name |builtinSetName| defined within this section.
+1. Return a list of (|name|, |externType|, |steps|) for the set with name |builtinSetName| defined within this section. |steps| describe how to allocate the externval that this builtin import resolves to.
 
 </div>
 
@@ -1923,10 +1923,12 @@ To <dfn>instantiate a builtin set</dfn> with name |builtinSetName|, perform the 
 
 1. Let |builtins| be the result of [=get the builtins for a builtin set=] |builtinSetName|.
 1. Let |exportsObject| be [=!=] [$OrdinaryObjectCreate$](null).
-1. [=list/iterate|For each=] (|name|, |funcType|, |steps|) of |builtins|,
-    1. Let |funcaddr| be the result fo [=create a builtin function=] with |funcType| and |steps|.
-    1. Let |func| be the result of creating [=a new Exported Function=] from |funcaddr|.
-    1. Let |value| be |func|.
+1. [=list/iterate|For each=] (|name|, |externType|, |steps|) of |builtins|,
+    1. If |externType| is of the form `func |funcType|`,
+        1. Let |funcaddr| be the result of [=create a builtin function=] with |funcType| and |steps|.
+        1. Let |value| be the result of creating [=a new Exported Function=] from |funcaddr|.
+    1. Otherwise,
+        1. Let |value| be the result of performing |steps|.
     1. Let |status| be [=!=] [$CreateDataProperty$](|exportsObject|, |name|, |value|).
     1. Assert: |status| is true.
 1. Return |exportsObject|.
@@ -1941,8 +1943,7 @@ To <dfn>validate an import for builtins</dfn> with |import|, enabled builtins |b
 1. Let |maybeBuiltin| be the result of [=find a builtin|finding a builtin=] for |import| and |builtinSetNames|.
 1. If |maybeBuiltin| is null, return true.
 1. Let |importExternType| be |import|[2].
-1. Let |builtinFuncType| be |maybeBuiltin|[0][1].
-1. Let |builtinExternType| be `func |builtinFuncType|`.
+1. Let |builtinExternType| be |maybeBuiltin|[1][1].
 1. Return [=match_externtype=](|builtinExternType|, |importExternType|).
 
 </div>
@@ -2202,6 +2203,23 @@ When this builtin is invoked with parameters |first| and |second|, the following
 
 </div>
 
+<h3 id="builtins-js-exn">JS Exception Builtins</h3>
+
+The JS exception builtin set exposes the [=JavaScript exception tag=] as a builtin import. The [=builtin-set/name=] for this set is `js/exn`, and the [=builtin-set/qualified name=] is `wasm:js/exn`.
+
+<h4 id="builtins-js-exn-js-tag">"js-tag"</h4>
+
+The |externType| of this builtin is `tag exception (rec (type (func (param externref)))).0`.
+
+<div algorithm="js-exn-js-tag">
+
+The execution steps of this builtin are as follows:
+
+1. Let |tagAddress| be the result of [=get the JavaScript exception tag|getting the JavaScript exception tag=].
+1. Return the result of [=create a Tag object|creating a Tag object=] from |tagAddress|.
+
+</div>
+
 <h2 id="errors">Error Condition Mappings to JavaScript</h2>
 
 Running WebAssembly programs encounter certain events which halt execution of the WebAssembly code.
@@ -2310,7 +2328,7 @@ To <dfn export>parse a WebAssembly module</dfn> given a <a>byte sequence</a> |by
 1. Let |stableBytes| be a [=get a copy of the buffer source|copy of the bytes held by the buffer=] |bytes|.
 1. [=Compile a WebAssembly module|Compile the WebAssembly module=] |stableBytes| and store the result as |module|.
 1. If |module| is [=error=], throw a {{CompileError}} exception.
-1. Let |builtinSetNames| be « "js-string" ».
+1. Let |builtinSetNames| be « "js-string", "js/exn" ».
 1. Let |importedStringModule| be "wasm:js/string-constants".
 1. [=Construct a WebAssembly module object=] from |module|, |bytes|, |builtinSetNames| and |importedStringModule|, and let |module| be the result.
 1. Let |requestedModules| be a set.
