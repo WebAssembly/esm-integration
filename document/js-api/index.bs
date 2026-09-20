@@ -2321,6 +2321,7 @@ To <dfn export>parse a WebAssembly module</dfn> given a <a>byte sequence</a> |by
         1. Throw a {{LinkError}} exception.
     1. Note: The following step only applies when integrating with the JS String Builtins proposal.
     1. If [=Find a builtin=] with (|moduleName|, |name|, |type|) and builtins |module|.\[[BuiltinSets]] is not null, then [=iteration/continue=].
+    1. If |moduleName| equals |module|.\[[ImportedStringModule]], then [=iteration/continue=].
     1. [=set/Append=] |moduleName| to |requestedModules|.
 1. For each (|name|, <var ignore>type</var>) in [=module_exports=](|module|.\[[Module]])
     1. If |name| starts with the prefix "wasm:" or "wasm-js:",
@@ -2411,6 +2412,7 @@ WebAssembly Module Records have the following methods:
 1. Let |imports| be « ».
 1. [=list/iterate|For each=] (|importedModuleName|, |name|, |importtype|) in [=module_imports=](|module|),
     1. If [=Find a builtin=] with (|importedModuleName|, |name|) and builtins |module|.\[[BuiltinSets]] is not null, then [=iteration/continue=].
+    1. If |importedModuleName| equals |record|.\[[ModuleSource]].\[[ImportedStringModule]], then [=iteration/continue=].
     1. Let |importedModule| be [$GetImportedModule$](|record|, |importedModuleName|).
     1. Let |resolution| be |importedModule|.ResolveExport(|name|).
     1. Assert: |resolution| is a [=ResolvedBinding Record=], as validated during environment initialization.
