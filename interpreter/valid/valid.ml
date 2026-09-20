@@ -159,6 +159,7 @@ let check_comptype (c : context) (ct : comptype) at =
 
 let check_subtype (c : context) (sut : subtype) at =
   let SubT (_fin, uts, ct) = sut in
+  require (List.length uts <= 1) at "multiple supertypes";
   List.iter (fun ut -> check_typeuse c ut at) uts;
   check_comptype c ct at
 
@@ -178,12 +179,15 @@ let check_subtype_sub (c : context) (sut : subtype) x at =
 let check_rectype (c : context) (rt : rectype) at : context =
   let RecT sts = rt in
   let x = Lib.List32.length c.types in
-  let c' = {c with types = c.types @ roll_deftypes x rt} in
+  let dts =
+    try List.map (subst_deftype (subst_of c.types)) (roll_deftypes x rt)
+    with UnknownIndex x -> [type_ c (x @@ at)]  (* force error *)
+  in
+  let c' = {c with types = c.types @ dts} in
   List.iter (fun st -> check_subtype c' st at) sts;
   Lib.List32.iteri
     (fun i st -> check_subtype_sub c' st (Int32.add x i) at) sts;
   c'
-
 
 let check_tagtype (c : context) (tt : tagtype) at =
   let TagT ut = tt in
@@ -374,7 +378,7 @@ let check_vec_binop binop at =
       error at "invalid lane index"
   | _ -> ()
 
-let check_memop (c : context) (memop : ('t, 's) memop) ty_size get_sz at =
+let check_memop (c : context) (memop : ('t, 's) memop) x ty_size get_sz at =
   let size =
     match get_sz memop.pack with
     | None -> ty_size memop.ty
@@ -384,7 +388,7 @@ let check_memop (c : context) (memop : ('t, 's) memop) ty_size get_sz at =
   in
   require (1 lsl memop.align >= 1 && 1 lsl memop.align <= size) at
     "alignment must not be larger than natural";
-  let MemoryT (at_, _lim) = memory c (0l @@ at) in
+  let MemoryT (at_, _lim) = memory c x in
   if at_ = I32AT then
     require (I64.lt_u memop.offset 0x1_0000_0000L) at
       "offset out of range";
@@ -623,7 +627,7 @@ let rec check_instr (c : context) (e : instr) (s : infer_resulttype) : infer_ins
 
   | TableFill x ->
     let TableT (at, _lim, rt) = table c x in
-    [NumT (numtype_of_addrtype at); RefT rt; 
+    [NumT (numtype_of_addrtype at); RefT rt;
       NumT (numtype_of_addrtype at)] --> [], []
 
   | TableCopy (x, y) ->
@@ -649,34 +653,34 @@ let rec check_instr (c : context) (e : instr) (s : infer_resulttype) : infer_ins
 
   | Load (x, memop) ->
     let MemoryT (at, _lim) = memory c x in
-    let t = check_memop c memop num_size (Lib.Option.map fst) e.at in
+    let t = check_memop c memop x num_size (Lib.Option.map fst) e.at in
     [NumT (numtype_of_addrtype at)] --> [NumT t], []
 
   | Store (x, memop) ->
     let MemoryT (at, _lim) = memory c x in
-    let t = check_memop c memop num_size (fun sz -> sz) e.at in
+    let t = check_memop c memop x num_size (fun sz -> sz) e.at in
     [NumT (numtype_of_addrtype at); NumT t] --> [], []
 
   | VecLoad (x, memop) ->
     let MemoryT (at, _lim) = memory c x in
-    let t = check_memop c memop vec_size (Lib.Option.map fst) e.at in
+    let t = check_memop c memop x vec_size (Lib.Option.map fst) e.at in
     [NumT (numtype_of_addrtype at)] --> [VecT t], []
 
   | VecStore (x, memop) ->
     let MemoryT (at, _lim) = memory c x in
-    let t = check_memop c memop vec_size (fun _ -> None) e.at in
+    let t = check_memop c memop x vec_size (fun _ -> None) e.at in
     [NumT (numtype_of_addrtype at); VecT t] --> [], []
 
   | VecLoadLane (x, memop, i) ->
     let MemoryT (at, _lim) = memory c x in
-    let t = check_memop c memop vec_size (fun sz -> Some sz) e.at in
+    let t = check_memop c memop x vec_size (fun sz -> Some sz) e.at in
     require (I8.to_int_u i < vec_size t / Pack.packed_size memop.pack) e.at
       "invalid lane index";
     [NumT (numtype_of_addrtype at); VecT t] -->  [VecT t], []
 
   | VecStoreLane (x, memop, i) ->
     let MemoryT (at, _lim) = memory c x in
-    let t = check_memop c memop vec_size (fun sz -> Some sz) e.at in
+    let t = check_memop c memop x vec_size (fun sz -> Some sz) e.at in
     require (I8.to_int_u i < vec_size t / Pack.packed_size memop.pack) e.at
       "invalid lane index";
     [NumT (numtype_of_addrtype at); VecT t] -->  [], []
@@ -769,7 +773,7 @@ let rec check_instr (c : context) (e : instr) (s : infer_resulttype) : infer_ins
     require (i < Lib.List32.length fts) e.at
       ("unknown field " ^ I32.to_string_u i);
     let FieldT (mut, st) = Lib.List32.nth fts i in
-    require (mut == Var) e.at "field is immutable";
+    require (mut == Var) e.at "immutable field";
     let t = unpacked_storagetype st in
     [RefT (Null, UseHT (Def (type_ c x))); t] --> [], []
 
@@ -811,7 +815,7 @@ let rec check_instr (c : context) (e : instr) (s : infer_resulttype) : infer_ins
 
   | ArraySet x ->
     let FieldT (mut, st) = array_type c x in
-    require (mut == Var) e.at "array is immutable";
+    require (mut == Var) e.at "immutable array";
     let t = unpacked_storagetype st in
     [RefT (Null, UseHT (Def (type_ c x))); NumT I32T; t] --> [], []
 
@@ -821,19 +825,19 @@ let rec check_instr (c : context) (e : instr) (s : infer_resulttype) : infer_ins
   | ArrayCopy (x, y) ->
     let FieldT (mutd, std) = array_type c x in
     let FieldT (_muts, sts) = array_type c y in
-    require (mutd = Var) e.at "array is immutable";
+    require (mutd = Var) e.at "immutable array";
     require (match_storagetype c.types sts std) e.at "array types do not match";
     [RefT (Null, UseHT (Def (type_ c x))); NumT I32T; RefT (Null, UseHT (Def (type_ c y))); NumT I32T; NumT I32T] --> [], []
 
   | ArrayFill x ->
     let FieldT (mut, st) = array_type c x in
-    require (mut = Var) e.at "array is immutable";
+    require (mut = Var) e.at "immutable array";
     let t = unpacked_storagetype st in
     [RefT (Null, UseHT (Def (type_ c x))); NumT I32T; t; NumT I32T] --> [], []
 
   | ArrayInitData (x, y) ->
     let FieldT (mut, st) = array_type c x in
-    require (mut = Var) e.at "array is immutable";
+    require (mut = Var) e.at "immutable array";
     let () = data c y in
     let t = unpacked_storagetype st in
     require (is_numtype t || is_vectype t) x.at
@@ -842,7 +846,7 @@ let rec check_instr (c : context) (e : instr) (s : infer_resulttype) : infer_ins
 
   | ArrayInitElem (x, y) ->
     let FieldT (mut, st) = array_type c x in
-    require (mut = Var) e.at "array is immutable";
+    require (mut = Var) e.at "immutable array";
     let rt = elem c y in
     require (match_valtype c.types (RefT rt) (unpacked_storagetype st)) x.at
       ("type mismatch: element segment's type " ^ string_of_reftype rt ^

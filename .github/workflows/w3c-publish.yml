@@ -4,9 +4,7 @@ on:
   push:
     # Disable on forks!
     branches: [ main ]
-    paths: [ .github/**, document/** ]
-  pull_request:
-    paths: [ .github/**, document/** ]
+    paths: [ .github/**, document/**, specification/** ]
 
   # Allows you to run this workflow manually from the Actions tab, gh CLI tool,
   # or REST API. THe w3c-status options correspond to the valid options for
@@ -34,8 +32,12 @@ env:
   YARN_ENABLE_IMMUTABLE_INSTALLS: false
   W3C_STATUS: ${{ github.event_name == 'workflow_dispatch' && inputs.w3c-status || 'CRD' }}
 
+permissions:
+  contents: read
+
 jobs:
   publish-to-w3c-TR:
+    if: ${{ github.repository == 'WebAssembly/spec' }}
     strategy:
       fail-fast: false
       matrix:
@@ -49,7 +51,7 @@ jobs:
       - name: Setup OCaml
         uses: ocaml/setup-ocaml@v3
         with:
-          ocaml-compiler: 4.14.x
+          ocaml-compiler: 5.04.x
       - name: Setup Dune
         if: ${{ matrix.spec == 'core' }}
         run: opam install --yes dune menhir mdx zarith && opam exec dune --version
@@ -68,9 +70,9 @@ jobs:
       - name: Build SpecTec
         if: ${{ matrix.spec == 'core' }}
         run: cd spectec && opam exec make
-      - name: Publish ${{ matrix.spec }} spec to its https://www.w3.org/TR/ URL
+      - name: Publish (or validate) ${{ matrix.spec }} spec to its https://www.w3.org/TR/ URL
         if: env.W3C_ECHIDNA_TOKEN_CORE
-        run: cd document/${{ matrix.spec }} && opam exec make WD-echidna-CI
+        run: cd document/${{ matrix.spec }} && opam exec make W3C_STATUS=${{ env.W3C_STATUS }} ECHIDNA_DRYRUN=${{ env.ECHIDNA_DRYRUN}} WD-echidna-CI
         env:
           W3C_ECHIDNA_TOKEN_CORE: ${{ secrets.W3C_ECHIDNA_TOKEN_CORE }}
           W3C_ECHIDNA_TOKEN_JSAPI: ${{ secrets.W3C_ECHIDNA_TOKEN_JSAPI }}
@@ -79,9 +81,9 @@ jobs:
           ECHIDNA_DRYRUN: |-
             ${{ !((github.event_name == 'workflow_dispatch' && !inputs.dry-run) ||
                   (github.event_name == 'push' && github.repository == 'WebAssembly/spec' && github.ref == 'refs/heads/main')) }}
-      - name: Validate ${{ matrix.spec }} spec with Echidna
+      - name: Validate ${{ matrix.spec }} spec with Echidna using personal credentials
         if: env.W3C_USERNAME
-        run: cd document/${{ matrix.spec }} && opam exec make WD-echidna
+        run: cd document/${{ matrix.spec }} && opam exec make W3C_STATUS=${{ env.W3C_STATUS }} WD-echidna
         env:
           W3C_USERNAME: ${{ secrets.W3C_USERNAME }}
           W3C_PASSWORD: ${{ secrets.W3C_PASSWORD }}
