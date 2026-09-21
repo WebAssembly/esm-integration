@@ -768,7 +768,7 @@ In addition, the interface object for {{Module}} must have as its \[[Prototype]]
 </div>
 
 <div algorithm>
-    The <dfn method for="Module">imports(|moduleObject|)</dfn> method, when invoked, performs the following steps:
+    To <dfn lt="external imports">get the external imports</dfn> of a {{Module}} |moduleObject|, perform the following steps:
     1. Let |module| be |moduleObject|.\[[Module]].
     1. Let |builtinSetNames| be |moduleObject|.\[[BuiltinSets]].
     1. Let |importedStringModule| be |moduleObject|.\[[ImportedStringModule]].
@@ -776,6 +776,14 @@ In addition, the interface object for {{Module}} must have as its \[[Prototype]]
     1. [=list/iterate|For each=] (|moduleName|, |name|, |type|) of [=module_imports=](|module|),
         1. If [=find a builtin=] for (|moduleName|, |name|, |type|) and |builtinSetNames| is not null, then [=iteration/continue=].
         1. If |importedStringModule| is not null and |moduleName| equals |importedStringModule|, then [=iteration/continue=].
+        1. [=list/Append=] (|moduleName|, |name|, |type|) to |imports|.
+    1. Return |imports|.
+</div>
+
+<div algorithm>
+    The <dfn method for="Module">imports(|moduleObject|)</dfn> method, when invoked, performs the following steps:
+    1. Let |imports| be « ».
+    1. [=list/iterate|For each=] (|moduleName|, |name|, |type|) of the [=external imports=] of |moduleObject|,
         1. Let |kind| be the [=string value of the extern type=] |type|.
         1. Let |obj| be «[ "{{ModuleImportDescriptor/module}}" → |moduleName|, "{{ModuleImportDescriptor/name}}" → |name|, "{{ModuleImportDescriptor/kind}}" → |kind| ]».
         1. [=list/Append=] |obj| to |imports|.
@@ -2314,14 +2322,11 @@ To <dfn export>parse a WebAssembly module</dfn> given a <a>byte sequence</a> |by
 1. Let |importedStringModule| be "wasm:js/string-constants".
 1. [=Construct a WebAssembly module object=] from |module|, |bytes|, |builtinSetNames| and |importedStringModule|, and let |module| be the result.
 1. Let |requestedModules| be a set.
-1. For each (|moduleName|, |name|, |type|) in [=module_imports=](|module|.\[[Module]]),
+1. For each (|moduleName|, |name|, <var ignore>type</var>) of the [=external imports=] of |module|,
     1. If |moduleName| starts with the prefix "wasm-js:",
         1. Throw a {{LinkError}} exception.
     1. If |name| starts with the prefix "wasm:" or "wasm-js:",
         1. Throw a {{LinkError}} exception.
-    1. Note: The following step only applies when integrating with the JS String Builtins proposal.
-    1. If [=Find a builtin=] with (|moduleName|, |name|, |type|) and builtins |module|.\[[BuiltinSets]] is not null, then [=iteration/continue=].
-    1. If |moduleName| equals |module|.\[[ImportedStringModule]], then [=iteration/continue=].
     1. [=set/Append=] |moduleName| to |requestedModules|.
 1. For each (|name|, <var ignore>type</var>) in [=module_exports=](|module|.\[[Module]])
     1. If |name| starts with the prefix "wasm:" or "wasm-js:",
@@ -2410,9 +2415,7 @@ WebAssembly Module Records have the following methods:
 1. Let |record| be this WebAssembly Module Record.
 1. Let |module| be |record|.\[[ModuleSource]].\[[Module]].
 1. Let |imports| be « ».
-1. [=list/iterate|For each=] (|importedModuleName|, |name|, |importtype|) in [=module_imports=](|module|),
-    1. If [=Find a builtin=] with (|importedModuleName|, |name|) and builtins |module|.\[[BuiltinSets]] is not null, then [=iteration/continue=].
-    1. If |importedModuleName| equals |record|.\[[ModuleSource]].\[[ImportedStringModule]], then [=iteration/continue=].
+1. [=list/iterate|For each=] (|importedModuleName|, |name|, |importtype|) of the [=external imports=] of |record|.\[[ModuleSource]],
     1. Let |importedModule| be [$GetImportedModule$](|record|, |importedModuleName|).
     1. Let |resolution| be |importedModule|.ResolveExport(|name|).
     1. Assert: |resolution| is a [=ResolvedBinding Record=], as validated during environment initialization.
@@ -2494,7 +2497,7 @@ WebAssembly Module Record Environment Record.
     1. If |specifier|.\[[Module]].\[[ModuleRecord]] is null,
         1. Let |realm| be the current agent's realm record.
         1. Let |requestedModules| be a set.
-        1. For each (|moduleName|, <var ignore>name</var>, <var ignore>type</var>) in [=module_imports=](|specifier|.\[[Module]]),
+        1. For each (|moduleName|, <var ignore>name</var>, <var ignore>type</var>) of the [=external imports=] of |specifier|,
             1. [=set/Append=] |moduleName| to |requestedModules|.
         1. Let |moduleRecord| be {
               <!-- WebAssembly Module Records -->
@@ -2503,7 +2506,7 @@ WebAssembly Module Record Environment Record.
               \[[Realm]]: |realm|,
               \[[Environment]]: ~empty~,
               \[[Namespace]]: ~empty~,
-              \[[ModuleSource]]: |module|,
+              \[[ModuleSource]]: |specifier|,
               \[[HostDefined]]: ~empty~,
               <!-- Cyclic Module Records -->
               \[[Status]]: "new",
@@ -2519,7 +2522,7 @@ WebAssembly Module Record Environment Record.
               \[[AsyncParentModules]]: &laquo; &raquo;,
               \[[PendingAsyncDependencies]]: ~empty~,
             }.
-        1. Set |module|.\[[ModuleRecord]] to |moduleRecord|.
+        1. Set |specifier|.\[[Module]].\[[ModuleRecord]] to |moduleRecord|.
         1. Return |moduleRecord|.
     1. Return |specifier|.\[[Module]].\[[ModuleRecord]].
 1. Return ~not-a-source~.
