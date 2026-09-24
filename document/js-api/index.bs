@@ -2413,23 +2413,45 @@ WebAssembly Module Records have the following methods:
 <h3 id="module-execution">ExecuteModule ( [ |promiseCapability| ] ) Concrete Method</h3>
 1. Assert: |promiseCapability| was not provided.
 1. Let |record| be this WebAssembly Module Record.
-1. Let |module| be |record|.\[[ModuleSource]].\[[Module]].
+1. Let |moduleObject| be |record|.\[[ModuleSource]].
+1. Let |module| be |moduleObject|.\[[Module]].
+1. Let |builtinSetNames| be |moduleObject|.\[[BuiltinSets]].
+1. Let |importedStringModule| be |moduleObject|.\[[ImportedStringModule]].
 1. Let |imports| be « ».
-1. [=list/iterate|For each=] (|importedModuleName|, |name|, |importtype|) of the [=external imports=] of |record|.\[[ModuleSource]],
+1. [=list/iterate|For each=] (|importedModuleName|, |name|, |importtype|) of [=module_imports=](|module|),
+    1. If |importedStringModule| is not null and |importedModuleName| equals |importedStringModule|,
+        1. Assert: |importtype| is of the form [=global=] [=const=] |valtype|.
+        1. Let |store| be the [=surrounding agent=]'s [=associated store=].
+        1. Let |value| be [=?=] [=ToWebAssemblyValue=](|name|, |valtype|).
+        1. Let (|store|, |globaladdr|) be [=global_alloc=](|store|, [=const=] |valtype|, |value|).
+        1. Set the [=surrounding agent=]'s [=associated store=] to |store|.
+        1. Let |externglobal| be [=external value|global=] |globaladdr|.
+        1. [=list/Append=] |externglobal| to |imports|.
+        1. [=iteration/continue=].
+    1. If |builtinSetNames| is not null,
+        1. Let |maybeBuiltin| be the result of [=find a builtin|finding a builtin=] for (|importedModuleName|, |name|, |importtype|) and |builtinSetNames|.
+        1. If |maybeBuiltin| is not null,
+            1. Let |funcType| be |maybeBuiltin|[1][1].
+            1. Let |steps| be |maybeBuiltin|[1][2].
+            1. Let |funcaddr| be the result of [=create a builtin function=] with |funcType| and |steps|.
+            1. Let |externfunc| be the [=external value=] [=external value|func=] |funcaddr|.
+            1. [=list/Append=] |externfunc| to |imports|.
+            1. [=iteration/continue=].
     1. Let |importedModule| be [$GetImportedModule$](|record|, |importedModuleName|).
     1. Let |resolution| be |importedModule|.ResolveExport(|name|).
     1. Assert: |resolution| is a [=ResolvedBinding Record=], as validated during environment initialization.
-    1. Let |resolvedModule| be |resolution|.\\[[Module]].
+    1. Let |resolvedModule| be |resolution|.\[[Module]].
     1. Let |resolvedName| be |resolution|.\[[BindingName]].
     1. If |resolvedModule| is a WebAssembly Module Record,
-        1. If |resolvedModule|.\[[Instance]] is ~empty~, throw a {LinkError} exception.
+        1. If |resolvedModule|.\[[Instance]] is ~empty~, throw a {{LinkError}} exception.
         1. Assert: |resolvedModule|.\[[Instance]] is a WebAssembly {{Instance}} object.
         1. Assert: |resolvedModule|.\[[ModuleSource]] is a WebAssembly {{Module}} object.
-        1. Let |module| be |resolvedModule|.\[[ModuleSource]].\[[Module]].
-        1. Let |externval| be [=instance_export=](|resolvedModule|.\[[Instance]], |resolvedName|).
+        1. Let |importedInstance| be |resolvedModule|.\[[Instance]].
+        1. Let |importedCoreModule| be |resolvedModule|.\[[ModuleSource]].\[[Module]].
+        1. Let |externval| be [=instance_export=](|importedInstance|.\[[Instance]], |resolvedName|).
         1. Assert: |externval| is not [=error=].
-        1. Assert: [=module_exports=](|module|) contains an element (|resolvedName|, <var ignore>type</var>).
-        1. Let |externtype| be the value of |type| for the element (|resolvedName|, |type|) in [=module_exports=](|module|).
+        1. Assert: [=module_exports=](|importedCoreModule|) contains an element (|resolvedName|, <var ignore>type</var>).
+        1. Let |externtype| be the value of |type| for the element (|resolvedName|, |type|) in [=module_exports=](|importedCoreModule|).
         1. If |importtype| is not an [=extern subtype=] of |externtype|, throw a {{LinkError}} exception.
         1. [=list/Append=] |externval| to |imports|.
     1. Otherwise,
@@ -2467,23 +2489,29 @@ WebAssembly Module Records have the following methods:
             1. Let |tableaddr| be |v|.\[[Table]].
             1. Let |externtable| be the [=external value=] [=external value|table=] |tableaddr|.
             1. [=list/Append=] |externtable| to |imports|.
-1. [=Instantiate the core of a WebAssembly module=] |module| with |imports|, and let |instance| be the result.
-1. Set |record|.\[[Instance]] to |instance|.
+1. [=Instantiate the core of a WebAssembly module=] |module| with |imports|, and let |coreInstance| be the result.
+1. Let |instanceObject| be a [=/new=] {{Instance}}.
+1. [=initialize an instance object|Initialize=] |instanceObject| from |module| and |coreInstance|.
+1. Set |record|.\[[Instance]] to |instanceObject|.
 1. [=list/iterate|For each=] (|name|, |externtype|) of [=module_exports=](|module|),
+    1. Let |externval| be [=instance_export=](|coreInstance|, |name|).
+    1. Assert: |externval| is not [=error=].
     1. If |externtype| is of the form [=global=] |mut| |globaltype|,
         1. Assert: |externval| is of the form [=external value|global=] |globaladdr|.
         1. Let [=external value|global=] |globaladdr| be |externval|.
+        1. Let |store| be the [=surrounding agent=]'s [=associated store=].
         1. Let |global_value| be [=global_read=](|store|, |globaladdr|).
-        1. If |globaltype| is not [=v128=],
-            1. Note: The condition above leaves unsupported JS values as uninitialized in TDZ and therefore as a reference error on
-                access. When integrating with shared globals, they may be excluded here similarly to v128 above.
+        1. If |globaltype| [=matches/valtype|matches=] [=v128=] or [=exnref=],
+            1. Note: This leaves the binding uninitialized in TDZ and therefore as a reference error on
+                access. When integrating with shared globals, they may be excluded here similarly.
+        1. Otherwise,
             1. Perform [=!=] |record|.\[[Environment]].InitializeBinding(|name|, [=ToJSValue=](|global_value|)).
             1. If |mut| is [=var=], then associate all future mutations of |globaladdr| with the ECMA-262 binding record for |name| in
-                |record|.\[[Environment]], such that |record|.\[[Environment]].GetBindingValue(|resolution|.\[[BindingName]], true)
+                |record|.\[[Environment]], such that |record|.\[[Environment]].GetBindingValue(|name|, true)
                 always returns [=ToJSValue=]([=global_read=](|store|, |globaladdr|)) for the current [=surrounding agent=]'s
                 [=associated store=] |store|.
     1. Otherwise,
-        1. Perform ! |record|.\[[Environment]].InitializeBinding(|name|, ! Get(|instance|.\[[Exports]], |name|)).
+        1. Perform ! |record|.\[[Environment]].InitializeBinding(|name|, ! Get(|instanceObject|.\[[Exports]], |name|)).
 
 Note: The linking semantics here for Wasm to Wasm modules are identical to the WebAssembly JS API semantics as if passing the
 the exports object as the imports object in instantiation. When linking Wasm module imports to JS module exports, the JS API semantics
