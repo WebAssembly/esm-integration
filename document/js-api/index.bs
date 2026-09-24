@@ -509,6 +509,28 @@ To <dfn>instantiate imported strings</dfn> with module |module| and |importedStr
 
 </div>
 
+<div algorithm="read-the-imports">
+  To <dfn>read the imports</dfn> from a WebAssembly module |module| from imports object |importObject|, enabled builtins |builtinSetNames|, and |importedStringModule|, perform the following steps:
+    1. If |module|.[=imports=] [=list/is empty|is not empty=], and |importObject| is undefined, throw a {{TypeError}} exception.
+    1. Let |builtinOrStringImports| be the result of [=instantiate the builtin and string imports=] of |module| with |builtinSetNames| and |importedStringModule|.
+    1. Let |imports| be « ».
+    1. [=list/iterate|For each=] (|moduleName|, |componentName|, |externtype|) of [=module_imports=](|module|),
+        1. If |builtinOrStringImports| [=map/exist|contains=] |moduleName|,
+            1. Let |o| be |builtinOrStringImports|[|moduleName|].
+            1. If |o| [=is not an Object=] or if [$HasProperty$](|o|, |componentName|) is false,
+                1. Set |o| to [=?=] [$Get$](|importObject|, |moduleName|).
+        1. Else,
+            1. Let |o| be [=?=] [$Get$](|importObject|, |moduleName|).
+        1. If |o| [=is not an Object=], throw a {{TypeError}} exception.
+        1. Let |v| be [=?=] [$Get$](|o|, |componentName|).
+        1. [=Read an import value=] |v| of type |externtype| into |imports|.
+    1. Return |imports|.
+
+Note: This algorithm only verifies the right kind of JavaScript values are passed.
+The verification of WebAssembly type requirements is deferred to the
+"[=instantiate the core of a WebAssembly module=]" algorithm.
+</div>
+
 <div algorithm>
   To <dfn>instantiate the builtin and string imports</dfn> of a WebAssembly module |module| with enabled builtins |builtinSetNames| and |importedStringModule|, perform the following steps:
     1. Let |builtinOrStringImports| be the ordered map « ».
@@ -566,28 +588,6 @@ To <dfn>instantiate imported strings</dfn> with module |module| and |importedStr
         1. Let |tagaddr| be |v|.\[[Address]].
         1. Let |externtag| be the [=external value=] [=external value/tag=] |tagaddr|.
         1. [=list/Append=] |externtag| to |imports|.
-
-Note: This algorithm only verifies the right kind of JavaScript values are passed.
-The verification of WebAssembly type requirements is deferred to the
-"[=instantiate the core of a WebAssembly module=]" algorithm.
-</div>
-
-<div algorithm="read-the-imports">
-  To <dfn>read the imports</dfn> from a WebAssembly module |module| from imports object |importObject|, enabled builtins |builtinSetNames|, and |importedStringModule|, perform the following steps:
-    1. If |module|.[=imports=] [=list/is empty|is not empty=], and |importObject| is undefined, throw a {{TypeError}} exception.
-    1. Let |builtinOrStringImports| be the result of [=instantiate the builtin and string imports=] of |module| with |builtinSetNames| and |importedStringModule|.
-    1. Let |imports| be « ».
-    1. [=list/iterate|For each=] (|moduleName|, |componentName|, |externtype|) of [=module_imports=](|module|),
-        1. If |builtinOrStringImports| [=map/exist|contains=] |moduleName|,
-            1. Let |o| be |builtinOrStringImports|[|moduleName|].
-            1. If |o| [=is not an Object=] or if [$HasProperty$](|o|, |componentName|) is false,
-                1. Set |o| to [=?=] [$Get$](|importObject|, |moduleName|).
-        1. Else,
-            1. Let |o| be [=?=] [$Get$](|importObject|, |moduleName|).
-        1. If |o| [=is not an Object=], throw a {{TypeError}} exception.
-        1. Let |v| be [=?=] [$Get$](|o|, |componentName|).
-        1. [=Read an import value=] |v| of type |externtype| into |imports|.
-    1. Return |imports|.
 </div>
 
 <div algorithm>
