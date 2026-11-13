@@ -491,6 +491,7 @@ A {{Module}} object represents a single WebAssembly module. Each {{Module}} obje
 
 <div algorithm>
     The <dfn method for="WebAssembly">compile(|bytes|, |options|)</dfn> method, when invoked, performs the following steps:
+    1. Perform [=?=] [$HostEnsureCanCompileWasmBytes$]([=current Realm=]).
     1. Let |stableBytes| be a [=get a copy of the buffer source|copy of the bytes held by the buffer=] |bytes|.
     1. [=Asynchronously compile a WebAssembly module=] from |stableBytes| using |options| and return the result.
 </div>
@@ -692,6 +693,7 @@ The verification of WebAssembly type requirements is deferred to the
 
 <div algorithm>
   The <dfn method for="WebAssembly">instantiate(|bytes|, |importObject|, |options|)</dfn> method, when invoked, performs the following steps:
+    1. Perform [=?=] [$HostEnsureCanCompileWasmBytes$]([=current Realm=]).
     1. Let |stableBytes| be a [=get a copy of the buffer source|copy of the bytes held by the buffer=] |bytes|.
     1. [=Asynchronously compile a WebAssembly module=] from |stableBytes| using |options| and let |promiseOfModule| be the result.
     1. [=Instantiate a promise of a module|Instantiate=] |promiseOfModule| with imports |importObject| and return the result.
@@ -817,6 +819,7 @@ In addition, the interface object for {{Module}} must have as its \[[Prototype]]
 <div algorithm>
     The <dfn constructor for="Module">Module(|bytes|, |options|)</dfn> constructor, when invoked, performs the following steps:
 
+    1. Perform [=?=] [$HostEnsureCanCompileWasmBytes$]([=current Realm=]).
     1. Let |stableBytes| be a [=get a copy of the buffer source|copy of the bytes held by the buffer=] |bytes|.
     1. [=Compile a WebAssembly module|Compile the WebAssembly module=] |stableBytes| and store the result as |module|.
     1. If |module| is [=error=], throw a {{CompileError}} exception.
@@ -2264,6 +2267,19 @@ Note: ECMAScript doesn't specify any sort of behavior on out-of-memory condition
     See [Issue 879](https://github.com/WebAssembly/spec/issues/879) for further discussion.
 </div>
 
+<h2 id="implementation-defined-operations">Implementation-defined Operations</h2>
+
+<h3 id="host-ensure-can-compile-wasm-bytes">HostEnsureCanCompileWasmBytes ( |realm| )</h3>
+
+The <dfn abstract-op export>HostEnsureCanCompileWasmBytes</dfn>(|realm|) abstract operation is an implementation-defined abstract operation that allows host environments to block the compilation of WebAssembly source bytes in the Realm |realm| when those bytes are provided directly by JavaScript code.
+
+An implementation of HostEnsureCanCompileWasmBytes may complete normally or abruptly. Any abrupt completion must be a {{CompileError}} exception, and is propagated to the caller. The default implementation of HostEnsureCanCompileWasmBytes is to unconditionally return an empty normal completion.
+
+It is called by the {{Module/Module(bytes, options)}} constructor, {{WebAssembly/compile(bytes, options)}}, {{WebAssembly/instantiate(bytes, importObject, options)}}, and the streaming compilation functions of the <a href="https://webassembly.github.io/spec/web-api/index.html">WebAssembly Web API</a>. For the functions returning a promise, an abrupt completion results in a rejected promise.
+
+Note: {{WebAssembly/validate(bytes, options)}} does not produce a {{Module}} and is never blocked. Instantiating an existing {{Module}} is also never blocked, since the compilation of its source was already permitted when it was created.
+
+Note: On the Web, this operation is implemented by [[CSP]] to require the <code>'wasm-unsafe-eval'</code> or <code>'unsafe-eval'</code> source expressions.
 
 <h2 id="limits">Implementation-defined Limits</h2>
 
@@ -2371,6 +2387,8 @@ To <dfn export>parse a WebAssembly module</dfn> given a <a>byte sequence</a> |by
 1. Return |moduleRecord|.
 
 Note: From HTML, it's not observable when [=parse a WebAssembly module=] begins, so any work perfomed in compilation may be performed off-thread.
+
+Note: This algorithm does not call [$HostEnsureCanCompileWasmBytes$], since |bytes| are not provided by JavaScript code but by the host's module loading, which is expected to have already applied its own policy to their source. In HTML, this is the `script-src` Content Security Policy check of the module fetch, as for JavaScript modules, so that importing a WebAssembly module does not require <code>'wasm-unsafe-eval'</code>.
 </div>
 
 <div algorithm>

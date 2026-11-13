@@ -49,6 +49,7 @@ urlPrefix: https://tc39.es/ecma262/; spec: ECMASCRIPT
     type: dfn
         text: agent cluster; url: sec-agent-clusters
         text: current Realm; url: current-realm
+        text: ? ; url: sec-returnifabrupt-shorthands
 urlPrefix: https://webassembly.github.io/spec/core/; spec: WebAssembly; type: dfn
     text: function index; url: syntax/modules.html#syntax-funcidx
     text: name section; url: appendix/custom.html?highlight=name%20section#binary-namesec
@@ -66,6 +67,8 @@ urlPrefix: https://webassembly.github.io/spec/js-api/; spec: WASMJS
         text: asynchronously compile a webassembly module; url: #asynchronously-compile-a-webassembly-module
         text: instantiate a promise of a module; url: #instantiate-a-promise-of-a-module
         text: Exported Function; url: #exported-function
+    type: abstract-op
+        text: HostEnsureCanCompileWasmBytes; url: #abstract-opdef-hostensurecancompilewasmbytes
 url:https://html.spec.whatwg.org/#cors-same-origin;text:CORS-same-origin;type:dfn;spec:HTML
 url:https://fetch.spec.whatwg.org/#concept-body-consume-body;text:consume body;type:dfn;spec:FETCH
 url:https://w3c.github.io/webappsec-secure-contexts/#environment-settings-object-contextually-secure; text:contextually secure; type: dfn; spec: SECURECONTEXTS
@@ -116,6 +119,10 @@ Note: This algorithm accepts a {{Response}} object, or a
     compilation or instantiation fails, the returned promise will be rejected with a
     {{CompileError}} or other relevant error type, depending on the cause of failure.
 
+
+    1. Perform [=?=] [$HostEnsureCanCompileWasmBytes$]([=current Realm=]).
+
+        Note: This check is performed before |source| is consumed, and an abrupt completion results in the calling function returning a rejected promise.
 
     1. Let |returnValue| be [=a new promise=].
     1. [=React=] to |source|:

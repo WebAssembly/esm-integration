@@ -119,6 +119,24 @@ integration under CSP policies.
 
 While Wasm is currently fully sandboxed, having equal access to imports to JS provides it equal capabilities to execution primitives, so that it should not be considered a weaker capability from an ESM integration perspective.
 
+This is distinct from the [`wasm-unsafe-eval`](https://github.com/WebAssembly/content-security-policy/blob/main/proposals/CSP.md) source expression of the WebAssembly CSP proposal, which gates the compilation of arbitrary bytes provided by JavaScript through `new WebAssembly.Module`, `WebAssembly.compile`, `WebAssembly.instantiate` and their streaming variants, in the same way that `unsafe-eval` gates `eval` in JavaScript. Since an imported Wasm module has a URL that is checked by `script-src`, it does not require `wasm-unsafe-eval`:
+
+```js
+// Content-Security-Policy: script-src 'self'
+
+// Permitted, since ./fib.wasm is allowed by script-src
+import source fibModule from "./fib.wasm";
+import { fib } from "./fib.wasm";
+
+// Permitted, the module was already compiled under the script-src policy
+const { exports } = await WebAssembly.instantiate(fibModule);
+
+// CompileError, compiling arbitrary bytes requires 'wasm-unsafe-eval'
+new WebAssembly.Module(bytes);
+```
+
+This is specified by the JS API host hook `HostEnsureCanCompileWasmBytes`, which is called by the JS API functions compiling bytes, and not when parsing a WebAssembly module for the ESM integration.
+
 ## FAQ
 
 ### Does the source phase replace the instance linking?
