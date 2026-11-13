@@ -98,7 +98,8 @@ jobs:
           variants='["head","upstream"]'
 
   build-core-spec:
-    runs-on: ubuntu-latest
+    # mathjax2katex.py fails on the Python 3.14 of ubuntu-26.04
+    runs-on: ubuntu-24.04
     needs: resolve-baseline
     strategy:
       fail-fast: false
