@@ -47,6 +47,7 @@ urlPrefix: https://tc39.es/ecma262/; spec: ECMASCRIPT
         text: NativeError; url: sec-nativeerror-constructors
         text: TypeError; url: sec-native-error-types-used-in-this-standard-typeerror
         text: RangeError; url: sec-native-error-types-used-in-this-standard-rangeerror
+        text: SyntaxError; url: sec-native-error-types-used-in-this-standard-syntaxerror
     type: dfn
         url: sec-string-object
             text: String
@@ -291,6 +292,7 @@ spec:infra; type:dfn; text:byte sequence
 spec:ecma-262; type:exception; for:ECMAScript; text:Error
 spec:ecmascript; type:exception; for:ECMAScript; text:TypeError
 spec:ecmascript; type:exception; for:ECMAScript; text:RangeError
+spec:ecmascript; type:exception; for:ECMAScript; text:SyntaxError
 spec:ecmascript; type:interface; for:ECMAScript; text:ArrayBuffer
 spec:ecmascript; type:dfn; text:agent
 spec:webidl; type:dfn; text:resolve
@@ -2414,6 +2416,10 @@ WebAssembly Module Records have the following methods:
 
 <h3 id="module-declaration-environment-setup">InitializeEnvironment ( ) Concrete Method</h3>
 1. Let |record| be this WebAssembly Module Record.
+1. For each (|importedModuleName|, |name|, <var ignore>type</var>) of the [=external imports=] of |record|.\[[ModuleSource]],
+    1. Let |importedModule| be [$GetImportedModule$](|record|, |importedModuleName|).
+    1. Let |resolution| be |importedModule|.ResolveExport(|name|).
+    1. If |resolution| is either null or ~ambiguous~, throw a {{SyntaxError}} exception.
 1. Let |env| be [$NewModuleEnvironment$](null).
 1. Set |record|.\[[Environment]] to |env|.
 1. For each |name| in the [=export name list=] of |record|,
