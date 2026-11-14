@@ -119,7 +119,7 @@ integration under CSP policies.
 
 While Wasm is currently fully sandboxed, having equal access to imports to JS provides it equal capabilities to execution primitives, so that it should not be considered a weaker capability from an ESM integration perspective.
 
-This is distinct from the [`wasm-unsafe-eval`](https://github.com/WebAssembly/content-security-policy/blob/main/proposals/CSP.md) source expression of the WebAssembly CSP proposal, which gates the compilation of arbitrary bytes provided by JavaScript through `new WebAssembly.Module`, `WebAssembly.compile`, `WebAssembly.instantiate` and their streaming variants, in the same way that `unsafe-eval` gates `eval` in JavaScript. Since an imported Wasm module has a URL that is checked by `script-src`, it does not require `wasm-unsafe-eval`:
+This is distinct from the [`wasm-unsafe-eval`](https://github.com/WebAssembly/content-security-policy/blob/main/proposals/CSP.md) source expression of the WebAssembly CSP proposal, which gates the compilation of arbitrary bytes provided by JavaScript through `new WebAssembly.Module`, `WebAssembly.compile`, `WebAssembly.instantiate` and their streaming variants, as well as the instantiation of modules, in the same way that `unsafe-eval` gates `eval` in JavaScript. Since an imported Wasm module has a URL that is checked by `script-src`, it does not require `wasm-unsafe-eval`, including when instantiating a module obtained in the source phase:
 
 ```js
 // Content-Security-Policy: script-src 'self'
@@ -128,14 +128,18 @@ This is distinct from the [`wasm-unsafe-eval`](https://github.com/WebAssembly/co
 import source fibModule from "./fib.wasm";
 import { fib } from "./fib.wasm";
 
-// Permitted, the module was already compiled under the script-src policy
+// Permitted, the module was loaded under the script-src policy
 const { exports } = await WebAssembly.instantiate(fibModule);
 
 // CompileError, compiling arbitrary bytes requires 'wasm-unsafe-eval'
 new WebAssembly.Module(bytes);
+
+// A module received from another context that was imported there has its
+// URL checked against the script-src policy of this context
+onmessage = ({ data: module }) => WebAssembly.instantiate(module);
 ```
 
-This is specified by the JS API host hook `HostEnsureCanCompileWasmBytes`, which is called by the JS API functions compiling bytes, and not when parsing a WebAssembly module for the ESM integration.
+This is specified by the JS API host hook `HostEnsureCanCompileWasmBytes`, which is called by the JS API functions compiling bytes, and not when parsing a WebAssembly module for the ESM integration. When instantiating a module it is passed the host-defined value of a module loaded through the ESM integration, which is recreated when the module is sent to another context, allowing CSP to check the source of the module against the policy of the context instantiating it.
 
 ## FAQ
 

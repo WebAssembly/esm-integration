@@ -701,6 +701,7 @@ The verification of WebAssembly type requirements is deferred to the
 
 <div algorithm>
   The <dfn method for="WebAssembly">instantiate(|moduleObject|, |importObject|)</dfn> method, when invoked, performs the following steps:
+    1. [=Ensure a WebAssembly module can be instantiated|Ensure=] |moduleObject| can be instantiated in the [=current Realm=].
     1. [=asynchronously instantiate a WebAssembly module|Asynchronously instantiate the WebAssembly module=] |moduleObject| importing |importObject|, and return the result.
 </div>
 
@@ -830,6 +831,7 @@ In addition, the interface object for {{Module}} must have as its \[[Prototype]]
     1. Set **this**.\[[Bytes]] to |stableBytes|.
     1. Set **this**.\[[BuiltinSets]] to |builtinSetNames|.
     1. Set **this**.\[[ImportedStringModule]] to |importedStringModule|.
+    1. Set **this**.\[[ModuleRecord]] to null.
 
 Note: Some implementations enforce a size limitation on |bytes|. Use of this API is discouraged, in favor of asynchronous APIs.
 </div>
@@ -846,6 +848,7 @@ interface Instance {
 
 <div algorithm>
   The <dfn constructor for="Instance">Instance(|moduleObject|, |importObject|)</dfn> constructor, when invoked, runs the following steps:
+    1. [=Ensure a WebAssembly module can be instantiated|Ensure=] |moduleObject| can be instantiated in the [=current Realm=].
     1. Let |builtinSetNames| be |moduleObject|.\[[BuiltinSets]].
     1. Let |importedStringModule| be |moduleObject|.\[[ImportedStringModule]].
     1. Let |module| be |moduleObject|.\[[Module]].
@@ -2269,17 +2272,30 @@ Note: ECMAScript doesn't specify any sort of behavior on out-of-memory condition
 
 <h2 id="implementation-defined-operations">Implementation-defined Operations</h2>
 
-<h3 id="host-ensure-can-compile-wasm-bytes">HostEnsureCanCompileWasmBytes ( |realm| )</h3>
+<h3 id="host-ensure-can-compile-wasm-bytes">HostEnsureCanCompileWasmBytes ( |realm| [ , |hostDefined| ] )</h3>
 
-The <dfn abstract-op export>HostEnsureCanCompileWasmBytes</dfn>(|realm|) abstract operation is an implementation-defined abstract operation that allows host environments to block the compilation of WebAssembly source bytes in the Realm |realm| when those bytes are provided directly by JavaScript code.
+The <dfn abstract-op export>HostEnsureCanCompileWasmBytes</dfn>(|realm|, |hostDefined|) abstract operation is an implementation-defined abstract operation that allows host environments to block the compilation of WebAssembly source bytes provided directly by JavaScript code, and the instantiation of WebAssembly modules, in the Realm |realm|.
+
+The optional |hostDefined| argument is given only when instantiating a {{Module}} that was loaded through the <a href="#esm-integration">ECMAScript module integration</a>, where it is the value of the \[[HostDefined]] field of its <a>WebAssembly Module Record</a>. This includes a {{Module}} for which the host [=create a WebAssembly Module Record|created a WebAssembly Module Record=] when it was deserialized. It allows the host to apply its module loading policy to the source of the module in |realm|, as distinct from a module compiled from bytes provided by JavaScript code.
 
 An implementation of HostEnsureCanCompileWasmBytes may complete normally or abruptly. Any abrupt completion must be a {{CompileError}} exception, and is propagated to the caller. The default implementation of HostEnsureCanCompileWasmBytes is to unconditionally return an empty normal completion.
 
-It is called by the {{Module/Module(bytes, options)}} constructor, {{WebAssembly/compile(bytes, options)}}, {{WebAssembly/instantiate(bytes, importObject, options)}}, and the streaming compilation functions of the <a href="https://webassembly.github.io/spec/web-api/index.html">WebAssembly Web API</a>. For the functions returning a promise, an abrupt completion results in a rejected promise.
+It is called when compiling source bytes by the {{Module/Module(bytes, options)}} constructor, {{WebAssembly/compile(bytes, options)}}, {{WebAssembly/instantiate(bytes, importObject, options)}}, and the streaming compilation functions of the <a href="https://webassembly.github.io/spec/web-api/index.html">WebAssembly Web API</a>. For the functions returning a promise, an abrupt completion results in a rejected promise.
 
-Note: {{WebAssembly/validate(bytes, options)}} does not produce a {{Module}} and is never blocked. Instantiating an existing {{Module}} is also never blocked, since the compilation of its source was already permitted when it was created.
+It is also called when instantiating a {{Module}} by {{WebAssembly/instantiate(moduleObject, importObject)}}, and the {{Instance/Instance(moduleObject, importObject)}} constructor, through the following algorithm.
 
-Note: On the Web, this operation is implemented by [[CSP]] to require the <code>'wasm-unsafe-eval'</code> or <code>'unsafe-eval'</code> source expressions.
+<div algorithm>
+  To <dfn>ensure a WebAssembly module can be instantiated</dfn> for a {{Module}} |moduleObject| in the Realm |realm|, perform the following steps:
+    1. Let |record| be |moduleObject|.\[[ModuleRecord]].
+    1. If |record| is not null and |record|.\[[HostDefined]] is not ~empty~, perform [=?=] [$HostEnsureCanCompileWasmBytes$](|realm|, |record|.\[[HostDefined]]).
+    1. Otherwise, perform [=?=] [$HostEnsureCanCompileWasmBytes$](|realm|).
+</div>
+
+Note: A {{Module}} can be instantiated in a different Realm to the one in which it was compiled, for example when sent to another Realm by structured serialization, so that permitting its compilation does not permit its instantiation. On the Web, a {{Module}} that was loaded through the module system is given a new <a>WebAssembly Module Record</a> for the same source when it is deserialized, so that each Realm applies its own policy to that source.
+
+Note: {{WebAssembly/validate(bytes, options)}} does not produce a {{Module}} and is never blocked.
+
+Note: On the Web, this operation is implemented by [[CSP]]. When |hostDefined| is given, it is the script of a module that was loaded through the module system. This is allowed if the script was loaded by the module loading of |realm|, and is otherwise checked against the `script-src` policy of |realm|. When it is not given, the <code>'wasm-unsafe-eval'</code> or <code>'unsafe-eval'</code> source expressions are required.
 
 <h2 id="limits">Implementation-defined Limits</h2>
 
@@ -2349,15 +2365,26 @@ To <dfn export>parse a WebAssembly module</dfn> given a <a>byte sequence</a> |by
 1. Let |builtinSetNames| be « "js-string" ».
 1. Let |importedStringModule| be "wasm:js/string-constants".
 1. If [=validate builtins and imported string for a WebAssembly module|validating builtins and imported strings=] for |module| with |builtinSetNames| and |importedStringModule| is false, throw a {{CompileError}} exception.
-1. [=Construct a WebAssembly module object=] from |module|, |bytes|, |builtinSetNames| and |importedStringModule|, and let |module| be the result.
+1. [=Construct a WebAssembly module object=] from |module|, |bytes|, |builtinSetNames| and |importedStringModule|, and let |moduleObject| be the result.
+1. Return the result of [=create a WebAssembly Module Record|creating a WebAssembly Module Record=] given |moduleObject|, |realm| and |hostDefined|.
+
+Note: From HTML, it's not observable when [=parse a WebAssembly module=] begins, so any work perfomed in compilation may be performed off-thread.
+
+Note: This algorithm does not call [$HostEnsureCanCompileWasmBytes$], since |bytes| are not provided by JavaScript code but by the host's module loading, which is expected to have already applied its own policy to their source. In HTML, this is the `script-src` Content Security Policy check of the module fetch, as for JavaScript modules. When the resulting module is instantiated, |hostDefined| is passed to [$HostEnsureCanCompileWasmBytes$], so that neither importing a WebAssembly module nor instantiating one obtained in the source phase requires <code>'wasm-unsafe-eval'</code>.
+</div>
+
+<div algorithm>
+To <dfn export>create a WebAssembly Module Record</dfn> given a {{Module}} |moduleObject|, a Realm |realm| and object |hostDefined|, perform the following steps.
+
+1. Assert: |moduleObject|.\[[ModuleRecord]] is null.
 1. Let |requestedModules| be a set.
-1. For each (|moduleName|, |name|, <var ignore>type</var>) of the [=external imports=] of |module|,
+1. For each (|moduleName|, |name|, <var ignore>type</var>) of the [=external imports=] of |moduleObject|,
     1. If |moduleName| starts with the prefix "wasm-js:",
         1. Throw a {{LinkError}} exception.
     1. If |name| starts with the prefix "wasm:" or "wasm-js:",
         1. Throw a {{LinkError}} exception.
     1. [=set/Append=] |moduleName| to |requestedModules|.
-1. For each (|name|, <var ignore>type</var>) in [=module_exports=](|module|.\[[Module]])
+1. For each (|name|, <var ignore>type</var>) in [=module_exports=](|moduleObject|.\[[Module]])
     1. If |name| starts with the prefix "wasm:" or "wasm-js:",
         1. Throw a {{LinkError}} exception.
 1. Let |moduleRecord| be {
@@ -2367,7 +2394,7 @@ To <dfn export>parse a WebAssembly module</dfn> given a <a>byte sequence</a> |by
       \[[Realm]]: |realm|,
       \[[Environment]]: ~empty~,
       \[[Namespace]]: ~empty~,
-      \[[ModuleSource]]: |module|,
+      \[[ModuleSource]]: |moduleObject|,
       \[[HostDefined]]: |hostDefined|,
       <!-- Cyclic Module Records -->
       \[[Status]]: "new",
@@ -2383,12 +2410,9 @@ To <dfn export>parse a WebAssembly module</dfn> given a <a>byte sequence</a> |by
       \[[AsyncParentModules]]: &laquo; &raquo;,
       \[[PendingAsyncDependencies]]: ~empty~,
     }.
-1. Set |module|.\[[ModuleRecord]] to |moduleRecord|.
+1. Set |moduleObject|.\[[ModuleRecord]] to |moduleRecord|.
 1. Return |moduleRecord|.
 
-Note: From HTML, it's not observable when [=parse a WebAssembly module=] begins, so any work perfomed in compilation may be performed off-thread.
-
-Note: This algorithm does not call [$HostEnsureCanCompileWasmBytes$], since |bytes| are not provided by JavaScript code but by the host's module loading, which is expected to have already applied its own policy to their source. In HTML, this is the `script-src` Content Security Policy check of the module fetch, as for JavaScript modules, so that importing a WebAssembly module does not require <code>'wasm-unsafe-eval'</code>.
 </div>
 
 <div algorithm>
