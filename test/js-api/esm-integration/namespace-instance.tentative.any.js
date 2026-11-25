@@ -50,3 +50,13 @@ promise_test(async () => {
   const exportsInstance2 = WebAssembly.namespaceInstance(exportsModule);
   assert_equals(exportsInstance, exportsInstance2);
 }, "WebAssembly.namespaceInstance() should work correctly with multiple modules");
+
+promise_test(async () => {
+  const wasmNamespace = await import("./resources/namespace-instance-cycle.wasm");
+  const { earlyError } = await import("./resources/namespace-instance-cycle.js");
+
+  assert_true(earlyError instanceof TypeError);
+  assert_true(
+    WebAssembly.namespaceInstance(wasmNamespace) instanceof WebAssembly.Instance
+  );
+}, "WebAssembly.namespaceInstance() should throw TypeError before the WebAssembly module has executed");
